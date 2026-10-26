@@ -1,0 +1,1396 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Manu o te Taime : un jeu poétique qui fait vivre une vie polynésienne entière, chapitre par chapitre.">
+<style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Manu o te Taime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+/* Layout: a storybook spread. The painted chapter plate and the moment card on the left; the growing plant and the life ledger on the right. Stacks on phones. */
+:root{
+  --bg:#e9efeb; --paper:#f7f9f5; --ink:#16252a; --muted:#56696a; --line:#c9d5cf; --hover:#e3ebe6;
+  --accent:#1d6b68; --on-accent:#f3faf8; --sun:#b9850f; --good:#2c7a4c; --bad:#a6473a;
+  --plant-bg:#f1efe3;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Literata", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d191b; --paper:#15242a; --ink:#e3ebe7; --muted:#93a6a3; --line:#28393e; --hover:#1c2f35;
+  --accent:#5fbfb6; --on-accent:#0a1a1c; --sun:#e6b546; --good:#6fc28c; --bad:#e58c7a;
+  --plant-bg:#1b2c30; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d191b; --paper:#15242a; --ink:#e3ebe7; --muted:#93a6a3; --line:#28393e; --hover:#1c2f35;
+  --accent:#5fbfb6; --on-accent:#0a1a1c; --sun:#e6b546; --good:#6fc28c; --bad:#e58c7a;
+  --plant-bg:#1b2c30; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px;grid-template-columns:minmax(0,1fr) 310px;grid-template-areas:"top top" "stage life"}
+@media (max-width:880px){.wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "stage" "life"}}
+.top{grid-area:top;display:flex;align-items:baseline;gap:8px 14px;flex-wrap:wrap}
+.top h1{font-family:var(--display);font-weight:400;font-size:2.3rem;line-height:1;margin:0}
+.top p{margin:0;color:var(--muted);font-style:italic}
+.top .save{margin-left:auto;font-size:.8rem;color:var(--muted);display:flex;gap:10px;align-items:center}
+.linkbtn{font:inherit;font-size:.8rem;background:none;border:0;color:var(--accent);cursor:pointer;text-decoration:underline;padding:0}
+#stage{grid-area:stage;min-width:0;display:flex;flex-direction:column;gap:14px}
+.tl{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex-wrap:wrap}
+.tl li{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:3px 7px;border-radius:99px;border:1px solid transparent}
+.tl li.done{color:var(--ink);opacity:.6}
+.tl li.now{border-color:var(--sun);color:var(--ink);opacity:1}
+.ch-head{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap}
+.ch-num{font-family:var(--display);color:var(--sun);font-size:1rem}
+.ch-title{font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1.15;margin:0;text-wrap:balance}
+.ch-age{color:var(--muted);font-size:.9rem;margin-left:auto;font-variant-numeric:tabular-nums}
+.plate{display:block;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:3px;background:var(--paper);box-shadow:0 14px 30px -22px rgba(0,0,0,.6)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:20px clamp(16px,3vw,26px);display:flex;flex-direction:column;gap:14px;min-width:0}
+.card.fade{animation:fade .45s ease both}
+@keyframes fade{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.card.fade{animation:none}}
+.step{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{margin:0;font-size:1.15rem;font-style:italic;text-wrap:pretty}
+.m-text{margin:0;font-size:1.12rem;text-wrap:pretty;max-width:62ch}
+.narr{margin:0;max-width:62ch;font-size:1.05rem;line-height:1.7;text-wrap:pretty}
+.narr::first-letter{font-family:var(--display);float:left;font-size:2.7em;line-height:.85;padding:5px 8px 0 0;color:var(--sun)}
+.chips,#stats{display:none}
+.mood{font-style:italic;color:var(--ink)}
+.note.help{border-left-color:var(--accent);color:var(--accent)}
+.narr+.m-text{border-top:1px dashed var(--line);padding-top:12px}
+.notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.notes li{font-size:.93rem;color:var(--muted)}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{font:inherit;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:11px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:background .15s,border-color .15s}
+.choice:hover{background:var(--hover);border-color:var(--accent)}
+.choice:focus-visible,.btn:focus-visible,.btn2:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choice.locked{cursor:not-allowed;border-style:dashed;opacity:.62}
+.choice.locked:hover{background:transparent;border-color:var(--line)}
+.c-lock{font-size:.82rem;font-style:italic;color:var(--bad)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;align-self:flex-start;background:var(--accent);color:var(--on-accent);border:0;border-radius:99px;padding:10px 20px;cursor:pointer;font-weight:600}
+.btn:hover{filter:brightness(1.08)}
+.btn2{font:inherit;align-self:flex-start;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:99px;padding:9px 18px;cursor:pointer}
+.btn2:hover{background:var(--hover)}
+.picked{margin:0;font-size:.95rem;color:var(--muted)}
+.picked b{color:var(--ink);font-weight:600}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:520px){.sides{grid-template-columns:1fr}}
+.side h4{margin:0 0 4px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.side.good h4{color:var(--good)} .side.bad h4{color:var(--bad)}
+.side p{margin:0;font-size:1rem}
+.note{margin:0;font-style:italic;border-left:2px solid var(--sun);padding-left:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.chip.up{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.chip.down{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.birth{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0}
+.birth dt{font-size:.75rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.birth dd{margin:0}
+.hint{margin:0;color:var(--muted);font-style:italic}
+.poem{font-family:var(--display);font-size:1.12rem;line-height:1.75;display:flex;flex-direction:column;gap:14px}
+.poem p{margin:0}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;color:var(--accent)}
+.recap{margin:10px 0 0;padding-left:18px;font-size:.92rem;color:var(--muted)}
+.recap b{color:var(--ink);font-weight:600}
+.lesson{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+.lesson h4{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.lesson p{margin:0;max-width:62ch}
+#life{grid-area:life;min-width:0;display:flex;flex-direction:column;gap:14px;align-self:start}
+@media (min-width:881px){#life{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.15rem}
+#plant{display:block;width:100%;max-width:100%;aspect-ratio:4/4.6;border-radius:4px}
+.legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.who-name{font-family:var(--display);font-size:1.25rem;margin:0}
+.who-sub{margin:0;font-size:.88rem;color:var(--muted)}
+.status{display:flex;flex-wrap:wrap;gap:6px}
+.status span{font-size:.76rem;border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+.stats{display:grid;grid-template-columns:max-content 1fr 2.2em;gap:6px 10px;align-items:center;font-size:.84rem}
+.stats .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:var(--hover);overflow:hidden}
+.bar b{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .5s}
+.bar.neg b{background:var(--bad)}
+@media (prefers-reduced-motion:reduce){.bar b{transition:none}}
+@media (min-width:521px) and (max-width:880px){#life{display:grid;grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="top">
+    <h1>Manu o te Taime</h1>
+    <p>Une vie en Polynésie, chapitre par chapitre</p>
+    <div class="save" id="saveBox"></div>
+  </header>
+
+  <section id="stage" aria-live="polite">
+    <ol class="tl" id="tl"></ol>
+    <div class="ch-head"><span class="ch-num" id="chNum"></span><h2 class="ch-title" id="chTitle"></h2><span class="ch-age" id="chAge"></span></div>
+    <canvas class="plate" id="painting" aria-label="Peinture du chapitre"></canvas>
+    <article class="card fade" id="card"></article>
+  </section>
+
+  <aside id="life">
+    <div class="panel">
+      <h3>Ta plante</h3>
+      <canvas id="plant" aria-label="La plante qui représente ta vie"></canvas>
+      <ul class="legend">
+        <li><i style="background:#4a9552"></i>Feuilles : tes liens</li>
+        <li><i style="background:#f6f1de;border:1px solid #b9a97a"></i>Fleurs : ta joie</li>
+        <li><i style="background:#86ad3c"></i>Fruits : utilité, reconnaissance</li>
+        <li><i style="background:#c9a33f"></i>Feuilles jaunies : le stress</li>
+        <li><i style="background:#5a3d27"></i>Branches cassées : les regrets</li>
+        <li><i style="background:#d7bf96"></i>Racines : ton calme intérieur</li>
+      </ul>
+    </div>
+    <div class="panel" id="whoPanel">
+      <div id="who"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const R=Math.random;
+const pick=a=>a[Math.floor(R()*a.length)];
+const clamp=v=>Math.max(0,Math.min(100,Math.round(v)));
+function wpick(items,w){let t=w.reduce((a,b)=>a+b,0),r=R()*t;for(let i=0;i<items.length;i++){r-=w[i];if(r<=0)return items[i];}return items[items.length-1];}
+function rng(seed){let s=seed>>>0;return function(){s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SAVE_KEY="manu-o-te-taime-v1";
+
+/* ---------- Données du monde ---------- */
+const STATS=[["sante","Santé"],["argent","Argent"],["joie","Joie"],["stress","Stress"],["lien","Liens"],["emo","Calme intérieur"],["reco","Reconnaissance"],["utile","Utilité"],["regret","Regrets"]];
+const NEG={stress:1,regret:1};
+const CH=[
+ {n:"Chapitre I",t:"Le bébé",a:[0,2],k:3,line:"Tu ouvres les yeux. Le monde sent le monoï et le lait chaud."},
+ {n:"Chapitre II",t:"L'enfance",a:[3,11],k:7,line:"Les pieds nus, les mangues tombées, l'école au bout de la route."},
+ {n:"Chapitre III",t:"L'adolescence",a:[12,17],k:8,line:"Le corps change, le cœur s'emballe, les questions arrivent."},
+ {n:"Chapitre IV",t:"Le jeune adulte",a:[18,29],k:11,line:"Le monde t'ouvre ses portes, ou te les ferme. Il faut choisir."},
+ {n:"Chapitre V",t:"L'âge adulte",a:[30,44],k:12,line:"Les années passent vite. Tu portes les autres, et parfois on te porte."},
+ {n:"Chapitre VI",t:"L'âge mûr",a:[45,59],k:10,line:"Tu as fait une bonne partie du chemin. Tu regardes en arrière autant que devant."},
+ {n:"Chapitre VII",t:"La vieillesse",a:[60,74],k:8,line:"Le temps ralentit. Tu as enfin le temps de regarder ceux que tu aimes."},
+ {n:"Chapitre VIII",t:"Le grand âge",a:[75,95],k:5,line:"Le corps est fatigué, mais la mémoire est pleine de visages et de rires."},
+ {n:"Chapitre IX",t:"La mort",a:null},
+ {n:"Épilogue",t:"Après toi",a:null}
+];
+const TL=["Bébé","Enfance","Adolescence","Jeune adulte","Adulte","Âge mûr","Vieillesse","Grand âge","Mort","Après"];
+const PLACES=[
+ {n:"Papeete, dans le quartier de Tipaerui",short:"Tahiti",type:"high",far:false,w:[3,3,2,1]},
+ {n:"Faa'a, près de l'aéroport",short:"Tahiti",type:"high",far:false,w:[3,3,2,1]},
+ {n:"Punaauia, sur la côte ouest de Tahiti",short:"Tahiti",type:"high",far:false,w:[0,1,3,5]},
+ {n:"Taravao, sur la presqu'île",short:"Tahiti",type:"high",far:false,w:[2,2,2,1]},
+ {n:"Moorea, au bord de la baie de Cook",short:"Moorea",type:"high",far:false,w:[1,2,2,2]},
+ {n:"Raiatea, l'île sacrée",short:"Raiatea",type:"high",far:true,w:[2,2,2,1]},
+ {n:"Rangiroa, dans les Tuamotu",short:"Rangiroa",type:"atoll",far:true,w:[2,2,1,1]},
+ {n:"Hiva Oa, aux Marquises",short:"Hiva Oa",type:"high",far:true,w:[2,2,1,0]},
+ {n:"Rurutu, aux Australes",short:"Rurutu",type:"high",far:true,w:[2,2,1,0]}
+];
+const WEALTH=["très pauvre","modeste","de classe moyenne","aisée"];
+const WDESC=[
+ "Un fare en tôle, huit bouches à nourrir, du riz et du poisson quand la pêche est bonne. Beaucoup d'amour, peu de tout le reste.",
+ "Papa travaille sur les chantiers, mama fait des ménages. On compte chaque franc à la fin du mois.",
+ "Deux salaires, une voiture, un peu d'épargne. On ne manque de rien d'essentiel.",
+ "Une grande maison, des voyages, des portes qui s'ouvrent facilement."
+];
+const HERITAGE=["mā'ohi","demi, mā'ohi et popa'a","tinito, sino-tahitien{|ne}","popa'a"];
+const FN={F:["Hinano","Maeva","Mareva","Poerava","Heiata","Vaimiti","Tiare","Hinatea","Moerani","Teura","Vaitiare","Herenui","Kelly","Laura","Jessica","Mélanie"],
+          M:["Teva","Tehei","Rainui","Manutea","Teiki","Toanui","Tavita","Heimana","Tamatoa","Raiarii","Hiro","Tihoti","Kevin","Jordan","Steeve","Mathieu"]};
+const SKIN=["peau très brune","peau brune","peau cuivrée","peau dorée","peau claire"];
+const HAIR=["cheveux noirs et épais","cheveux noirs et raides","cheveux bouclés","cheveux crépus","cheveux châtains et ondulés","cheveux clairs"];
+const DISEASES=[null,
+ {k:"diabete",n:"Un terrain familial de diabète",d:"Il faudra surveiller ton sucre toute ta vie.",start:-4,decay:-3},
+ {k:"goutte",n:"Une goutte héréditaire",d:"Tes articulations souffriront plus tôt que celles des autres.",start:-2,decay:-2},
+ {k:"asthme",n:"De l'asthme",d:"Ton souffle sera parfois court.",start:-6,decay:-1},
+ {k:"thal",n:"Une thalassémie",d:"Ton sang porte une anémie héritée de tes ancêtres.",start:-8,decay:-2}];
+const PETS=["Pito","Rambo","Nono","Taro","Bobby","Kiki"];
+const DIS={
+ jambe:{n:"Amputé{|e} d'une jambe",lock:["armee","peche","artisan"],t:"Un accident de scooter sur la route de ceinture. À l'hôpital du Taaone, les médecins ne peuvent pas sauver ta jambe."},
+ bras:{n:"Amputé{|e} d'un bras",lock:["armee","peche","artisan","soin"],t:"Un accident : une machine happe ton bras. Les chirurgiens doivent l'amputer."},
+ paralysie:{n:"En fauteuil roulant",lock:["armee","peche","artisan","soin","hotel"],t:"Un plongeon dans un récif trop peu profond. Ta moelle épinière est touchée : tu ne marcheras plus."},
+ vue:{n:"Malvoyant{|e}",lock:["armee","peche","artisan","medecin","soin"],t:"Une infection mal soignée attaque tes yeux. Tu perds presque toute la vue."}
+};
+const RANK={none:0,cap:1,bac:2,sup1:3,sup2:4};
+const DIPLN={cap:"au moins un CAP",bac:"le bac",sup1:"des études supérieures",sup2:"de longues études en France"};
+
+const CAREERS={
+ peche:{n:"Pêcheu{r|se} ou perliculteu{r|trice}",fx:{argent:1,joie:4,sante:2,lien:3,stress:3,utile:4},ok:"La mer, le ciel, tes propres horaires.",ko:"Des revenus incertains, le dos qui craque, les mauvaises saisons.",mem:"la mer au petit matin"},
+ hotel:{n:"Employé{|e} dans un hôtel",fx:{argent:4,stress:5,lien:-4,joie:1,reco:1},ok:"Un salaire régulier, des gens du monde entier.",ko:"Les horaires décalés, les week-ends au travail, loin des tiens.",mem:"les sourires pour les touristes"},
+ armee:{n:"Militaire",fx:{argent:6,reco:5,lien:-8,stress:5,sante:1},ok:"Une solde stable, la fierté, les voyages.",ko:"Des années loin du fenua, les missions dangereuses.",mem:"l'uniforme et les départs"},
+ artiste:{n:"Artiste : tatouage, musique ou danse",fx:{argent:-3,joie:7,reco:6,stress:4},ok:"Tu vis de ce qui te fait vibrer.",ko:"Chaque fin de mois est un pari.",mem:"l'art dans tes mains"},
+ artisan:{n:"Artisan électricien ou mécanicien",need:"cap",fx:{argent:5,utile:5,sante:-2,stress:2,lien:2},ok:"On t'appelle quand tout tombe en panne.",ko:"Le corps s'use, et les clients paient en retard.",mem:"les outils dans le pick-up"},
+ bureau:{n:"Fonctionnaire au Pays",need:"bac",fx:{argent:6,stress:1,joie:-3,lien:4,utile:1},ok:"La sécurité, des horaires fixes, du temps pour les tiens.",ko:"L'ennui, parfois, et les dossiers qui se ressemblent."},
+ soin:{n:"Infirmi{er|ère} ou sage-femme au Taaone",need:"sup1",fx:{argent:5,utile:9,reco:4,stress:8,lien:-4,sante:-2},ok:"Tu soignes, tu accueilles les nouveau-nés.",ko:"Les gardes de nuit, la fatigue, les drames.",mem:"les premiers cris des nouveau-nés"},
+ prof:{n:"Enseignant{|e}",need:"sup1",fx:{argent:5,utile:7,reco:3,stress:5,lien:3},ok:"Des élèves qui deviennent quelqu'un grâce à toi.",ko:"Les classes chargées, les copies le dimanche.",mem:"une classe qui récite"},
+ medecin:{n:"Médecin",need:"sup2",fx:{argent:10,reco:8,utile:8,stress:10,lien:-9,sante:-3},ok:"Le respect, un bon salaire, des vies sauvées.",ko:"Tu n'es presque jamais à la maison.",mem:"la blouse blanche"},
+ commerce:{n:"Ouvrir ton snack ou ta boutique",money:35,fx:{argent:"var",stress:9,reco:4,lien:-6,joie:2},ok:"Ton nom sur l'enseigne.",ko:"Tout peut s'effondrer d'une saison à l'autre.",mem:"l'enseigne à ton nom"}
+};
+
+let S=null;
+const dr=()=>RANK[S.f.dipl||"none"];
+function careerLock(k){const c=CAREERS[k];if(S.f.disab&&DIS[S.f.disab].lock.includes(k))return "Ton handicap ferme cette porte";if(S.f.casier&&["armee","bureau","soin","prof","medecin"].includes(k))return "Ton casier judiciaire ferme cette porte";if(c.need&&dr()<RANK[c.need])return "Il faut "+DIPLN[c.need];if(c.money&&S.st.argent<c.money)return "Il faut un capital de départ que tu n'as pas";return null;}
+
+function fmt(s){
+  if(typeof s==="function")s=s(S);
+  if(!s)return "";
+  return s.replace(/\{([^{}|]*)\|([^{}|]*)\}/g,(m,a,b)=>S.sex==="M"?a:b)
+          .replace(/\{e\}/g,S.sex==="F"?"e":"")
+          .replace(/\{pet\}/g,S.pet).replace(/\{partner\}/g,S.partner||"").replace(/\{friend\}/g,S.friend).replace(/\{lover\}/g,S.lover||"").replace(/\{child\}/g,S.childName||"ton enfant")
+          .replace(/\{(f|p|l|ci)(e|il|Il|le)\}/g,(m,w,x)=>{const sx=w==="f"?S.fSex:w==="p"?S.pSex:w==="ci"?S.childSex:S.lSex;const F=sx==="F";return {e:F?"e":"",il:F?"elle":"il",Il:F?"Elle":"Il",le:F?"la":"le"}[x];})
+          .replace(/\{name\}/g,S.first);
+}
+function endCouple(S){S.f.couple=false;S.f.divorced=true;}
+function newCouple(S){S.f.couple=true;S.partner=S.lover;S.pSex=S.lSex;S.f.coupleSince=S.ci;}
+function prepLover(S){S.lSex=loveSex();S.lover=loveName(S.lSex);}
+function loveSex(){const o=S.sex==="F"?"M":"F";if(S.orient==="hetero")return o;if(S.orient==="gay")return S.sex;return R()<.5?"F":"M";}
+function loveName(sx){const pool=FN[sx].slice(0,12).filter(n=>n!==S.first&&n!==S.partner&&n!==S.friend);return pick(pool);}
+function addKids(n){S.f.kids=(S.f.kids||0)+n;if(!S.childName){S.childSex=R()<.5?"F":"M";S.childName=loveName(S.childSex);}}
+/* ---------- Moments de vie ---------- */
+const MOM={
+0:[
+ {must:true,text:S=>["Ta mama n'a pas vraiment le choix : il faut vite retourner travailler. Qui va s'occuper de toi ?","Ta mama hésite : rester avec toi, ou reprendre le travail ?","Ta mama hésite : rester avec toi, ou reprendre le travail ?","Tes parents ont le choix. Comment veulent-ils t'élever ?"][S.wealth],
+  choices:[
+  {t:"Mama reste à la maison avec toi",fx:S=>({lien:10,joie:4,argent:S.wealth<2?-8:-3}),ok:"Tu grandis contre sa peau, bercé{e} de himene.",ko:S=>S.wealth<2?"Le frigo est souvent vide en fin de mois.":"Un salaire en moins à la maison.",mem:"la voix de mama qui chante"},
+  {t:"Ta grand-mère te garde",fx:{lien:7,argent:3},set:S=>{S.f.reo=1},ok:"Mamie te parle en reo tahiti et t'apprend ses chansons.",ko:"Tu pleures chaque matin quand mama s'en va.",mem:"les mains de ta grand-mère"},
+  {t:"La crèche, à Papeete",lock:S=>S.wealth<2?"Ta famille n'a pas les moyens de payer une crèche":null,fx:{etu:1,argent:-3,lien:-3,sante:-2,joie:2},ok:"Tu parles tôt, tu découvres les autres enfants.",ko:"Les rhumes en série, et de longues journées loin des tiens."}
+ ]},
+ {must:true,cond:S=>S.wealth<=1,text:"Ta tante n'a pas d'enfant. Elle propose de t'élever comme le sien. C'est le fa'a'amu, une vieille tradition d'amour au fenua.",choices:[
+  {t:"Rester avec tes parents",fx:{lien:4,argent:-3},ok:"Tes frères et sœurs autour de toi, toujours.",ko:"Peu de place, peu d'argent, beaucoup de bruit."},
+  {t:"Partir chez ta tante, en fa'a'amu",fx:{argent:8,lien:3,regret:4},set:S=>{S.f.faaamu=true},ok:"Elle te donne tout ce qu'elle a, et un lit à toi.",ko:"Plus tard, tu te demanderas : pourquoi moi ?",mem:"deux maisons, deux mamans"}
+ ]},
+ {text:"Tu as deux ans. Le soir, qu'est-ce qui t'apaise ?",choices:[
+  {t:"Le ukulele de papa",fx:{joie:5,lien:4,stress:-2},ok:"La musique entre en toi pour toujours.",ko:"Certains soirs, papa rentre trop tard pour jouer.",mem:"le ukulele de papa"},
+  {t:"La pluie sur le toit",fx:{stress:-5,joie:2,lien:-2,emo:2},ok:"Tu deviens {un enfant calme|une enfant calme}.",ko:"Tu apprends tôt à te consoler {tout seul|toute seule}."},
+  {t:"La télé allumée",fx:{joie:3,sante:-2,lien:-3},ok:"Des couleurs, des voix, des histoires.",ko:"On se parle moins autour de toi."}
+ ]},
+ {text:"La nuit, tu pleures sans t'arrêter. Tes parents sont épuisés.",choices:[
+  {t:"Ils te prennent dans leurs bras jusqu'au matin",fx:{lien:6,emo:4},ok:"Tu apprends que quelqu'un vient toujours.",ko:"Tes parents sont des zombies au travail.",mem:"les bras qui viennent toujours"},
+  {t:"Ils te laissent pleurer pour que tu apprennes",fx:{emo:-3,stress:3,lien:-2},ok:"Tu finis par t'endormir seul{e}.",ko:"Quelque chose en toi apprend à ne plus appeler."},
+  {t:"Ta grand-mère te frotte au monoï et chante",fx:{lien:5,sante:2,emo:3},set:S=>{S.f.reo=1},ok:"Le ra'au et la voix des anciens te calment.",ko:"Tes parents se sentent incapables."}
+ ]},
+ {cond:S=>S.wealth<=1,text:"Papa rentre du travail le vendredi soir avec des amis et de la bière. Les voix montent.",choices:[
+  {t:"Mama t'emmène dormir chez la voisine",fx:{stress:2,lien:2,emo:1},ok:"Tu dors en paix.",ko:"Tu grandis avec ces vendredis-là dans la mémoire."},
+  {t:"Tu restes dans ton coin, les yeux grands ouverts",fx:{stress:6,emo:-4},ok:"Tu apprends à te faire tout{|e} petit{|e}.",ko:"La peur s'installe tôt, sans mot pour la dire."}
+ ]}
+],
+1:[
+ {must:true,text:"L'école primaire, au bout de la route. Ce que tu aimes le plus :",choices:[
+  {t:"Les livres et les leçons",fx:{etu:2,reco:3,joie:2,lien:-3},ok:"La maîtresse te félicite. Les mots t'ouvrent le monde.",ko:"Dans la cour, on t'appelle « l'intello ».",mem:"les livres de la bibliothèque"},
+  {t:"Le sport : va'a, football, ori tahiti",fx:{sante:6,joie:5,lien:4,etu:-1},ok:"Ton corps devient fort et joyeux.",ko:"Les devoirs attendent souvent, et les notes baissent.",mem:"la pirogue au lever du jour"},
+  {t:"Aider ta famille : pêche, fa'a'apu, petits frères",fx:S=>({utile:7,reco:4,etu:-1,joie:S.sex==="F"?-3:-1,stress:S.sex==="F"?3:1}),ok:"Ta famille compte sur toi, et tu en es fi{er|ère}.",ko:"{À cinq heures du matin, papa te réveille pour la pêche, même les jours d'école.|La vaisselle, le linge, les petits : on attend plus de toi que de tes frères.}",mem:"le poisson rapporté à la maison"}
+ ]},
+ {must:true,text:"Un enfant nouveau, {friend}, reste seul{fe} dans un coin de la cour.",choices:[
+  {t:"Aller lui parler",fx:{lien:6,joie:4,emo:2},set:S=>{S.f.friend=true},ok:"{fIl} devient ton ami{fe} pour la vie.",ko:"Ta bande se moque un peu de toi.",mem:"{friend}, l'ami{fe} de toujours"},
+  {t:"Rester avec ta bande",fx:{reco:2,regret:3},ok:"Ta place dans le groupe est sûre.",ko:"Tu ne sauras jamais qui {fil} était."}
+ ]},
+ {cond:S=>!S.f.animal,text:"Un chiot maigre te suit jusqu'au fare. Il te regarde comme si tu étais sa seule chance.",choices:[
+  {t:"Le garder et l'appeler {pet}",fx:{joie:8,lien:4,argent:-2,utile:2},set:S=>{S.f.animal=true},ok:"Il dort contre ta porte chaque nuit.",ko:"Un jour, il faudra lui dire au revoir.",mem:"un chien nommé {pet}"},
+  {t:"Le chasser",fx:{regret:5,argent:1},ok:"Pas de bouche de plus à nourrir.",ko:"Tu repenses longtemps à ses yeux."}
+ ]},
+ {text:"Dans la cour, des enfants se moquent de toi.",choices:[
+  {t:"Te battre",fx:{reco:4,stress:4,lien:-2,emo:-2},ok:"On ne t'embête plus.",ko:"Convoqué{e} chez le directeur, et papa est furieux."},
+  {t:"Te taire",fx:{stress:7,regret:3},ok:"Ça passe, comme passent les averses.",ko:"Mais ça reste à l'intérieur."},
+  {t:"En parler à un adulte",fx:{lien:5,stress:-2,reco:-2,emo:3},ok:"Quelqu'un te protège enfin.",ko:"Certains te traitent de rapporteu{r|se}."}
+ ]},
+ {text:"Ta petite sœur casse ton jouet préféré. La colère monte d'un coup.",choices:[
+  {t:"La frapper",fx:{stress:3,emo:-3,lien:-3},ok:"La colère sort, tout de suite.",ko:"Elle pleure, et tu te sens mal toute la soirée."},
+  {t:"Pleurer dans ton coin",fx:{stress:4,regret:2},ok:"Personne ne te voit.",ko:"Personne ne sait ce que tu ressens."},
+  {t:"Lui dire : « Je suis triste et en colère »",fx:{emo:6,lien:3},ok:"Ta grand-mère te prend dans ses bras : tu as trouvé les mots.",ko:"Le jouet reste cassé. Les mots ne réparent pas tout."}
+ ]},
+ {text:"Le dimanche, à la paroisse, on cherche des voix pour les himene.",choices:[
+  {t:"Chanter avec le chœur",fx:{lien:6,reco:4,joie:4},set:S=>{S.f.faith=1},ok:"Ta voix se mêle à celles de tout le village.",ko:"Les répétitions te prennent tous tes samedis.",mem:"les himene du dimanche"},
+  {t:"Rester jouer dehors",fx:{joie:4,lien:-2,regret:1},ok:"Le dimanche est à toi.",ko:"Ta grand-mère est déçue."}
+ ]},
+ {text:"La maîtresse interdit de parler reo tahiti en classe. À la maison, mamie ne parle que ça.",choices:[
+  {t:"Parler reo avec mamie, en secret",fx:{lien:4,joie:3,etu:-1},set:S=>{S.f.reo=2},ok:"Tu gardes la langue de tes ancêtres.",ko:"Tu te sens coupé{e} en deux.",mem:"le reo de mamie"},
+  {t:"Ne parler que français, pour réussir",fx:{etu:2,reco:2,regret:4},set:S=>{S.f.reo=0},ok:"Tes notes montent.",ko:"Un jour, tu ne comprendras plus les chansons de ta grand-mère."}
+ ]},
+ {cond:S=>S.wealth>=3,text:"Pour l'été, tes parents te proposent un voyage à Paris.",choices:[
+  {t:"Partir à Paris",fx:{etu:1,joie:3,reco:2,lien:-2},ok:"Les musées, le métro, la neige peut-être.",ko:"Tes cousins passent l'été sur le motu sans toi."},
+  {t:"Rester sur le motu avec les cousins",fx:{lien:7,joie:6},ok:"Les crabes, les feux de camp, les fous rires.",ko:"Tu découvriras le monde plus tard, peut-être.",mem:"l'été sur le motu"}
+ ]},
+ {cond:S=>S.wealth<=1,text:"Il n'y a plus d'argent à la maison. Ton oncle veut que tu vendes des firifiri au bord de la route, avant l'école.",choices:[
+  {t:"Vendre les firifiri",fx:{argent:5,utile:6,etu:-2,sante:-2},ok:"Tu rapportes de quoi manger.",ko:"Tu t'endors en classe.",mem:"les firifiri du matin"},
+  {t:"Aller à l'école reposé{e}",fx:{etu:2,lien:-3,regret:2},ok:"Tes notes montent.",ko:"Tu sens le regard lourd de ton oncle."}
+ ]},
+ {text:"Papy raconte Moruroa : les essais nucléaires, les copains partis travailler là-bas, ceux qui sont tombés malades.",choices:[
+  {t:"Poser des questions, encore et encore",fx:{etu:1,emo:2,lien:3,stress:1},ok:"Tu comprends d'où vient une colère ancienne.",ko:"Certaines réponses font peur.",mem:"les histoires de papy sur Moruroa"},
+  {t:"Aller jouer, c'est trop long",fx:{joie:2,regret:2},ok:"L'enfance ne doit pas tout porter.",ko:"Tu regretteras de ne pas avoir écouté."}
+ ]},
+ {text:"Un cousin plus âgé te montre comment voler des bonbons au magasin chinois.",choices:[
+  {t:"Essayer, pour voir",fx:{joie:2,stress:3,regret:2},set:S=>{if(R()<.4){S.st.reco=clamp(S.st.reco-4);S.st.lien=clamp(S.st.lien-2);return "Le commerçant t'attrape et t'amène chez tes parents. La honte.";}},ok:"L'adrénaline, le goût du sucre.",ko:"Tu apprends que c'est facile."},
+  {t:"Refuser",fx:{emo:2,reco:1,lien:-2},ok:"Ta conscience reste propre.",ko:"Le cousin te traite de peureu{x|se}."}
+ ]},
+ {text:"Tes parents se disputent fort, presque chaque soir.",choices:[
+  {t:"Te mettre entre eux",fx:{stress:6,lien:2,emo:-2},ok:"Parfois, ça les arrête.",ko:"Ce n'est pas ton rôle, et ça te pèse."},
+  {t:"Mettre la musique fort et t'enfermer",fx:{stress:4,emo:-2,joie:1},ok:"Tu te protèges.",ko:"Tu apprends à fuir plutôt qu'à affronter."},
+  {t:"En parler à ta tante",fx:{lien:4,emo:4,stress:-2},ok:"Ta tante parle à tes parents. Les choses se calment un peu.",ko:"Tes parents se sentent trahis."}
+ ]}
+],
+2:[
+ {must:true,text:S=>S.place.far?`Fin du collège. Pour aller au lycée, il faut quitter ${S.place.short} et partir à l'internat, à Tahiti.`:"Fin du collège. Il faut choisir ta route.",choices:[
+  {t:"Le lycée général, pour le bac",fx:S=>({etu:1,stress:4+(S.place.far?4:0)+(S.f.etu<2?5:0),lien:S.place.far?-6:0}),ok:"Le bac en ligne de mire, des portes ouvertes.",ko:S=>S.place.far?"L'internat, le mal du pays, ta famille au téléphone une fois par semaine.":(S.f.etu<2?"Tu dois travailler deux fois plus que les autres.":"Les révisions, la pression des parents."),
+   set:S=>{if(S.f.etu+R()*4>=3){S.f.dipl="bac";S.mems.push("le bac, et mama qui pleure de fierté");return "Tu obtiens ton bac. Mama pleure de fierté.";}S.f.dipl="none";S.st.regret=clamp(S.st.regret+6);S.st.reco=clamp(S.st.reco-3);return "Tu rates le bac de peu. Il faudra trouver un autre chemin.";}},
+  {t:"Le lycée professionnel, pour un CAP",fx:{etu:1,utile:3,reco:1,stress:2},set:S=>{S.f.dipl="cap"},ok:"Un métier dans les mains, et vite.",ko:"Certains te regardent de haut."},
+  {t:"Arrêter l'école et travailler",fx:{argent:6,utile:4,etu:-2,regret:5},set:S=>{S.f.dipl="none"},ok:"Ton premier salaire aide la famille.",ko:"Les portes se ferment, doucement."}
+ ]},
+ {must:true,text:"Au bal du Heiva, quelqu'un te sourit à chaque chanson.",choices:[
+  {t:"Lui dire ce que tu ressens",fx:{joie:4,stress:3,lien:3},set:S=>{const cs=loveSex();if(R()<.55){S.f.firstLove=true;S.f.flOpp=cs!==S.sex;S.st.joie=clamp(S.st.joie+6);return "Ton amour est partagé. Tout l'été a le goût de la mangue.";}S.st.joie=clamp(S.st.joie-7);return "Ton amour n'est pas partagé. Tu pleures sous le manguier.";},ok:"Tu oses. Ton cœur bat comme un pahu.",ko:"Tu découvres aussi la jalousie et les larmes.",mem:"un premier amour au Heiva"},
+  {t:"Garder le secret",fx:{regret:6,stress:-1},ok:"Personne ne peut te blesser.",ko:"Toute ta vie, tu te demanderas : et si ?",mem:"un sourire jamais rendu"}
+ ]},
+ {must:true,cond:S=>S.queer,text:S=>{if(S.trans)return S.sex==="M"?"Depuis longtemps, tu sens que tu n'es pas comme on l'attend d'un garçon. Au fenua, il y a toujours eu une place pour les māhū. Mais ta famille t'en fera-t-elle une ?":"Depuis longtemps, tu sens que tu es un garçon, même si les autres voient une fille. Tu ne sais pas comment le dire.";return {gay:S.sex==="M"?"Depuis longtemps, ton cœur va vers les garçons.":"Depuis longtemps, ton cœur va vers les filles.",bi:"Ton cœur va vers les garçons comme vers les filles.",ace:"Les autres parlent sans cesse de désir. Toi, tu ne ressens pas la même chose, et tu te demandes si c'est normal."}[S.orient]+" Tu ne sais pas comment le dire à ta famille.";},choices:[
+  {t:"En parler d'abord à {friend}, ton ami{fe}",fx:{stress:-2,lien:5,emo:4,regret:2},ok:"Quelqu'un sait, et t'aime pareil.",ko:"Le reste de la famille ne sait toujours rien."},
+  {t:"Vivre au grand jour",fx:{joie:10,reco:3,stress:5,lien:-3},set:S=>{S.f.out=true},ok:"Tu respires enfin. Tu es toi.",ko:"Une partie de la famille se tait quand tu entres.",mem:"le jour où tu as dit qui tu es"},
+  {t:"Garder ça pour toi",fx:{stress:9,regret:8,lien:2},ok:"Personne ne te juge.",ko:"Tu vis à moitié, en te cachant."}
+ ]},
+ {text:"La troupe de danse du quartier prépare le Heiva, sur la scène de To'ata.",choices:[
+  {t:"Entrer dans la troupe",fx:{reco:8,joie:6,sante:3,etu:-2,stress:2},ok:"Sur la grande scène, la foule acclame ta troupe.",ko:"Les répétitions chaque soir, et les notes qui baissent.",mem:"la scène de To'ata"},
+  {t:"Rester dans les gradins",fx:{etu:1,regret:3},ok:"Tu as du temps pour réviser.",ko:"Tu regardes les autres danser à ta place."}
+ ]},
+ {must:true,text:"Sur le motu, une bouteille de Hinano et du paka passent de main en main.",choices:[
+  {t:"Boire et fumer avec les autres",fx:{lien:5,joie:3,sante:-6,stress:-2},set:S=>{S.f.alcool=(S.f.alcool||0)+1},ok:"Tu ris avec les autres jusqu'au matin.",ko:"Le lendemain est dur. Certains copains ne s'arrêteront plus."},
+  {t:"Une bière, pas plus",fx:{lien:3,sante:-1},ok:"Tu fais partie du groupe sans te perdre.",ko:"Tenir la limite demande de la force chaque fois."},
+  {t:"Refuser",fx:S=>({lien:S.sex==="M"?-6:-3,sante:2,reco:1,emo:2}),ok:"Tu gardes la tête claire.",ko:"{Chez les garçons, refuser, c'est passer pour faible.|On t'invite un peu moins.}"}
+ ]},
+ {text:"Ton père t'humilie devant toute la famille au repas du dimanche. La colère te brûle.",choices:[
+  {t:"Exploser et claquer la porte",fx:{stress:4,emo:-4,lien:-5,reco:2},ok:"Tu ne te laisses pas faire.",ko:"Des mots que tu ne pourras pas reprendre."},
+  {t:"Tout garder pour toi",fx:{stress:7,regret:3},ok:"Le repas continue, calme en apparence.",ko:"La colère reste coincée dans ta gorge."},
+  {t:"Respirer, nommer ce que tu ressens, et lui parler plus tard",fx:{emo:8,lien:3,stress:-2},ok:"Le soir, ton père t'écoute. Il ne savait pas qu'il t'avait blessé{e}.",ko:"Il faut du courage, et ça ne marche pas toujours du premier coup."}
+ ]},
+ {text:"Ça ne va pas fort depuis des semaines. Tu dors mal, tu ris moins.",choices:[
+  {t:"En parler à {friend}",fx:{lien:5,emo:5,stress:-4},ok:"{fIl} ne te juge pas.",ko:"Dire ses faiblesses fait peur."},
+  {t:"Voir l'infirmière scolaire",fx:{emo:6,stress:-5,sante:2,reco:-1},ok:"Quelqu'un dont c'est le métier t'aide à y voir clair.",ko:"Tu as peur que les autres le sachent."},
+  {t:"Faire semblant que tout va bien",fx:{stress:6,joie:-4,regret:2},ok:"Personne ne s'inquiète.",ko:"Tu restes {seul|seule} avec ça."}
+ ]},
+ {text:"Ton frère aîné rentre ivre et casse tout dans le fare. Mama pleure.",choices:[
+  {t:"T'interposer",fx:{stress:5,reco:3,sante:-3,lien:2},ok:"Tu protèges ta mère.",ko:"Tu prends un coup, et la peur reste."},
+  {t:"Appeler les mutoi, la police municipale",fx:{stress:3,lien:-4,emo:2},ok:"La nuit se termine sans blessé.",ko:"Ton frère ne te le pardonne pas. « On ne dénonce pas la famille. »"},
+  {t:"Te cacher avec les petits",fx:{stress:6,regret:3,emo:-2},ok:"Les petits sont à l'abri.",ko:"Tu te sens lâche, et ce n'est pas juste."}
+ ]},
+ {text:"Les parents de {friend} déménagent en France. C'est la dernière soirée.",choices:[
+  {t:"Promettre de s'écrire chaque semaine",fx:{lien:3,joie:-2,emo:2},ok:"L'amitié survit à la distance, un temps.",ko:"Les messages s'espacent. C'est la vie."},
+  {t:"Partir avant la fin, pour ne pas pleurer",fx:{regret:5,emo:-3},ok:"Pas de larmes devant les autres.",ko:"Tu n'as pas dit au revoir."}
+ ]},
+ {text:"Le pasteur propose une année de mission religieuse après le collège. Tes parents y tiennent.",choices:[
+  {t:"Partir en mission",fx:{lien:4,reco:4,emo:3,joie:2,etu:-1},set:S=>{S.f.faith=2},ok:"Une communauté, une discipline, un sens.",ko:"Un an de moins pour tes études, et des règles strictes."},
+  {t:"Refuser",fx:{lien:-4,reco:-2,joie:2},set:S=>{S.f.faith=0},ok:"Tu choisis ta propre route.",ko:"Tes parents ont honte devant la paroisse."}
+ ]},
+ {text:"Un professeur voit quelque chose en toi et propose de t'aider gratuitement le soir.",choices:[
+  {t:"Accepter",fx:{etu:2,reco:3,stress:2,lien:2},ok:"Tes résultats grimpent.",ko:"Tes copains se moquent du « chouchou »."},
+  {t:"Refuser, par fierté",fx:{regret:4,joie:1},ok:"Tu ne dois rien à personne.",ko:"Une main tendue, et tu l'as laissée."}
+ ]},
+ {late:true,cond:S=>S.f.firstLove&&S.f.flOpp&&S._preg,text:S=>S.sex==="F"?"Tu attends un enfant. Tu as dix-sept ans.":"Ta copine attend un enfant de toi. Tu as dix-sept ans.",choices:S=>S.sex==="F"?[
+  {t:"Élever ton enfant",fx:{utile:8,joie:6,stress:8,etu:-3,argent:-5},set:S=>{addKids(1);S.f.care=(S.f.care||0)+1},ok:"Un petit être te regarde comme si tu étais le monde.",ko:"L'école s'arrête, la fatigue commence.",mem:"un bébé à dix-sept ans"},
+  {t:"Le confier à ta mère, en fa'a'amu",fx:{regret:8,lien:3,stress:2},set:S=>{addKids(1)},ok:"Tu peux continuer tes études.",ko:"Ton enfant t'appelle par ton prénom, et elle, mama."}
+ ]:[
+  {t:"Assumer ton rôle de père",fx:{utile:7,reco:4,stress:8,argent:-5,etu:-2},set:S=>{addKids(1);S.f.care=(S.f.care||0)+1},ok:"Tu deviens un homme plus vite que prévu.",ko:"Il faut travailler sur les chantiers, le lycée passe au second plan.",mem:"un bébé à dix-sept ans"},
+  {t:"Fuir",fx:{regret:12,reco:-6,lien:-6},set:S=>{addKids(1);S.f.care=(S.f.care||0)-2},ok:"Ta vie reste légère.",ko:"Un enfant grandit quelque part, sans toi."}
+ ]}
+]
+};
+/* Traumatisme : les blessures anciennes ferment certaines portes tant qu'on ne les soigne pas */
+const TR=S=>(S.f.trauma||0)>=2&&S.st.emo<45?"Tes blessures anciennes te submergent : tu n'y arrives pas":null;
+function trauma(n,why){S.f.trauma=(S.f.trauma||0)+n;if(why)S.f.traumaWhy=why;}
+
+const THERAPY={cond:S=>(S.f.trauma||0)>0&&!S.f.homeless,text:S=>`Certaines nuits, ${S.f.traumaWhy||"le passé"} revient. Tu sursautes, tu t'emportes, tu t'éteins.`,choices:[
+ {t:"Consulter un psychologue",lock:S=>S.st.argent<12?"Les consultations coûtent cher et tu n'as pas de quoi":null,fx:{argent:-6,emo:9,stress:-6,reco:-1},set:S=>{S.f.trauma=Math.max(0,S.f.trauma-2);return "Semaine après semaine, tu apprends à poser les mots sur ce qui s'est passé.";},ok:"Une vraie aide, pour de bon.",ko:"Le prix, et le regard de ceux qui disent que « c'est pour les fous »."},
+ {t:"Aller au centre de consultation gratuit, après des mois d'attente",fx:{emo:6,stress:-3},set:S=>{S.f.trauma=Math.max(0,S.f.trauma-1)},ok:"Ça ne coûte rien, et ça aide.",ko:"Six mois d'attente, et des rendez-vous espacés."},
+ {t:"En parler au pasteur, ou à un ancien de la famille",fx:{emo:4,lien:4,stress:-2},set:S=>{if(R()<.5){S.f.trauma=Math.max(0,S.f.trauma-1);return "Les mots des anciens apaisent quelque chose.";}return "Les mots apaisent un temps, mais la blessure reste.";},ok:"Des mots familiers, un cadre connu.",ko:"On te dit de prier, de pardonner. Ce n'est pas toujours ce dont tu as besoin."},
+ {t:"Serrer les dents, comme tout le monde",fx:{stress:6,emo:-4,joie:-3},ok:"Tu continues d'avancer.",ko:"La blessure dicte tes réactions sans que tu le saches."}
+]};
+const FRIEND_TALK={text:"{friend} t'appelle tard le soir. {fIl} va mal et a besoin de parler.",choices:[
+ {t:"Lui donner tout de suite des solutions",fx:{utile:3,lien:-2},ok:"Tu veux vraiment l'aider.",ko:"{fIl} soupire : « Tu ne m'écoutes pas. »"},
+ {t:"L'écouter jusqu'au bout, sans juger",fx:{lien:7,emo:5,utile:5,stress:3,sante:-1},ok:"{fIl} se sent enfin entendu{fe}.",ko:"Il est trois heures du matin, et tu travailles demain.",mem:"les nuits au téléphone avec {friend}"},
+ {t:"Lui demander : « Tu veux que je t'aide, que je t'écoute, ou juste que je comprenne ? »",fx:{lien:6,emo:7,utile:4},ok:"{fIl} sait enfin ce dont {fil} a besoin, et toi aussi.",ko:"La question surprend d'abord. La confiance prend du temps."},
+ {t:"Changer de sujet",fx:{stress:-2,lien:-6,regret:3},ok:"Tu protèges ta soirée.",ko:"{fIl} n'appellera plus de sitôt."}
+]};
+const COUPLE_TALK={cond:S=>S.f.couple,text:"{partner} rentre fermé{pe}. La soirée tourne à la dispute pour une broutille.",choices:[
+ {t:"Dire calmement ce que tu ressens : « Je me sens seul{e} quand… »",lock:TR,fx:{emo:6,lien:5,stress:-2},ok:"{partner} baisse la garde et te prend la main.",ko:"Il faut ravaler ta fierté, et l'autre n'est pas toujours prêt{pe} à entendre."},
+ {t:"Reprocher : « Tu ne fais jamais rien ! »",fx:{stress:6,lien:-6,emo:-3},ok:"Tu as vidé ton sac.",ko:"La dispute dure trois jours."},
+ {t:"Bouder en silence",fx:{stress:4,lien:-3},ok:"Pas de cris ce soir.",ko:"Le silence devient un mur."},
+ {t:"Proposer d'en parler demain, à tête reposée",fx:{emo:4,stress:-3,lien:2},ok:"La nuit calme les deux cœurs.",ko:"Rien n'est réglé ce soir."}
+]};
+const BETRAYAL={p:.45,cond:S=>S.f.couple,text:"Tu découvres que {partner} te ment depuis des mois : une autre relation, cachée. Plus tard, tu apprendras que {pil} se sentait invisible depuis des années. Ça n'excuse rien. Ça explique un peu.",choices:[
+ {t:"Laisser éclater ta colère",fx:{stress:6,joie:-6,emo:-3,reco:-2},set:S=>{trauma(1,"la trahison");if(R()<.5){endCouple(S);return "Les cris, la valise jetée dehors : c'est fini.";}return "Après la tempête, vous restez ensemble. Mais quelque chose s'est brisé.";},ok:"Ta colère, au moins, est vraie.",ko:"Des mots qui ne s'effaceront pas."},
+ {t:"Pleurer, en silence",fx:{joie:-8,stress:5,regret:3},set:S=>{trauma(1,"la trahison")},ok:"Tu ne fais de mal à personne.",ko:"Sauf à toi-même."},
+ {t:"Rompre",fx:{joie:-8,stress:5,lien:-5,reco:2},set:S=>{endCouple(S);trauma(1,"la trahison");if(R()<.5){S.f.depression=1;return "La tristesse t'accompagne de longs mois.";}},ok:"Tu te respectes.",ko:"Tout un monde s'écroule. Il faudra reconstruire.",mem:"une trahison, et la force de repartir"},
+ {t:"Prendre le temps de comprendre, puis décider",lock:TR,fx:{emo:6,stress:3},set:S=>{if(R()<.35+S.st.emo/200){S.st.lien=clamp(S.st.lien+6);return "Vous vous reconstruisez, lentement, autrement.";}endCouple(S);return "Comprendre n'a pas suffi. Vous vous séparez, sans haine.";},ok:"Tu cherches ce qui s'est vraiment passé.",ko:"Des semaines dans le doute."}
+]};
+const FRIEND_BETRAYAL={p:.4,text:"{friend} a raconté à tout le quartier un secret que tu lui avais confié. Un soir de fête, quelques bières, et les mots sont sortis.",choices:[
+ {t:"Couper les ponts",fx:{lien:-6,reco:2,regret:3},ok:"Tu protèges ta confiance.",ko:"Des années d'amitié s'arrêtent là."},
+ {t:"Lui dire ta colère, en face",fx:{stress:4,emo:3},set:S=>{if(R()<.5)return "{fIl} s'excuse, les larmes aux yeux.";S.st.lien=clamp(S.st.lien-5);return "{fIl} se défend, et l'amitié se fissure.";},ok:"Tu dis les choses.",ko:"La conversation est dure."},
+ {t:"Chercher à comprendre pourquoi",lock:TR,fx:{emo:6,stress:2},set:S=>{if(R()<.6){S.st.lien=clamp(S.st.lien+5);return "{fIl} avait peur et a mal agi. Vous vous retrouvez.";}return "Tu comprends, mais la confiance ne revient pas.";},ok:"Tu regardes au-delà de la blessure.",ko:"C'est à toi de faire le premier pas, alors que c'est toi qui as été blessé{e}."},
+ {t:"Faire comme si de rien n'était",fx:{stress:6,regret:3},ok:"Pas de scène.",ko:"La blessure reste ouverte."}
+]};
+const LOVE_SINGLE={p:.4,prep:prepLover,cond:S=>!S.f.couple&&!S.f.homeless,text:"Sans prévenir, ton cœur s'emballe pour {lover}. L'amour ne se choisit pas.",choices:[
+ {t:"Te déclarer tout de suite",fx:{stress:3},set:S=>{if(R()<.5){newCouple(S);S.st.joie=clamp(S.st.joie+8);return "{lover} t'aime aussi. Tout va très vite.";}S.st.joie=clamp(S.st.joie-6);S.st.regret=clamp(S.st.regret+3);return "Trop vite : {lover} prend peur et s'éloigne.";},ok:"Tu ne laisses pas passer ta chance.",ko:"Se précipiter, c'est risquer de tout perdre.",mem:"{lover}"},
+ {t:"Prendre le temps de mieux {lle} connaître",fx:{emo:3},set:S=>{if(R()<.4){S.st.regret=clamp(S.st.regret+7);return "Le temps que tu te décides, {lover} rencontre quelqu'un d'autre.";}newCouple(S);S.st.lien=clamp(S.st.lien+8);return "Le temps a construit quelque chose de solide.";},ok:"Tu avances avec prudence.",ko:"Attendre, c'est parfois laisser passer sa chance."},
+ {t:"Devenir ami{e} d'abord, sans rien forcer",fx:{lien:4,emo:2},set:S=>{if(R()<.35){newCouple(S);return "Un soir, l'amitié devient amour.";}return "Vous restez amis. C'est déjà beaucoup.";},ok:"Un compromis doux, sans pression.",ko:"Tu ne sauras peut-être jamais."}
+]};
+const LOVE_COUPLE={p:.3,prep:prepLover,cond:S=>S.f.couple,text:"Tu es avec {partner}, et pourtant ton cœur s'emballe pour {lover}. Tu n'as rien demandé.",choices:[
+ {t:"Tout quitter pour {lover}",fx:{joie:8,regret:6,lien:-6,stress:6},set:S=>{newCouple(S);S.f.divorced=true;if(R()<.5){S.st.joie=clamp(S.st.joie-10);return "Six mois plus tard, la passion retombe. Qu'as-tu fait ?";}return "Une nouvelle vie commence, avec ses joies et ses cicatrices.";},ok:"Tu suis ton cœur.",ko:"Tu laisses derrière toi une personne blessée."},
+ {t:"En parler honnêtement à {partner}",lock:TR,fx:{emo:6,stress:5},set:S=>{if(R()<.55){S.st.lien=clamp(S.st.lien+5);return "La conversation est dure, mais votre couple en sort plus vrai.";}S.st.lien=clamp(S.st.lien-6);return "{partner} ne te le pardonne pas tout de suite.";},ok:"L'honnêteté, même quand elle fait peur.",ko:"La vérité peut blesser."},
+ {t:"Garder ça pour toi et t'éloigner de {lover}",fx:{stress:4,regret:4,lien:2},ok:"Ton couple est protégé.",ko:"Le secret pèse, la nuit."}
+]};
+const OPPORTUNITY={cond:S=>!S.f.homeless,text:"{friend} te propose de vous associer pour ouvrir un food truck sur le front de mer. Il faut répondre ce soir.",choices:[
+ {t:"Dire oui tout de suite",fx:{stress:4},set:S=>{if(R()<.45){S.st.argent=clamp(S.st.argent+12);S.st.reco=clamp(S.st.reco+6);return "Ça marche ! La file d'attente s'allonge chaque soir.";}S.st.argent=clamp(S.st.argent-12);S.st.stress=clamp(S.st.stress+8);return "Trop vite : pas de plan, et les dettes s'accumulent.";},ok:"Tu saisis l'occasion.",ko:"Foncer sans réfléchir, c'est jouer à pile ou face.",mem:"le food truck sur le front de mer"},
+ {t:"Demander une semaine pour réfléchir",fx:{emo:2},set:S=>{if(R()<.5){S.st.regret=clamp(S.st.regret+7);return "Une semaine plus tard, {friend} a trouvé un autre associé.";}S.st.argent=clamp(S.st.argent+6);S.st.reco=clamp(S.st.reco+3);return "Tu poses tes conditions : le projet démarre sur de bonnes bases.";},ok:"Tu prends le temps de bien faire.",ko:"Les occasions n'attendent pas toujours."},
+ {t:"Accepter, mais seulement le week-end pour commencer",fx:{argent:4,stress:3,lien:2},ok:"Tu testes sans tout risquer.",ko:"Tu gagnes peu, et tes week-ends disparaissent."}
+]};
+const OPPORTUNITY2={cond:S=>!!S.f.metier&&!S.f.homeless,text:"On te propose un poste à Nouméa, deux fois mieux payé. Réponse dans 48 heures.",choices:[
+ {t:"Accepter et partir",fx:{argent:10,reco:4,lien:-8,stress:5},ok:"Un nouveau départ, un vrai salaire.",ko:"Le fenua te manque chaque jour.",mem:"les années à Nouméa"},
+ {t:"Refuser sans hésiter",fx:{lien:3,regret:5},ok:"Tu restes auprès des tiens.",ko:"Tu te demanderas longtemps ce que tu as laissé passer."},
+ {t:"Négocier : partir deux ans, puis revenir",fx:{argent:6,lien:-3,emo:2,stress:3},ok:"Un compromis qui garde une porte de retour.",ko:"Deux ans, c'est long pour ceux qui attendent."}
+]};
+const SURVIVAL={must:true,cond:S=>S.st.argent<18&&!S.f.homeless,text:"Le frigo est vide, le loyer est en retard. Les prix sont un tiers plus chers qu'en France, et il faut tenir jusqu'à la fin du mois.",choices:[
+ {t:"Demander de l'aide à ta famille",fx:{argent:8,reco:-3,lien:2,emo:2},set:S=>{S.f.survived=true},ok:"La famille répond présente.",ko:"Tu dois avaler ta fierté et entendre les remarques."},
+ {t:"Prendre un deuxième travail, de nuit",fx:{argent:8,sante:-6,lien:-5,stress:6},set:S=>{S.f.survived=true},ok:"L'argent rentre.",ko:"Tu ne dors plus, tu ne vois plus personne."},
+ {t:"Voler de quoi manger",fx:{argent:4,stress:6,regret:4},set:S=>{S.f.survived=true;if(R()<.3){S.st.reco=clamp(S.st.reco-8);S.st.stress=clamp(S.st.stress+5);return "Le vigile t'attrape. La honte, la plainte.";}},ok:"Ce soir, la famille mange.",ko:"Tu n'aurais jamais cru en arriver là."},
+ {t:"Aller voir une association, une assistante sociale",fx:{argent:5,emo:3,reco:-1,stress:-2},set:S=>{S.f.survived=true},ok:"Des gens bienveillants, des aides que tu ne connaissais pas.",ko:"Les dossiers, l'attente, l'impression de mendier."}
+]};
+const HOMELESS_EV={auto:true,text:"Les dettes, le loyer impayé, la porte fermée. Tu dors maintenant près de la cathédrale de Papeete, avec les autres que personne ne regarde.",fx:{joie:-8,stress:8,reco:-6},set:S=>{S.f.homeless=true;S.f.everHomeless=true;trauma(1,"la rue");const out=[];if(S.f.metier){S.f.metier=null;out.push("Tu perds ton travail.");}if(S.f.couple&&R()<.6){S.f.couple=false;out.push(`${S.partner} n'a pas pu suivre.`);}return out.join(" ");}};
+const HOMELESS={must:true,cond:S=>S.f.homeless,text:"La rue. Le jour, la chaleur et les regards. La nuit, les chiens et la peur. Comment t'en sortir ?",choices:[
+ {t:"Accepter le foyer d'accueil et un accompagnement social",fx:{emo:4,reco:-2},set:S=>{if(R()<.55+S.st.emo/300){S.f.homeless=false;S.st.argent=Math.max(S.st.argent,18);return "Un logement temporaire, puis un petit travail. Tu remontes, marche après marche.";}return "Les places manquent. Il faudra recommencer demain.";},ok:"Tu acceptes la main tendue.",ko:"Les règles du foyer, l'impression d'être un dossier."},
+ {t:"Rentrer chez ta famille, demander pardon s'il le faut",fx:{reco:-4,lien:4},set:S=>{if(S.st.lien>30||R()<.5){S.f.homeless=false;S.st.argent=Math.max(S.st.argent,15);return "Ta famille t'ouvre la porte. Personne ne pose de questions.";}return "La porte reste fermée. Trop de choses ont été dites.";},ok:"Tu fais le premier pas.",ko:"Il faut affronter la honte."},
+ {t:"Survivre au jour le jour, avec les autres de la rue",fx:{lien:4,sante:-4,stress:3},ok:"Une solidarité que personne ne voit.",ko:"Le corps s'use vite dehors.",mem:"la solidarité des gens de la rue"}
+]};
+const REHAB={cond:S=>!!S.f.disab,text:"Après l'accident, il faut réapprendre à vivre.",choices:[
+ {t:"Te battre en rééducation, chaque jour",fx:{sante:6,emo:6,stress:4,reco:3},ok:"Tu progresses, pas à pas.",ko:"La douleur, la fatigue, les jours sans progrès."},
+ {t:"Accepter l'aide des autres",fx:{lien:8,emo:4,reco:-2},ok:"Tu découvres qui t'aime vraiment.",ko:"Ta fierté en prend un coup."},
+ {t:"T'enfermer dans la colère",fx:{stress:8,lien:-6,emo:-4,regret:4},ok:"Ta colère est légitime.",ko:"Les visites se font rares."},
+ {t:"Rejoindre un club de handisport ou de va'a adapté",fx:{joie:6,reco:5,sante:4,lien:4,stress:2},ok:"Sur l'eau, tu te sens libre de nouveau.",ko:"Il faut affronter le regard des autres.",mem:"le va'a adapté, et la liberté retrouvée"}
+]};
+const ACCIDENT={auto:true,text:S=>DIS[S.f.disab].t,prep:S=>{S.f.disab=wpick(["jambe","bras","paralysie","vue"],[.35,.25,.2,.2]);},fx:{sante:-15,joie:-10,stress:10,argent:-5},set:S=>{trauma(1,"l'accident");S.mems.push("le jour où ton corps a changé");if(S.f.metier&&DIS[S.f.disab].lock.includes(S.f.metier)){const n=fmt(CAREERS[S.f.metier].n).toLowerCase();S.f.metier=null;return `Tu ne peux plus exercer ton métier : ${n}.`;}}};
+/* Alcool, ice, justice */
+const DRINK={cond:S=>!S.f.homeless,text:"Les vendredis, ça finit toujours à la bière avec les collègues, puis au volant pour rentrer.",choices:[
+ {t:"Boire, et conduire quand même",fx:{lien:3,joie:2,sante:-3},set:S=>{S.f.alcool=(S.f.alcool||0)+1;if(R()<.3){S.f.justice="alcool";return "Contrôle de gendarmerie : 1,2 gramme. Permis retiré, convocation au tribunal.";}if(R()<.15){S.st.sante=clamp(S.st.sante-15);S.f.justice="accident";trauma(1,"l'accident");return "Un virage, un poteau. Tu te réveilles au Taaone. Quelqu'un d'autre était dans la voiture.";}},ok:"Tu fais partie de la bande.",ko:"Trente-cinq morts par an sur les routes du fenua, surtout des hommes, surtout la nuit."},
+ {t:"Boire, et dormir sur place",fx:{lien:2,sante:-3,stress:1},set:S=>{S.f.alcool=(S.f.alcool||0)+1},ok:"Personne ne meurt ce soir.",ko:"Ta famille t'attend, et l'alcool prend sa place."},
+ {t:"Être celui qui ne boit pas et ramène tout le monde",fx:{utile:5,reco:3,lien:1,joie:-1},ok:"Tes amis rentrent vivants grâce à toi.",ko:"On se moque gentiment, et parfois pas gentiment."},
+ {t:"Rentrer directement à la maison",fx:{lien:-3,sante:2,emo:2},ok:"Ta santé, ta famille.",ko:"Petit à petit, on ne t'invite plus."}
+]};
+const ALCO={cond:S=>(S.f.alcool||0)>=2,text:"La bière du soir est devenue le rhum du matin. Tes mains tremblent. {friend} te le dit en face : « Tu bois trop. »",choices:[
+ {t:"Nier, et te fâcher",fx:{lien:-6,sante:-6,stress:4,emo:-3},set:S=>{S.f.alcool++;if(R()<.4){S.f.lostJob=true;}},ok:"Personne ne te commande.",ko:"Tu t'enfonces, et ceux qui t'aiment s'éloignent."},
+ {t:"Accepter la main tendue : cure, groupe de parole, croix bleue",fx:{sante:6,emo:7,reco:-2,lien:4,stress:3},set:S=>{S.f.alcool=0;S.f.sober=true;return "Les premières semaines sont un enfer. Puis, un matin, tu te réveilles clair.";},ok:"Tu reprends ta vie en main.",ko:"Tu devras dire non toute ta vie, à chaque fête, à chaque Heiva."},
+ {t:"Réduire, tout seul, sans en parler",fx:{sante:1,stress:3},set:S=>{if(R()<.6){S.f.alcool++;return "Tu tiens trois semaines. Puis tout recommence.";}S.f.alcool=1;return "Tu tiens. Seul, mais tu tiens.";},ok:"Pas besoin des autres.",ko:"Seul, c'est beaucoup plus dur."}
+]};
+const ICE={p:.5,cond:S=>!S.f.ice&&!S.f.homeless,text:"Dans une soirée, quelqu'un sort une pipe en verre. L'ice. Un gramme vaut une fortune au fenua, mais la première fois est offerte. Plus d'un Polynésien sur dix y a déjà goûté.",choices:[
+ {t:"Essayer, une fois",fx:{joie:6,sante:-5},set:S=>{if(R()<.6){S.f.ice=true;return "Une fois. Puis une autre. L'ice ne lâche pas.";}return "Une fois, et une nuit blanche. Tu as eu peur de toi-même.";},ok:"Une euphorie que tu n'as jamais connue.",ko:"La descente, et le besoin qui revient."},
+ {t:"Refuser et partir",fx:{lien:-3,emo:3,reco:1},ok:"Tu rentres chez toi entier.",ko:"Certains amis vont disparaître dans cette fumée, et tu ne pourras rien faire."},
+ {t:"Refuser, et essayer de convaincre {friend} de partir aussi",fx:{utile:4,emo:3,stress:3,lien:2},set:S=>{if(R()<.5)return "{friend} te suit. Vous ne reparlerez jamais de cette soirée.";S.st.lien=clamp(S.st.lien-5);return "{friend} reste. Dans un an, {fil} ne sera plus {fle} même.";},ok:"Tu as essayé de sauver quelqu'un.",ko:"On ne sauve pas les gens malgré eux."}
+]};
+const ICE_FALL={must:true,cond:S=>S.f.ice,text:"L'ice a tout pris : ton argent, ton sommeil, tes amis. Tu as déjà vendu la télé de ta mère. Il reste une porte de sortie, étroite.",choices:[
+ {t:"Demander l'hospitalisation, même si c'est en psychiatrie",fx:{sante:5,emo:6,reco:-4,stress:4},set:S=>{S.f.ice=false;S.f.sober=true;trauma(1,"l'ice");return "Des semaines terribles. Puis, un matin, tu te reconnais dans le miroir.";},ok:"Tu as choisi de vivre.",ko:"Le manque, l'enfermement, le regard des autres."},
+ {t:"Dealer, pour financer ta propre consommation",fx:{argent:8,stress:10,reco:-6},set:S=>{if(R()<.6){S.f.justice="ice";return "Les gendarmes débarquent à l'aube. Menottes, garde à vue, Nuutania.";}},ok:"L'argent rentre vite.",ko:"Un tiers des détenus de Nuutania sont là pour ça."},
+ {t:"Laisser ta famille t'enfermer chez un oncle sur un atoll, loin de tout",fx:{lien:5,emo:4,sante:3,joie:-3},set:S=>{S.f.ice=false;S.f.sober=true;trauma(1,"l'ice");return "Six mois de pêche, de coprah et de silence. Le manque s'efface, lentement.";},ok:"La famille fait ce que l'hôpital ne peut pas.",ko:"Six mois arrachés à ta vie, et la peur que ça revienne."}
+]};
+const TRIAL={must:true,cond:S=>!!S.f.justice,text:S=>({alcool:"Tribunal de Papeete. Conduite en état d'ivresse. Le juge te regarde par-dessus ses lunettes.",accident:"Tribunal de Papeete. Ton passager a été blessé. Blessures involontaires sous l'emprise de l'alcool.",ice:"Tribunal de Papeete. Trafic de stupéfiants. Ta mère est au fond de la salle.",vol:"Tribunal de Papeete. Vol et recel. Ta famille a honte.",violence:"Tribunal de Papeete. Violences sur conjoint. Tu es seul{e} sur le banc."})[S.f.justice],choices:[
+ {t:"Payer un avocat",lock:S=>S.st.argent<25?"Tu n'as pas de quoi payer un avocat":null,fx:{argent:-15,stress:6},set:S=>verdict(0.25),ok:"Quelqu'un plaide pour toi.",ko:"Tes économies y passent."},
+ {t:"Avocat commis d'office, et dire la vérité",fx:{stress:8,emo:3},set:S=>verdict(0.5),ok:"Tu assumes.",ko:"Le juge n'a pas le temps d'écouter ta vie."},
+ {t:"Mentir, et accuser quelqu'un d'autre",fx:{stress:10,regret:6,emo:-3},set:S=>verdict(0.65),ok:"Peut-être que ça passe.",ko:"Si ça ne passe pas, c'est pire. Et tu le sais."}
+]};
+function verdict(pPrison){const why=S.f.justice;S.f.justice=null;S.f.casier=true;if(why==="alcool"||R()>pPrison){S.st.argent=clamp(S.st.argent-8);S.st.reco=clamp(S.st.reco-4);return "Sursis, amende, stage. Tu rentres chez toi, un casier judiciaire en plus. Certains métiers te sont désormais fermés.";}S.f.prison=1+(why==="ice"?2:0);S.f.lostJob=true;S.st.reco=clamp(S.st.reco-12);trauma(1,"la prison");return `${S.f.prison} an${S.f.prison>1?"s":""} ferme à Nuutania. La porte se referme derrière toi.`;}
+const PRISON={must:true,cond:S=>S.f.prison>0,text:"Nuutania. Une cellule prévue pour un, à deux ou trois. Les rats, la chaleur, trois heures d'activité par semaine. Les visites de ta famille coûtent cher et durent trente minutes.",choices:[
+ {t:"Travailler à l'atelier et préparer ta sortie",fx:{emo:4,utile:3,reco:2,stress:5},set:S=>{S.f.prison=0;S.f.lostJob=true;if(dr()<1)S.f.dipl="cap";return "Tu sors avec un diplôme et un plan. Dehors, les regards n'ont pas changé.";},ok:"Tu ne ressors pas pire.",ko:"La prison reste dans ton corps longtemps."},
+ {t:"Te rapprocher de ceux qui savent comment ça marche dedans",fx:{stress:4,lien:2,emo:-3},set:S=>{S.f.prison=0;S.f.lostJob=true;if(R()<.5){S.f.justice="vol";return "Tu sors, et six mois après, tu es de retour sur le banc du tribunal.";}return "Tu sors, avec des contacts dont tu te serais passé{e}.";},ok:"Tu survis à l'intérieur.",ko:"L'intérieur te suit dehors."},
+ {t:"Prier, lire, écrire à ta famille chaque jour",fx:{emo:6,lien:5,stress:2},set:S=>{S.f.prison=0;S.f.lostJob=true;S.f.faith=Math.max(S.f.faith||0,1);return "Tu sors apaisé{e}. Ta famille t'attend à la porte.";},ok:"L'enfermement devient une traversée.",ko:"Tu as perdu des années que personne ne te rendra."}
+]};
+const VOTE={cond:S=>!S.f.homeless,text:"Élections territoriales. Ton oncle est sur une liste et passe te voir avec un carton de poulets. « La famille vote ensemble. »",choices:[
+ {t:"Voter pour la liste de l'oncle, par loyauté",fx:{lien:4,reco:1,regret:2},ok:"La famille est unie.",ko:"Tu as voté pour un poulet, pas pour des idées."},
+ {t:"Voter selon tes convictions, et le lui dire",lock:TR,fx:{emo:4,reco:2,lien:-4},ok:"Tu es libre.",ko:"L'oncle ne te parle plus pendant un an."},
+ {t:"Voter selon tes convictions, sans rien dire",fx:{emo:2,stress:2},ok:"Le secret de l'isoloir existe pour ça.",ko:"Tu souris à l'oncle en sachant que tu mens."},
+ {t:"Ne pas voter",fx:{regret:2,stress:-1},ok:"Tu restes hors de tout ça.",ko:"D'autres décident pour toi : les prix, l'école, l'hôpital."}
+]};
+const BINGO={cond:S=>!S.f.homeless,text:"Le bingo du quartier, chaque samedi soir. Ta tante y a gagné un frigo. Toi, tu y laisses la moitié de ta paie.",choices:[
+ {t:"Continuer, un jour ça va tomber",fx:{joie:3,argent:-8,stress:4},set:S=>{S.f.gamble=true;if(R()<.2){S.st.argent=clamp(S.st.argent+10);return "Ce samedi, c'est toi qui cries « Bingo ! ».";}},ok:"L'excitation, les copines, les rires.",ko:"Les dettes, et les mensonges pour les cacher."},
+ {t:"Y aller sans argent, juste pour les gens",fx:{lien:3,joie:1},ok:"Tu gardes la fête, pas la perte.",ko:"Tenter sa chance « juste une fois » est une tentation hebdomadaire."},
+ {t:"Arrêter net",fx:{argent:4,lien:-3,emo:2},ok:"Ton compte en banque respire.",ko:"Le samedi devient très long."}
+]};
+const VIOLENCE_V={p:.35,cond:S=>S.f.couple,text:"Un soir de dispute, {partner} lève la main sur toi. Puis pleure, et jure que ça n'arrivera plus. {pIl} a grandi dans une maison où les coups étaient la langue du soir. Ça n'excuse rien, et tu as le droit de te protéger.",choices:[
+ {t:"Partir chez ta mère, cette nuit",fx:{stress:6,joie:-6,lien:2,emo:2},set:S=>{endCouple(S);trauma(1,"les coups");return "La porte claque derrière toi. Tu ne sais pas encore que c'est le bon choix.";},ok:"Tu te protèges.",ko:"Tout quitter, en une nuit, sans rien."},
+ {t:"Rester, et {le|la} croire",fx:{stress:8,emo:-4,joie:-4},set:S=>{trauma(1,"les coups");if(R()<.6){S.st.sante=clamp(S.st.sante-8);return "Ça recommence. Plus fort. Près de trois mille victimes de violences conjugales par an au fenua, et tu en fais partie.";}return "Ça ne recommence pas. Mais tu ne dors plus de la même façon.";},ok:"Tu donnes une chance.",ko:"La peur est entrée dans la maison."},
+ {t:"Porter plainte",fx:{stress:7,reco:-2,emo:3,lien:-4},set:S=>{endCouple(S);trauma(1,"les coups");return "La gendarmerie, l'association d'aide aux victimes, les regards de la belle-famille. Mais tu es en vie.";},ok:"La loi est de ton côté.",ko:"La famille de {partner} te traite de menteu{r|se}."}
+]};
+const VIOLENCE_A={p:.3,cond:S=>S.f.couple&&(S.st.emo<35||(S.f.alcool||0)>=2),text:"La colère monte, trop vite. Ta main part. {partner} te regarde, la lèvre fendue. Le silence.",choices:[
+ {t:"T'excuser, promettre, et ne rien changer",fx:{stress:5,regret:6,emo:-4},set:S=>{S.f.violent=true;if(R()<.5){S.f.justice="violence";endCouple(S);return "La fois suivante, {partner} porte plainte.";}},ok:"Le soir, vous dormez dans le même lit.",ko:"Rien n'est réglé. La prochaine fois est déjà là."},
+ {t:"Partir toi-même, et chercher de l'aide pour ta colère",fx:{emo:8,stress:4,reco:-2,lien:-3},set:S=>{S.f.violent=true;S.f.trauma=Math.max(0,(S.f.trauma||0)-1);return "Un groupe de parole pour hommes et femmes violents. Tu y découvres d'où vient ta colère.";},ok:"Tu brises quelque chose qui vient de loin.",ko:"Il faut admettre ce que tu as fait, et c'est le plus dur."},
+ {t:"Lui dire que c'est de sa faute",fx:{stress:6,lien:-8,emo:-5,regret:4},set:S=>{S.f.violent=true;endCouple(S);if(R()<.5)S.f.justice="violence";return "{partner} part avec les enfants. Tu restes seul{e} avec ta version.";},ok:"Tu ne te remets pas en question.",ko:"Tu perds tout, et tu ne comprends toujours pas pourquoi."}
+]};
+const DESPAIR={cond:S=>S.st.joie<30||S.f.depression>0,text:"Un matin, tu n'as plus envie de rien. Ni de te lever, ni de parler, ni de demain. Le vide.",choices:[
+ {t:"Appeler le numéro d'écoute, ou aller aux urgences",fx:{emo:8,stress:-6,joie:4,reco:-1},set:S=>{S.f.depression=0;S.f.trauma=Math.max(0,(S.f.trauma||0)-1);return "Une voix calme. Puis un médecin. Puis, des semaines plus tard, un peu de lumière.";},ok:"Tu demandes de l'aide, et c'est du courage.",ko:"Admettre qu'on n'y arrive pas seul est difficile."},
+ {t:"Appeler {friend}",fx:{lien:8,emo:5,joie:4},set:S=>{S.f.depression=0},ok:"{fIl} vient tout de suite et reste jusqu'au soir.",ko:"{fIl} ne peut pas tout porter à ta place."},
+ {t:"Aller à la mer, nager jusqu'au récif, et revenir",fx:{joie:4,emo:3,sante:2},ok:"La mer prend un peu du poids.",ko:"Le poids revient le soir."},
+ {t:"Ne rien dire à personne",fx:{joie:-6,stress:6,emo:-4,sante:-4},set:S=>{S.f.depression=2;trauma(1,"le vide")},ok:"Tu ne déranges personne.",ko:"Le vide grandit dans le silence."}
+]};
+const KIDS_TIME={cond:S=>S.f.kids>0&&!S.f.homeless,text:"{child} ramène un mot de l'école : bagarre, insolence, notes en chute. Tu rentres tard, fatigué{e}.",choices:[
+ {t:"Une gifle, comme on t'a élevé{e}",fx:{stress:2,emo:-3,lien:-3,regret:3},set:S=>{S.f.care=(S.f.care||0)-1;S.f.hit=true},ok:"Le silence revient tout de suite.",ko:"{child} apprend que la force règle les problèmes."},
+ {t:"Prendre une heure chaque soir pour parler et faire les devoirs",lock:S=>S.f.metier&&["medecin","soin","armee","commerce"].includes(S.f.metier)?"Ton métier ne te laisse pas ce temps-là":null,fx:{lien:6,utile:5,stress:4,joie:2,argent:-2},set:S=>{S.f.care=(S.f.care||0)+2},ok:"{child} s'ouvre peu à peu.",ko:"Ces heures, tu les prends sur ton sommeil et ton couple."},
+ {t:"Payer des cours particuliers",lock:S=>S.st.argent<30?"Tu n'en as pas les moyens":null,fx:{argent:-6,stress:-1},set:S=>{S.f.care=(S.f.care||0)+1},ok:"Les notes remontent.",ko:"Ce n'est pas toi qui es là, c'est un étranger payé."},
+ {t:"Laisser faire, ça passera",fx:{stress:-2,regret:4},set:S=>{S.f.care=(S.f.care||0)-1},ok:"Tu gardes tes forces.",ko:"{child} comprend qu'{ciIl} n'a pas d'importance."}
+]};
+const KIDS_TEEN={cond:S=>S.f.kids>0&&!S.f.homeless,text:"{child} a seize ans et rentre à quatre heures du matin, les yeux rouges, en sentant le paka.",choices:[
+ {t:"Crier, punir, confisquer le téléphone",fx:{stress:4,lien:-3,reco:1},set:S=>{S.f.care=(S.f.care||0)+0},ok:"Tu poses une limite.",ko:"{child} se referme et ment mieux."},
+ {t:"Attendre le lendemain, puis parler sans juger",lock:TR,fx:{emo:5,lien:5,stress:3},set:S=>{S.f.care=(S.f.care||0)+2},ok:"{child} finit par raconter ce qui ne va pas.",ko:"Il faut avaler ta peur et ta colère, et c'est long."},
+ {t:"L'envoyer chez un oncle aux Tuamotu pour l'éloigner des mauvaises fréquentations",fx:{lien:-4,stress:-2,argent:-3},set:S=>{S.f.care=(S.f.care||0)+1},ok:"Loin de la ville, {ciil} se calme.",ko:"{child} se sent rejeté{cie}."},
+ {t:"Faire comme si tu n'avais rien vu",fx:{stress:-1,regret:5},set:S=>{S.f.care=(S.f.care||0)-2},ok:"Pas de conflit.",ko:"Tu as laissé passer le moment où {ciil} avait besoin de toi."}
+]};
+MOM[3]=[
+ {must:true,cond:S=>dr()===2,text:"Le bac en poche. Et maintenant ?",choices:[
+  {t:"Partir étudier en France",lock:S=>(S.wealth>=2||S.f.etu>=4)?null:"Il faudrait une bourse : ni tes notes ni l'argent de ta famille ne suffisent",fx:S=>({etu:3,reco:5,lien:S.sex==="F"?-10:-8,stress:6,joie:-2}),set:S=>{S.f.dipl="sup2";S.f.france=true;return S.wealth<2?"Une bourse du Pays te permet de partir.":"";},ok:"Bordeaux, Montpellier, Paris : le monde s'ouvre.",ko:"{Le froid, la solitude, et cette question : « Tu viens d'où, vraiment ? »|Le froid, la solitude. Ta famille s'inquiète de te savoir seule, si loin.}",mem:"l'hiver loin du fenua"},
+  {t:"Commencer à Tahiti, puis partir en France pour le master",lock:S=>(S.wealth>=1||S.f.etu>=3)?null:"Même plus tard, le voyage et le logement coûtent trop cher",fx:{etu:3,lien:-3,argent:-3,stress:3,emo:2},set:S=>{S.f.dipl="sup2";S.f.france=true},ok:"Tu pars plus tard, plus mûr{|e}, plus prêt{|e}.",ko:"Deux départs au lieu d'un, et de longues années d'études."},
+  {t:"L'université, à Tahiti",fx:{etu:2,lien:2,argent:-3,stress:2},set:S=>{S.f.dipl="sup1"},ok:"Des études sans quitter les tiens.",ko:"Moins de filières, et les bouchons chaque matin."},
+  {t:"Travailler tout de suite",fx:{argent:5,regret:2},ok:"Ton propre argent, enfin.",ko:"Tu te demanderas où les études t'auraient mené{e}."}
+ ]},
+ {must:true,cond:S=>dr()<2,text:"Sans le bac, le travail est rare : à peine plus d'un adulte sur deux a un emploi au fenua. Que fais-tu ?",choices:[
+  {t:"Entrer au RSMA pour apprendre un métier",lock:S=>S.f.casier?"Ton casier judiciaire ferme cette porte":null,fx:{etu:1,reco:4,lien:-2,stress:3,sante:2},set:S=>{if(dr()<1)S.f.dipl="cap"},ok:"La discipline, un vrai métier, des amis pour la vie.",ko:"Le réveil à cinq heures, les ordres, loin de ta famille."},
+  {t:"Apprendre sur le tas chez un patron",fx:{argent:3,utile:3,stress:2},set:S=>{if(dr()<1&&R()<.6){S.f.dipl="cap";return "Ton patron t'aide à valider un CAP.";}},ok:"Tu gagnes un peu en apprenant.",ko:"Payé{e} au lance-pierre, sans contrat."},
+  {t:"Vivre de petits boulots",fx:{argent:2,joie:3,regret:3,stress:3},ok:"Personne ne te commande longtemps.",ko:"Rien n'est jamais sûr."}
+ ]},
+ {must:true,text:"Il faut choisir un métier. Chacun donne quelque chose, et en prend autre chose.",choices:S=>Object.keys(CAREERS).map(k=>{const c=CAREERS[k];return {t:c.n,lock:()=>careerLock(k),fx:()=>{const f={...c.fx};if(f.argent==="var")f.argent=-8;f.reco=(f.reco||0)+2;return f;},ok:c.ok,ko:c.ko,mem:c.mem,set:S=>{S.f.metier=k;if(k==="commerce")return "Tu investis toutes tes économies.";}};})},
+ {must:true,text:"{partner} entre dans ta vie : un rire au bord de l'eau, une main tendue pendant le Heiva.",choices:[
+  {t:"Vous installer ensemble",fx:{joie:8,lien:8,stress:4},set:S=>{S.f.couple=true;S.f.coupleSince=3},ok:"Quelqu'un t'attend le soir.",ko:"Les disputes pour l'argent, et moins de temps pour toi.",mem:"{partner}"},
+  {t:"Rester libre",fx:{joie:4,lien:-4},ok:"Tes soirées, tes voyages, ta liberté.",ko:"Certains soirs, la maison est très silencieuse.",mem:"la liberté choisie"}
+ ]},
+ {cond:S=>!S.f.homeless,text:"Où vas-tu vivre ?",choices:[
+  {t:"Rester chez tes parents",fx:{argent:5,lien:3,stress:3,joie:-2},ok:"Tu mets de l'argent de côté.",ko:"Pas d'intimité, et les remarques au dîner."},
+  {t:"Louer un appartement à Papeete",lock:S=>S.st.argent<30?"Le loyer est trop cher pour toi":null,fx:{argent:-6,joie:4,stress:2,lien:-2},ok:"Ton chez-toi, tes règles.",ko:"La moitié de ton salaire part dans le loyer."},
+  {t:"Bâtir un fare sur la terre familiale, en indivision",fx:{argent:-3,lien:4,stress:4},set:S=>{S.f.terre=true},ok:"Ta maison sur la terre de tes ancêtres.",ko:"Les cousins contestent le partage. L'indivision commence.",mem:"le fare sur la terre des ancêtres"}
+ ]},
+ {cond:S=>!S.f.animal,text:"Un chat roux s'installe sur ton perron et refuse de partir.",choices:[
+  {t:"L'adopter",fx:{joie:6,lien:3,argent:-2,stress:-2},set:S=>{S.f.animal=true;S.pet=pick(["Mimi","Tiki","Moana"]);},ok:"Il ronronne sur tes genoux après le travail.",ko:"Les frais de vétérinaire, et les poils partout.",mem:"un chat roux sur le perron"},
+  {t:"Le laisser à la voisine",fx:{regret:2,argent:1},ok:"Une chose de moins à gérer.",ko:"Il te regarde passer chaque matin."}
+ ]},
+ {text:"Un cousin te propose de l'argent facile : garder des sachets de paka chez toi.",choices:[
+  {t:"Accepter",fx:{argent:10,stress:8,reco:-3},set:S=>{if(R()<.35){S.f.justice="vol";return "Les gendarmes débarquent. Garde à vue, et la honte pour ta famille.";}return "Personne ne vient. Mais tu dors mal.";},ok:"Des billets faciles.",ko:"La peur au ventre à chaque voiture qui passe."},
+  {t:"Refuser",fx:{lien:-3,reco:2},ok:"Ta conscience est tranquille.",ko:"Ton cousin ne te parle plus."}
+ ]},
+ {text:"Un tatoueur propose de graver sur ta peau les motifs de ta famille, ta généalogie, ton île.",choices:[
+  {t:"Te faire tatouer",fx:{reco:4,joie:5,argent:-4,lien:3},ok:"Ton histoire sur ta peau, pour toujours.",ko:"Certains patrons, certains popa'a, te jugeront dessus.",mem:"le tatau de ta famille"},
+  {t:"Pas maintenant",fx:{regret:2},ok:"Tu gardes ta peau libre.",ko:"Tu repousses, encore."}
+ ]},
+ {cond:S=>S.f.faith>0,text:"La paroisse te demande de t'engager : diacre, catéchisme, chorale, chaque semaine.",choices:[
+  {t:"T'engager pleinement",fx:{lien:6,reco:5,utile:6,joie:3,stress:3},set:S=>{S.f.faith=2},ok:"Une communauté qui ne te lâchera jamais.",ko:"Tes dimanches, tes soirées, et des règles qui ne sont pas toujours les tiennes."},
+  {t:"Prendre tes distances",fx:{joie:2,lien:-5,regret:2},set:S=>{S.f.faith=0},ok:"Tu cherches ta propre foi.",ko:"Ta grand-mère ne comprend pas."}
+ ]},
+ FRIEND_TALK,COUPLE_TALK,LOVE_SINGLE,LOVE_COUPLE,OPPORTUNITY,SURVIVAL,FRIEND_BETRAYAL,HOMELESS,
+ DRINK,ICE,ICE_FALL,TRIAL,PRISON,VOTE,THERAPY,DESPAIR,VIOLENCE_V,VIOLENCE_A
+];
+MOM[4]=[
+ {must:true,cond:S=>S.f.couple,text:"Avec {partner}, vous parlez d'enfants. Les élever demande du temps, de l'argent, et de la patience.",choices:[
+  {t:"Fonder une famille",fx:{joie:8,utile:8,stress:7,argent:-8,lien:6},set:S=>{const n=1+Math.floor(R()*3);addKids(n);return n===1?`${S.childName} naît, et tout change.`:`${n} enfants naissent au fil des années. ${S.childName} est l'aîné${S.childSex==="F"?"e":""}.`;},ok:"Des rires partout dans le fare.",ko:"Les nuits courtes, l'argent qui file, moins de temps à deux.",mem:"des rires d'enfants dans le fare"},
+  {t:"Ne pas avoir d'enfant",fx:{joie:2,argent:4,regret:3,lien:-2},ok:"La liberté, les voyages, du temps à deux.",ko:"À chaque repas de famille, la question revient."},
+  {t:"Accueillir un enfant en fa'a'amu",fx:{utile:10,joie:6,stress:5,argent:-5,reco:3},set:S=>{addKids(1);S.f.care=(S.f.care||0)+1},ok:"Un enfant qui avait besoin d'une maison en a trouvé une.",ko:"Sa mère de naissance passe parfois, et ça remue tout.",mem:"un enfant fa'a'amu"}
+ ]},
+ {must:true,cond:S=>!S.f.couple,text:"Tu as la trentaine. Certains soirs, la solitude se fait sentir.",choices:[
+  {t:"Chercher l'amour",fx:{stress:3},set:S=>{if(R()<.55){prepLover(S);newCouple(S);S.st.joie=clamp(S.st.joie+8);S.st.lien=clamp(S.st.lien+6);return `Tu rencontres ${S.partner}. Tout recommence.`;}S.st.joie=clamp(S.st.joie-4);return "Les rendez-vous se suivent et ne mènent nulle part.";},ok:"Tu ouvres ton cœur à nouveau.",ko:"Le risque d'être déçu{e}."},
+  {t:"Te consacrer à tes neveux et nièces",fx:{utile:6,lien:5,joie:3,regret:2},ok:"Tu deviens {leur tonton préféré|leur tata préférée}.",ko:"Le soir, ils rentrent chez eux.",mem:"les neveux sur tes genoux"},
+  {t:"Savourer ta liberté",fx:{joie:4,lien:-6,argent:3},ok:"Personne à qui rendre des comptes.",ko:"Le silence, parfois, devient lourd."}
+ ]},
+ {cond:S=>!S.f.homeless,text:"Une maison est à vendre, avec un jardin et des manguiers.",choices:[
+  {t:"Acheter, avec un prêt sur 25 ans",lock:S=>S.st.argent<45?"La banque refuse le prêt : pas assez d'apport":null,fx:{argent:-10,stress:6,joie:5,reco:3},set:S=>{S.f.house=true},ok:"Une maison à toi.",ko:"Les mensualités, chaque mois, pendant 25 ans.",mem:"une maison sous les manguiers"},
+  {t:"Ne pas acheter",fx:{argent:3,regret:2},ok:"Pas de dette.",ko:"Le loyer, à vie, et rien à transmettre."}
+ ]},
+ {cond:S=>!!S.f.metier,text:"On te propose une promotion : plus de responsabilités, plus d'argent.",choices:[
+  {t:"Accepter",fx:{argent:8,reco:6,stress:7,lien:-7},set:S=>{if(S.f.kids)S.f.care=(S.f.care||0)-1},ok:"Ton nom sur la porte du bureau.",ko:S=>S.sex==="F"&&S.f.kids?"Tu rates les spectacles d'école, et on te demande sans cesse qui garde les enfants.":"Tu rates les anniversaires, les matchs, les dimanches."},
+  {t:"Accepter, en négociant des horaires pour ta famille",fx:{argent:5,reco:3,stress:4,lien:-2,emo:2},ok:"Un peu des deux : l'argent, et du temps.",ko:"On te le fait payer en petites remarques."},
+  {t:"Refuser, pour garder du temps",fx:{lien:6,joie:3,regret:3,reco:-2},set:S=>{if(S.f.kids)S.f.care=(S.f.care||0)+1},ok:"Tes soirées restent aux tiens.",ko:"Un collègue plus jeune passe devant toi."}
+ ]},
+ {cond:S=>S.f.couple,text:"Avec {partner}, les disputes deviennent quotidiennes.",choices:[
+  {t:"Divorcer",fx:{joie:-10,stress:8,lien:-6,regret:5,argent:-6},set:S=>{endCouple(S);if(R()<.6){S.f.depression=2;return "La dépression s'installe pour de longs mois.";}},ok:"Un jour, tu respires de nouveau.",ko:"Les avocats, les biens à partager, les enfants entre deux fare.",mem:"le divorce"},
+  {t:"Vous battre pour le couple, avec une conseillère",lock:TR,fx:{stress:5,lien:4,joie:2,argent:-3},set:S=>{if(R()<.55)return "Vous vous retrouvez, plus forts qu'avant.";endCouple(S);S.st.joie=clamp(S.st.joie-6);return "Malgré vos efforts, vous vous séparez.";},ok:"Vous parlez enfin.",ko:"Des mois d'efforts, sans garantie."},
+  {t:"Rester sans rien changer",fx:{stress:8,joie:-6,regret:4},ok:"La famille reste unie, en apparence.",ko:"Le silence s'installe à table."}
+ ]},
+ {cond:S=>S.f.terre,text:"Le dossier de la terre familiale arrive au tribunal foncier. Des dizaines d'héritiers, certains partis en France depuis trente ans. L'indivision divise la famille.",choices:[
+  {t:"Te battre pour ta part, avec un avocat",lock:S=>S.st.argent<25?"Un avocat coûte trop cher pour toi":null,fx:{argent:-8,reco:2,lien:-10,stress:8},set:S=>{if(R()<.5){S.st.argent=clamp(S.st.argent+12);return "Dix ans de procédure. Ton nom finit sur le titre.";}return "Dix ans de procédure, et le dossier est renvoyé. Rien n'est réglé.";},ok:"Tu défends ton droit.",ko:"Tes cousins ne te saluent plus au marché."},
+  {t:"Proposer un partage à l'amiable, autour d'un repas",lock:TR,fx:{emo:5,lien:3,stress:4},set:S=>{if(R()<.5){S.st.argent=clamp(S.st.argent+6);return "Après trois dimanches de discussions, un accord. La terre est partagée.";}S.st.lien=clamp(S.st.lien-5);return "Un cousin de France refuse de signer. Tout est bloqué.";},ok:"La famille parle au lieu de s'écrire par avocats.",ko:"Il suffit d'un refus pour tout bloquer."},
+  {t:"Laisser faire, pour la paix",fx:{lien:3,regret:6,argent:-2},ok:"La famille reste en paix.",ko:"Ta part de terre s'efface."}
+ ]},
+ {text:"Ton corps te parle : fatigue, poids, tension. Un adulte sur deux est obèse au fenua, et le diabète guette.",choices:[
+  {t:"Changer de vie : marche, sport, moins de gras",fx:{sante:10,joie:-3,stress:-2},ok:"Tu retrouves ton souffle.",ko:"Adieu les casse-croûte, le chao men et les sodas du dimanche."},
+  {t:"Profiter, on ne vit qu'une fois",fx:{joie:5,sante:-9},ok:"Les bons repas en famille.",ko:"Ta tension grimpe en silence."}
+ ]},
+ {cond:S=>S.f.kids>0&&S.f.reo>0,text:"Tes enfants ne parlent pas reo tahiti. Ils répondent en français à leur grand-mère.",choices:[
+  {t:"Parler reo à la maison, chaque soir",fx:{lien:5,joie:3,utile:3,stress:2},set:S=>{S.f.care=(S.f.care||0)+1},ok:"La langue de mamie passe à une génération de plus.",ko:"Les enfants râlent, et c'est un effort quotidien."},
+  {t:"Laisser tomber, le français compte plus pour l'école",fx:{regret:5,stress:-1},ok:"Une bataille de moins.",ko:"Avec toi s'éteindra une voix."}
+ ]},
+ {text:"Ton frère a vendu, sans rien dire, un terrain qui vous revenait à tous les deux. L'argent est parti. Lui aussi a ses raisons, que tu ne connais pas encore.",choices:[
+  {t:"Le haïr, et le dire à tout le monde",fx:{stress:6,lien:-8,emo:-5,reco:-2},set:S=>{S.f.feud=true},ok:"Tout le monde sait qui est le voleur.",ko:"La haine te ronge plus qu'elle ne le punit."},
+  {t:"Porter plainte",fx:{stress:6,lien:-6,argent:3},ok:"La loi tranchera.",ko:"Un frère au tribunal. Mama ne s'en remet pas."},
+  {t:"Lui demander pourquoi, en face",lock:TR,fx:{emo:6,stress:3},set:S=>{if(R()<.5)return "Il pleure : des dettes, la honte. Il te remboursera, peut-être.";S.f.feud=true;return "Il nie tout. Le lien est rompu.";},ok:"Tu cherches l'homme derrière l'acte.",ko:"Comprendre n'efface pas la perte."},
+  {t:"Lâcher prise",fx:{regret:4,emo:3,lien:2},ok:"La paix du cœur.",ko:"Tu as laissé passer une injustice."}
+ ]},
+ COUPLE_TALK,BETRAYAL,LOVE_SINGLE,LOVE_COUPLE,FRIEND_TALK,OPPORTUNITY2,SURVIVAL,FRIEND_BETRAYAL,HOMELESS,
+ DRINK,ALCO,ICE,ICE_FALL,TRIAL,PRISON,VOTE,BINGO,THERAPY,DESPAIR,VIOLENCE_V,VIOLENCE_A,KIDS_TIME
+];
+MOM[5]=[
+ {must:true,text:"Tes parents vieillissent. Ils ont besoin d'aide chaque jour.",choices:[
+  {t:"Les prendre chez toi",fx:S=>({utile:10,lien:6,stress:S.sex==="F"?11:8,argent:-4,joie:-2}),ok:"Ils finissent leur vie entourés.",ko:"{Tu portes, tu laves, tu veilles, et tu t'épuises.|Comme souvent, tout repose sur la fille de la famille.}",mem:"les mains de tes parents dans les tiennes"},
+  {t:"Partager avec tes frères et sœurs",fx:{lien:2,stress:3,regret:2},ok:"Chacun porte un peu.",ko:"Les reproches sur qui en fait le plus."},
+  {t:"Payer une auxiliaire de vie",lock:S=>S.st.argent<40?"Tu n'en as pas les moyens":null,fx:{argent:-8,regret:3,stress:-2,utile:2},ok:"Une professionnelle prend soin d'eux.",ko:"Tu te sens coupable de ne pas le faire toi-même."}
+ ]},
+ {must:true,text:"Tes parents s'éteignent à quelques mois d'intervalle. Puis vient le partage : la maison, la terre, les souvenirs. Tes frères et sœurs ne sont pas d'accord.",choices:[
+  {t:"Exiger ta part, quitte à aller au tribunal",fx:{argent:8,lien:-10,stress:8,reco:-2},set:S=>{S.f.feud=true},ok:"Tu obtiens ce qui te revient.",ko:"Noël ne réunira plus jamais tout le monde."},
+  {t:"Organiser une réunion de famille avec un ancien pour arbitrer",lock:TR,fx:{emo:6,lien:4,stress:5,argent:3},set:S=>{if(R()<.55)return "Trois dimanches, des larmes, puis un accord signé chez le notaire.";S.f.feud=true;S.st.lien=clamp(S.st.lien-6);return "Un frère quitte la table en claquant la porte. Rien n'est signé.";},ok:"La famille passe avant la terre.",ko:"Il suffit d'un seul refus."},
+  {t:"Laisser ta part aux autres",fx:{lien:3,regret:7,argent:-3,reco:3},ok:"On te dira généreu{x|se}.",ko:"Tes propres enfants n'auront rien."},
+  {t:"Tout laisser en indivision, comme avant",fx:{stress:-1,regret:4},ok:"Personne ne se fâche aujourd'hui.",ko:"Tes enfants hériteront du problème, avec cent cousins de plus."}
+ ]},
+ {text:"La commune cherche des volontaires : conseil municipal, association, paroisse.",choices:[
+  {t:"T'engager",fx:{reco:9,utile:8,stress:6,lien:-3},ok:"On te salue dans la rue, on vient te demander conseil.",ko:"Les réunions le soir, les critiques, les rumeurs.",mem:"les réunions du conseil"},
+  {t:"Garder ton temps pour toi",fx:{joie:3,regret:3},ok:"Tes soirées t'appartiennent.",ko:"Tu te sens parfois inutile."}
+ ]},
+ {cond:S=>S.f.kids>0,text:"{child} veut partir vivre en France.",choices:[
+  {t:"L'encourager",fx:{lien:-5,reco:3,joie:-2},set:S=>{S.f.childAway=true},ok:"{ciIl} part avec ta bénédiction.",ko:"À l'aéroport de Faa'a, les colliers de coquillages et les larmes.",mem:"un enfant qui s'envole"},
+  {t:"L'encourager, avec un appel vidéo chaque dimanche",fx:{lien:-2,reco:2,emo:3},set:S=>{S.f.childAway=true},ok:"La distance devient supportable.",ko:"Un écran ne remplace pas une étreinte."},
+  {t:"{Le|La} retenir",fx:{lien:3,regret:5,stress:2},set:S=>{S.f.care=(S.f.care||0)-1},ok:"{ciIl} reste près de toi.",ko:"Tu vois dans ses yeux le monde qu'{ciil} ne verra pas."}
+ ]},
+ {cond:S=>!S.f.kids,text:"Tu n'as pas eu d'enfant. Comment transmettre ce que tu sais ?",choices:[
+  {t:"Former des jeunes dans ton métier",fx:{utile:8,reco:5,stress:2},ok:"Des jeunes t'appellent « tonton » ou « tata ».",ko:"Ils partent un jour, sans se retourner."},
+  {t:"Voyager enfin",fx:{joie:8,argent:-6,lien:-2},ok:"Le Japon, la Nouvelle-Zélande, Rapa Nui.",ko:"Tes économies fondent."}
+ ]},
+ {cond:S=>!!S.f.metier&&!S.f.homeless,text:"À cinquante ans, l'envie de tout changer te prend.",choices:[
+  {t:"Te reconvertir",fx:{joie:7,argent:-6,stress:5,reco:2},ok:"Tu fais enfin ce qui te ressemble.",ko:"Tout recommencer, à ton âge, sans filet."},
+  {t:"Tenir jusqu'à la retraite",fx:{argent:4,joie:-4,regret:3},ok:"La retraite sera confortable.",ko:"Les années passent, toutes pareilles."}
+ ]},
+ {cond:S=>(S.disease&&S.disease.k==="diabete")||S.st.sante<45,text:"Le médecin te parle d'un traitement à prendre toute ta vie.",choices:[
+  {t:"Suivre le traitement à la lettre",fx:{sante:10,stress:3,joie:-2},ok:"Ton corps se stabilise.",ko:"Les cachets matin et soir, les prises de sang."},
+  {t:"Le traitement, et le ra'au de ta grand-mère",fx:{sante:7,lien:2},ok:"Tu soignes ton corps et ta mémoire.",ko:"Il faut tout dire au médecin, et ce n'est pas toujours simple."},
+  {t:"Le ra'au tahiti seulement",fx:{sante:-8,joie:2},ok:"Les plantes de ta grand-mère te rassurent.",ko:"La maladie avance en silence."}
+ ]},
+ {cond:S=>S.f.kids>0,text:"{child} a des ennuis : dettes, ou pire. {ciIl} vient te demander de l'argent, encore.",choices:[
+  {t:"Donner, sans poser de questions",fx:{argent:-10,lien:3,stress:4,regret:2},ok:"Tu ne laisses pas tomber ton enfant.",ko:"Tu finances peut-être ce qui le détruit."},
+  {t:"Refuser l'argent, proposer ton aide autrement",lock:TR,fx:{emo:5,stress:5,lien:-2},set:S=>{S.f.care=(S.f.care||0)+1},ok:"Tu l'aides à se relever, pas à retomber.",ko:"{ciIl} claque la porte en te traitant d'égoïste."},
+  {t:"Couper les ponts",fx:{lien:-8,stress:-2,regret:8},set:S=>{S.f.care=(S.f.care||0)-2},ok:"Tu protèges ce qui te reste.",ko:"Un enfant perdu, peut-être pour toujours."}
+ ]},
+ {cond:S=>S.f.couple&&(S.f.coupleSince||3)<=4,text:"Vingt ans avec {partner}. Vous vous connaissez par cœur. Vous vous ennuyez, aussi.",choices:[
+  {t:"Partir en voyage à deux, comme au début",fx:{joie:6,lien:5,argent:-6},set:S=>{S.f.oldTogether=true},ok:"Vous riez comme à vingt ans.",ko:"Le retour est brutal, et le compte en banque aussi."},
+  {t:"Chacun ses passions, chacun son coin",fx:{joie:3,lien:-2,emo:2},ok:"Un équilibre tranquille.",ko:"Deux solitudes sous un même toit."},
+  {t:"Lui dire que tu t'ennuies",lock:TR,fx:{stress:4,emo:4},set:S=>{if(R()<.6){S.st.lien=clamp(S.st.lien+6);S.f.oldTogether=true;return "{partner} aussi s'ennuyait. Vous réinventez tout.";}endCouple(S);return "{partner} ne voulait pas l'entendre. Vous vous séparez, tard.";},ok:"L'honnêteté.",ko:"Elle peut tout faire basculer."}
+ ]},
+ BETRAYAL,FRIEND_TALK,LOVE_SINGLE,SURVIVAL,HOMELESS,ALCO,TRIAL,PRISON,VOTE,BINGO,THERAPY,DESPAIR,KIDS_TEEN,COUPLE_TALK
+];
+MOM[6]=[
+ {must:true,text:S=>S.place.far?`La retraite. ${S.place.short} t'appelle.`:"La retraite. Où veux-tu vivre ces années ?",choices:S=>[
+  {t:S.place.far?`Retourner vivre à ${S.place.short}`:"Partir vivre dans une île tranquille",fx:{joie:8,lien:3,sante:-4,stress:-4},ok:"Le lagon, le silence, la pêche au petit matin.",ko:"L'hôpital est à une heure d'avion.",mem:S.place.far?`le retour à ${S.place.short}`:"une île tranquille"},
+  {t:"Rester près de Papeete",fx:{sante:3,lien:2,joie:-2},ok:"Les médecins et la famille tout près.",ko:"Le bruit, les bouchons, la ville qui change."}
+ ]},
+ {must:true,cond:S=>!S.f.papers,text:"Un notaire de Papeete te conseille de mettre tes affaires en ordre : testament, partage de la maison et de la terre, de ton vivant.",choices:[
+  {t:"Faire les papiers maintenant, avec tous tes enfants autour de la table",fx:{stress:4,emo:4,lien:3,argent:-3},set:S=>{S.f.papers=true},ok:"Tout est clair. Personne ne se battra après toi.",ko:"Parler de ta mort avec tes enfants est une épreuve."},
+  {t:"Plus tard, il y a le temps",fx:{stress:-2,regret:4},ok:"Pas besoin d'y penser aujourd'hui.",ko:"Il n'y a pas toujours le temps."},
+  {t:"Tout laisser à un seul enfant, celui qui s'occupe de toi",fx:{lien:-4,stress:2,regret:3},set:S=>{S.f.papers=true;S.f.unfair=true},ok:"Tu récompenses celui qui est là.",ko:"Les autres se sentiront trahis."}
+ ]},
+ {text:"Les jeunes du quartier viennent écouter tes histoires.",choices:[
+  {t:"Raconter ta vie, tes erreurs aussi",fx:{utile:8,reco:5,regret:-6,lien:5},ok:"Tes erreurs deviennent leurs leçons.",ko:"Certains souvenirs font mal à dire.",mem:"les histoires racontées sous le manguier"},
+  {t:"Garder tes histoires pour toi",fx:{regret:4,stress:-1},ok:"Ton passé t'appartient.",ko:"Avec toi partira un morceau du fenua."}
+ ]},
+ {cond:S=>S.f.divorced||S.f.feud||S.st.regret>35,text:"Un nom revient souvent dans tes pensées. Quelqu'un que tu as blessé, ou qui t'a blessé{e}.",choices:[
+  {t:"Appeler, et demander pardon",lock:TR,fx:{regret:-12,joie:4,stress:3},set:S=>{S.f.feud=false},ok:"Une voix au téléphone, des larmes, un soulagement.",ko:"Il faut rouvrir la vieille blessure.",mem:"un pardon tardif"},
+  {t:"Laisser dormir le passé",fx:{regret:4,stress:-2},ok:"Pas de vagues.",ko:"La question restera ouverte."}
+ ]},
+ {cond:S=>S.f.kids>0,text:"Tes enfants te demandent de garder les petits tous les jours, pendant qu'ils travaillent.",choices:[
+  {t:"Accepter, avec joie",fx:{joie:6,utile:7,lien:6,sante:-4,stress:3},ok:"Les petits t'apprennent les nouveaux mots.",ko:"Tu es fatigué{e}, et personne ne te demande ton avis."},
+  {t:"Deux jours par semaine, pas plus",fx:{joie:3,utile:4,lien:2,emo:3},ok:"Tu donnes sans t'épuiser.",ko:"Tes enfants trouvent que tu pourrais faire plus."},
+  {t:"Refuser : tu as donné assez",fx:{lien:-5,joie:2,regret:3},ok:"Ton temps t'appartient enfin.",ko:"On te traite d'égoïste."}
+ ]},
+ {cond:S=>S.f.couple,text:"{partner} tombe malade. Longtemps. Il faut tout faire : laver, nourrir, veiller.",choices:[
+  {t:"Tout faire toi-même, jusqu'au bout",fx:{lien:8,utile:8,sante:-8,stress:8,joie:-3},set:S=>{S.f.oldTogether=true},ok:"Tu tiens ta promesse.",ko:"Tu t'épuises, et personne ne prend soin de toi.",mem:"les mains de {partner} dans les tiennes"},
+  {t:"Demander de l'aide : enfants, infirmière, auxiliaire",fx:{lien:4,utile:4,stress:3,argent:-5},set:S=>{S.f.oldTogether=true},ok:"Vous tenez, ensemble, avec les autres.",ko:"Tu te sens coupable de ne pas tout porter."},
+  {t:"Fuir, un peu, chaque jour, au bar ou chez les copains",fx:{joie:1,lien:-8,regret:8,emo:-3},ok:"Tu respires.",ko:"{partner} t'attend, et tu n'es pas là."}
+ ]},
+ {text:"On t'annonce que la maison du voisin, qui te vole de l'eau depuis dix ans, est à vendre. L'occasion de régler l'affaire, ou pas.",choices:[
+  {t:"Aller lui parler enfin, et faire la paix",lock:TR,fx:{emo:4,lien:3,regret:-2},ok:"Dix ans de rancune réglés en une heure.",ko:"Il fallait avaler sa fierté."},
+  {t:"Le laisser partir avec sa dette",fx:{regret:2,stress:-1},ok:"Tu passes à autre chose.",ko:"Il ne saura jamais."}
+ ]},
+ FRIEND_TALK,{...LOVE_SINGLE,p:.2},HOMELESS,ALCO,THERAPY,DESPAIR,BINGO,VOTE,COUPLE_TALK,
+ {late:true,cond:S=>S.f.couple&&S._widow,text:S=>S._widowHow==="accident"?"{partner} prend la route un soir de pluie et ne revient pas. Un camion, un virage, la route de ceinture.":"{partner} s'en va avant toi, après une longue maladie, un matin de saison sèche.",choices:[
+  {t:"Faire ton deuil entouré{e}",fx:{joie:-8,lien:4,stress:2},set:S=>{S.f.couple=false;S.f.widow=true},ok:"Toute la famille chante pour {partner}.",ko:"Un côté du lit reste froid.",mem:"l'adieu à {partner}"},
+  {t:"Te refermer sur toi",fx:{joie:-12,lien:-8,regret:4},set:S=>{S.f.couple=false;S.f.widow=true;S.f.depression=2;trauma(1,"l'absence de "+S.partner)},ok:"Ta peine t'appartient.",ko:"Les jours deviennent longs et gris.",mem:"l'adieu à {partner}"}
+ ]},
+ {late:true,cond:S=>S.f.kids>0&&S._childLoss,text:"Le téléphone sonne au milieu de la nuit. {child}. Un accident. Un parent ne devrait jamais enterrer son enfant.",choices:[
+  {t:"Pleurer avec les autres, chanter, veiller",fx:{joie:-15,lien:5,stress:5},set:S=>{S.f.childDead=true;trauma(2,"la perte de "+S.childName)},ok:"La famille te porte.",ko:"Rien ne portera jamais ce poids à ta place.",mem:"le départ de {child}"},
+  {t:"Chercher un coupable : la route, le Pays, Dieu",fx:{joie:-15,stress:10,emo:-6,lien:-4},set:S=>{S.f.childDead=true;trauma(2,"la perte de "+S.childName)},ok:"La colère tient debout.",ko:"La colère ne rend personne.",mem:"le départ de {child}"},
+  {t:"T'enfermer dans le silence",fx:{joie:-18,lien:-8,emo:-6},set:S=>{S.f.childDead=true;S.f.depression=3;trauma(2,"la perte de "+S.childName)},ok:"Personne ne te demande rien.",ko:"Tu disparais, vivant{e}.",mem:"le départ de {child}"}
+ ]}
+];
+MOM[7]=[
+ {must:true,text:"Où veux-tu passer tes derniers jours ?",choices:[
+  {t:"À la maison, entouré{e} des tiens",lock:S=>S.st.lien<25?"Il ne reste plus grand monde autour de toi":null,fx:{lien:8,joie:4,stress:-2},set:S=>{S.f.endHome=true},ok:"Les voix familières, l'odeur du ma'a.",ko:"Ta famille porte une lourde charge.",mem:"les voix des tiens autour du lit"},
+  {t:"À l'hôpital, bien soigné{e}",fx:{sante:5,lien:-3},ok:"La douleur est soulagée.",ko:"Les néons, les visites trop courtes."},
+  {t:"Seul{e}, chez toi, avec la radio et le chat",fx:{joie:2,lien:-4,emo:3},ok:"Personne ne te voit faible.",ko:"Personne ne te tient la main."}
+ ]},
+ {cond:S=>!S.f.papers,text:"Tes dernières volontés : la terre, la maison, les souvenirs. Tu n'as encore rien écrit.",choices:[
+  {t:"Tout partager clairement chez le notaire, maintenant",fx:{lien:3,stress:-4,regret:-3},set:S=>{S.f.papers=true},ok:"Il n'y aura pas de dispute après toi.",ko:"Certains trouvent le partage injuste."},
+  {t:"Laisser la famille décider après toi",fx:{stress:-2,regret:3},ok:"Tu leur fais confiance.",ko:"L'indivision durera une génération de plus."}
+ ]},
+ {text:"Ce que tu regardes le plus souvent, maintenant :",choices:[
+  {t:"La mer",fx:{joie:4,stress:-3},ok:"Elle était là au début, elle est là à la fin.",ko:"Elle ne répond pas.",mem:"la mer, encore"},
+  {t:"Les visages de ceux qui restent",fx:{lien:5,joie:3},ok:"Tu les apprends par cœur.",ko:"Tu sais que tu vas leur manquer.",mem:"les visages de ceux qui restent"},
+  {t:"Le ciel, où s'allument les étoiles",fx:{regret:-4,stress:-2},ok:"Tes ancêtres naviguaient avec elles.",ko:"Le ciel est grand, et tu es petit{|e}.",mem:"les étoiles des anciens navigateurs"}
+ ]},
+ {cond:S=>S.f.couple,text:"{partner} et toi, vieux tous les deux. Les mêmes histoires, cent fois racontées.",choices:[
+  {t:"Les écouter encore, en souriant",fx:{lien:6,joie:5,emo:3},set:S=>{S.f.oldTogether=true},ok:"Vieillir ensemble est une chance rare.",ko:"Vous savez que l'un partira avant l'autre.",mem:"vieillir avec {partner}"},
+  {t:"Lui rappeler que tu les connais par cœur",fx:{joie:1,lien:-2},ok:"Un peu de silence.",ko:"Un peu de tristesse dans ses yeux."}
+ ]},
+ {cond:S=>S.f.kids>0&&!S.f.childDead,text:"{child} vient te voir et te demande : « Tu as été heureu{x|se}, toi ? »",choices:[
+  {t:"Dire la vérité, les joies et les regrets",fx:{emo:5,lien:5,regret:-5},set:S=>{S.f.care=(S.f.care||0)+1},ok:"{ciIl} repart avec quelque chose de vrai.",ko:"Certaines vérités sont lourdes pour un enfant, même adulte."},
+  {t:"Dire que oui, bien sûr",fx:{lien:2,regret:2},ok:"{ciIl} repart rassuré{cie}.",ko:"Tu as menti, un peu, par amour."}
+ ]},
+ {text:"La nuit, tu repenses à {friend}, à ta première danse, à ta mère. Les souvenirs reviennent sans ordre.",choices:[
+  {t:"Les écrire dans un cahier pour ceux qui restent",fx:{utile:5,regret:-4,emo:3},ok:"Quelque chose de toi restera.",ko:"Écrire fatigue, et certaines pages font pleurer.",mem:"le cahier des souvenirs"},
+  {t:"Les laisser passer, comme les nuages",fx:{stress:-3,emo:2},ok:"La paix.",ko:"Ils partiront avec toi."}
+ ]},
+ HOMELESS,DESPAIR
+];
+const KNEES={text:"Tes genoux lâchent. Monter la côte jusqu'au fare devient une épreuve, et le truck ne passe plus qu'une fois par jour.",choices:[
+ {t:"Accepter la canne, puis le déambulateur",fx:{sante:4,emo:3,reco:-1},ok:"Tu marches encore, plus lentement.",ko:"Les enfants du quartier te regardent passer. Tu étais si rapide, avant."},
+ {t:"Refuser, par fierté",fx:{reco:1,stress:2},set:S=>{if(R()<.5){S.st.sante=clamp(S.st.sante-10);trauma(1,"la chute");return "Une chute dans la descente. Le col du fémur. Des semaines à l'hôpital.";}},ok:"Personne ne te voit faible.",ko:"Le moindre caillou devient un danger."},
+ {t:"Quitter la montagne pour vivre en bas, près des commerces",lock:S=>S.st.argent<20?"Tu n'as pas de quoi déménager":null,fx:{argent:-5,sante:3,lien:-3,regret:3},ok:"Tout est à portée de pas.",ko:"Ta maison, ton jardin, ta vue sur la mer : tout reste là-haut.",mem:"la maison sur la montagne"}
+]};
+const CARE={must:true,text:"Un matin, tes jambes ne te portent plus. Tu ne peux plus te lever seul{e}, ni te laver, ni préparer tes repas. Il faut quelqu'un, chaque jour.",choices:[
+ {t:"Vivre chez {child}",lock:S=>!S.f.kids||S.f.childDead&&S.f.kids<2?"Tu n'as pas d'enfant pour t'accueillir":(S.f.care||0)<0?"Tes enfants sont loin, ou fâchés avec toi":null,fx:{lien:6,joie:3,stress:2,utile:-3},set:S=>{S.f.dependent="famille"},ok:"Les petits-enfants passent te dire bonjour avant l'école.",ko:"{child} s'épuise, et tu le vois. Tu te sens un poids.",mem:"la chambre chez {child}"},
+ {t:"Une auxiliaire de vie à domicile, chaque matin",lock:S=>S.st.argent<25?"Tu n'as pas de quoi payer, et le dossier d'aide du Pays traîne":null,fx:{argent:-6,emo:3,sante:4,lien:2},set:S=>{S.f.dependent="aide"},ok:"Elle connaît ton café, tes médicaments, tes chansons. Elle devient presque de la famille.",ko:"Une inconnue, d'abord, qui voit ton corps nu.",mem:"l'auxiliaire de vie qui chantait avec toi"},
+ {t:"Les voisins et la paroisse se relaient",lock:S=>S.st.lien<35?"Tu n'as pas assez de liens autour de toi":null,fx:{lien:6,reco:3,stress:3},set:S=>{S.f.dependent="voisins"},ok:"Tout le quartier passe. Tu n'es jamais seul{e}.",ko:"Parfois, personne ne vient avant midi."},
+ {t:"Une maison de retraite, à Papeete",fx:{sante:5,lien:-6,joie:-4,stress:-2},set:S=>{S.f.dependent="maison"},ok:"Des soins, des repas chauds, de la compagnie.",ko:"Ta chambre donne sur un parking. Le lagon te manque."},
+ {t:"Rester seul{e}, coûte que coûte",fx:{joie:2,sante:-8,stress:4,emo:-2},set:S=>{S.f.dependent="seul";if(R()<.5){S.st.sante=clamp(S.st.sante-10);return "Une chute dans la nuit. On te retrouve le lendemain matin, sur le carrelage froid.";}},ok:"Ta maison, tes règles, ta fierté.",ko:"Personne ne viendra si tu tombes."}
+]};
+const DIGNITY={cond:S=>S.f.dependent&&S.f.dependent!=="seul",text:"On t'aide pour la toilette, pour t'habiller, pour manger. Toi qui as porté les autres toute ta vie.",choices:[
+ {t:"Te laisser aider, en racontant ta jeunesse",fx:{emo:6,lien:4,joie:2},ok:"La gêne devient un moment de partage.",ko:"Il faut accepter de ne plus tout maîtriser."},
+ {t:"Te fâcher, repousser les mains",fx:{stress:5,lien:-4,sante:-3},ok:"Tu gardes un peu de contrôle.",ko:"Ceux qui t'aident repartent blessés, et reviennent quand même."},
+ {t:"En rire",fx:{joie:4,emo:3},ok:"Ton humour désarme tout le monde.",ko:"Parfois, le rire cache des larmes."}
+]};
+const FORGET={text:"Tu oublies des choses : les prénoms, les clés, le jour de la semaine. Une fois, tu as appelé {child} par le prénom de ton père.",choices:[
+ {t:"L'accepter, et écrire ce qui compte dans un carnet",fx:{emo:4,stress:-2},ok:"Le carnet se remplit de prénoms et de rendez-vous.",ko:"Certains jours, tu ne sais plus pourquoi tu l'as écrit."},
+ {t:"Le cacher à tout le monde",fx:{stress:5,lien:-2},ok:"Personne ne s'inquiète.",ko:"Les oublis grandissent dans le silence."},
+ {t:"En parler au médecin",fx:{sante:3,stress:3,emo:2},ok:"Un traitement ralentit les choses.",ko:"Le mot qu'il prononce te fait peur."}
+]};
+const BURNOUT={cond:S=>!!S.f.metier&&!S.f.homeless,text:"Tu n'en peux plus. Le travail, la maison, les autres. Un matin, tu pleures dans la voiture avant d'entrer au travail, sans savoir pourquoi.",choices:[
+ {t:"Voir ton médecin, et accepter un arrêt",fx:{sante:6,stress:-8,emo:5,argent:-3,reco:-2},ok:"Tu dors. Tu respires. Tu te retrouves, peu à peu.",ko:"Les collègues murmurent. Toi, tu culpabilises de ne pas être là."},
+ {t:"Dire à tes proches que tu n'y arrives plus",fx:{lien:6,stress:-5,emo:4},ok:"On t'écoute, on te soulage d'une partie du poids.",ko:"Dire ça à voix haute te fait honte, d'abord."},
+ {t:"Tenir, encore, comme tu as toujours fait",fx:{stress:8,sante:-6,reco:2},set:S=>{if(R()<.4){S.st.sante=clamp(S.st.sante-10);return "Trois mois plus tard, ton corps décide à ta place : malaise, hôpital, arrêt forcé.";}},ok:"Personne ne voit rien.",ko:"Le corps finit toujours par présenter la facture."},
+ {t:"Tout plaquer du jour au lendemain",fx:{joie:4,stress:-4,argent:-8,regret:3},set:S=>{S.f.lostJob=true},ok:"Un poids énorme tombe de tes épaules.",ko:"Le loyer, lui, n'a pas démissionné."}
+]};
+MOM[4].push(BURNOUT);MOM[5].push(BURNOUT);
+KIDS_TEEN.choices.splice(2,0,{t:"Demander conseil à l'assistante sociale du collège",fx:{emo:4,lien:3,stress:2},set:S=>{S.f.care=(S.f.care||0)+2},ok:"Tu n'es plus seul{e} face à ça. {child} non plus.",ko:"Tu as peur qu'on te juge comme un mauvais parent."});
+MOM[6].push(KNEES);
+MOM[7].unshift(CARE,DIGNITY,FORGET);
+
+const EVENTS=[
+ {ci:0,p:1,cond:S=>!!S.disease,text:S=>`Le pédiatre explique à tes parents : ${S.disease.n.toLowerCase()}. ${S.disease.d}`,fx:{stress:3}},
+ {ci:1,p:.3,text:"Un cyclone arrache la moitié du toit. Tout le quartier vient aider à reconstruire.",fx:{stress:5,lien:4,argent:-3}},
+ {ci:1,p:.25,cond:S=>S.wealth<=2,text:"Ton père perd son travail. La maison devient silencieuse.",fx:{argent:-8,stress:6,joie:-3}},
+ {ci:1,p:.25,text:"Ta grand-mère s'en va pendant la saison des pluies. On chante pour elle toute la nuit.",fx:{joie:-5,lien:-2,regret:2}},
+ {ci:1,p:.15,text:"Un adulte de la famille te fait du mal. Tu ne trouves pas les mots, et personne ne te les demande.",fx:{stress:8,emo:-6,joie:-5},set:S=>{trauma(2,"ce qui s'est passé quand tu étais petit"+(S.sex==="F"?"e":""))}},
+ {ci:2,p:.25,text:"Ton meilleur ami part vivre en France avec ses parents.",fx:{lien:-5,joie:-3}},
+ {ci:2,p:.2,text:"Un camarade de classe se donne la mort. Le collège entier se tait pendant une semaine.",fx:{joie:-6,stress:5,emo:-2},set:S=>{trauma(1,"la mort de ton camarade")}},
+ {ci:3,p:.2,text:"Un accident de scooter sur la route de ceinture. Des semaines à l'hôpital du Taaone.",fx:{sante:-10,stress:5,lien:2}},
+ {ci:3,p:.25,text:"Ton premier vrai salaire. Tu invites toute la famille au restaurant.",fx:{joie:5,reco:3,argent:-2}},
+ {ci:3,p:.2,text:"Une épidémie ferme le fenua pendant des mois. Confinement, hôtels vides, familles entassées.",fx:{argent:-6,stress:6,lien:2}},
+ {ci:4,p:.6,cond:S=>S.f.animal,text:"{pet} s'éteint, vieux et fatigué, sous le manguier.",fx:{joie:-6,lien:-2},set:S=>{S.f.animal=false}},
+ {ci:4,p:.3,cond:S=>["hotel","commerce"].includes(S.f.metier),text:S=>S.f.metier==="hotel"?"La crise touche le tourisme : ton hôtel ferme ses portes.":"Les clients se font rares. Ton commerce coule.",fx:{argent:-10,stress:8,reco:-3},set:S=>{S.f.lostJob=true}},
+ {ci:4,p:.25,text:"Un cyclone. Le fare est inondé, les papiers, les photos, tout est perdu.",fx:{argent:-8,stress:6,joie:-4,lien:3}},
+ {ci:4,p:.2,cond:S=>S.f.kids>0,text:"{child} tombe gravement malade. Des semaines au Taaone, puis l'évasan vers la France.",fx:{stress:10,argent:-8,joie:-6,lien:4},set:S=>{if(R()<.8)return `${S.childName} s'en sort. Tu as vieilli de dix ans.`;S.f.childDead=true;trauma(2,"la perte de "+S.childName);S.st.joie=clamp(S.st.joie-15);return `${S.childName} ne revient pas. Un parent ne devrait jamais enterrer son enfant.`;}},
+ {ci:5,p:.6,cond:S=>S.f.kids>0&&!S.f.childDead,text:"Ton premier petit-enfant naît. Tu pleures de joie à la maternité.",fx:{joie:8,utile:3,lien:5}},
+ {ci:5,p:.15,text:"Une alerte au cœur. Le médecin te dit de ralentir.",fx:{sante:-8,stress:5}},
+ {ci:5,p:.2,text:"{friend} meurt d'un cancer. Tu portes le cercueil.",fx:{joie:-8,lien:-4,regret:3},set:S=>{S.f.friendDead=true}},
+ {ci:6,p:.3,text:"Une amie d'enfance te retrouve sur les réseaux. Vous riez comme à quinze ans.",fx:{joie:6,lien:5}},
+ {ci:6,p:.2,cond:S=>S.f.terre||S.f.house,text:"Un cousin de France revient réclamer sa part de la terre. Les lettres d'avocat recommencent.",fx:{stress:6,lien:-3,argent:-3}},
+ {ci:7,p:.4,text:"Une chute dans la salle de bain. La hanche, l'hôpital, la rééducation.",fx:{sante:-10,stress:4}},
+ {good:true,ci:0,p:.6,text:"Ton premier sourire. Toute la famille se dispute pour te prendre dans ses bras.",fx:{joie:5,lien:4}},
+ {good:true,ci:1,p:.5,text:"Un dimanche parfait : ma'a tahiti, guitares, tous les cousins réunis.",fx:{joie:6,lien:5}},
+ {good:true,ci:2,p:.5,text:"Ton équipe de va'a remporte la course du district. Tu cries de joie avec les autres.",fx:{joie:6,reco:5}},
+ {good:true,ci:3,p:.5,text:"Un inconnu t'aide à pousser ta voiture en panne sous la pluie, et refuse ton argent.",fx:{joie:4,emo:2}},
+ {good:true,ci:4,p:.5,text:"Un soir, sans raison, tout le monde rit autour de la table.",fx:{joie:6,lien:4}},
+ {good:true,ci:5,p:.5,text:"Quelqu'un te remercie pour une chose que tu avais oubliée, faite il y a vingt ans.",fx:{reco:6,utile:4,joie:4}},
+ {good:true,ci:6,p:.5,text:"Le premier bain de mer de la saison. Tu nages comme un enfant.",fx:{joie:6,sante:2,stress:-4}},
+ {good:true,ci:7,p:.5,text:"Pour ton anniversaire, les enfants du quartier dansent pour toi.",fx:{joie:7,lien:5,reco:3}}
+].map(e=>({...e,auto:true}));
+
+const HELP=new Set(["En parler à un adulte","En parler à ta tante","En parler d'abord à {friend}, ton ami{fe}","En parler à {friend}","Voir l'infirmière scolaire","Appeler les mutoi, la police municipale","Consulter un psychologue","Aller au centre de consultation gratuit, après des mois d'attente","En parler au pasteur, ou à un ancien de la famille","Demander de l'aide à ta famille","Aller voir une association, une assistante sociale","Accepter le foyer d'accueil et un accompagnement social","Accepter l'aide des autres","Accepter la main tendue : cure, groupe de parole, croix bleue","Demander l'hospitalisation, même si c'est en psychiatrie","Partir toi-même, et chercher de l'aide pour ta colère","Appeler le numéro d'écoute, ou aller aux urgences","Appeler {friend}","Vous battre pour le couple, avec une conseillère","Demander de l'aide : enfants, infirmière, auxiliaire","Te laisser aider, en racontant ta jeunesse","En parler au médecin","Voir ton médecin, et accepter un arrêt","Dire à tes proches que tu n'y arrives plus","Demander conseil à l'assistante sociale du collège","Porter plainte","Rentrer chez ta famille, demander pardon s'il le faut","Laisser ta famille t'enfermer chez un oncle sur un atoll, loin de tout"]);
+const HELP_NOTE=["Demander de l'aide n'est pas une faiblesse. Il t'a fallu du courage.","Il faut plus de force pour tendre la main que pour serrer les dents.","Personne ne traverse la vie seul. Tu viens de le reconnaître, et c'est une force.","Dire « je n'y arrive pas seul{e} », c'est déjà commencer à y arriver.","Tu as laissé quelqu'un t'aider. C'est aussi un cadeau que tu lui fais."];
+const WISE_COST=["Cette fois, l'autre n'a pas voulu entendre. Ta patience n'a rien changé.","Tu as ravalé ta colère. Elle reviendra plus tard, ailleurs.","On a pris ta douceur pour de la faiblesse.","Tu as compris l'autre. Personne n'a cherché à te comprendre, toi.","Tu as bien fait. Ça ne t'a pas empêché{e} de pleurer en rentrant."];
+const QUIET=[
+ [0,"Ta grand-mère te berce dans le hamac, sous le manguier. Le vent fait le reste."],
+ [0,"Ton père te montre la mer pour la première fois. Tu ris quand l'eau touche tes pieds."],
+ [1,"Un après-midi entier à pêcher les crabes avec tes cousins. Personne ne gagne rien, tout le monde est heureux."],
+ [1,"La pluie tombe si fort sur la tôle qu'on ne s'entend plus parler. Alors on joue aux cartes."],
+ [1,"Le premier jour des vacances. Rien à faire. Le monde entier t'appartient."],
+ [2,"Un soir, sur le quai, avec les copains et une guitare. Rien ne se passe, et c'est parfait."],
+ [2,"Tu aides ton grand-père à réparer sa pirogue. Il parle peu, mais il te montre tout."],
+ [2,"Une nuit d'étoiles sur le motu. Tu te sens minuscule, et ça ne fait pas peur."],
+ [3,"Un dimanche sans rien de prévu. Ma'a tahiti, sieste, baignade. Tu ne demandes rien de plus."],
+ [3,"Ton premier appartement, vide, qui sent la peinture. Tu manges assis{|e} par terre, fi{er|ère}."],
+ [3,"Une longue conversation avec {friend}, jusqu'au lever du soleil, sur tout et sur rien."],
+ [4,"Un samedi ordinaire. Le marché de Papeete, le pain, les fleurs. La vie, simplement."],
+ [4,"Le Heiva revient chaque juillet. Tu regardes les danseurs et tu te souviens de tes quinze ans."],
+ [4,"Une semaine de vacances aux Tuamotu. Le lagon, le silence, le poisson cru au coco."],
+ [5,"Tu plantes un uru dans le jardin. Tu ne le verras peut-être pas donner, mais d'autres le verront."],
+ [5,"Une soirée à chanter des himene avec les anciens. Ta voix a changé, la chanson non."],
+ [6,"Le matin, ton café sur la terrasse. Les oiseaux, la mer en bas. Tu n'es pressé{e} de rien."],
+ [6,"Les petits du quartier viennent chercher des mangues. Tu leur en donnes plus qu'ils n'en portent."],
+ [7,"Quelqu'un ouvre la fenêtre pour toi. L'odeur du tiare entre dans la chambre."],
+ [7,"Tu t'endors l'après-midi au son d'un ukulele, quelque part dans la rue."]
+].map(([ci,text],i)=>({ci,text,auto:true,good:true,fx:{joie:2,stress:-2,lien:1}}));
+const FATE=[
+ {r:[3,7],p:.5,cond:S=>S.f.homeless,text:"Un matin, un patron de chantier s'arrête près de toi : il lui manque quelqu'un pour la semaine. La semaine devient un mois, puis un contrat, puis une chambre louée.",fx:{argent:12,reco:6,joie:8,emo:3},set:S=>{S.f.homeless=false;S.st.argent=Math.max(S.st.argent,24);S.mems.push("la main tendue d'un inconnu");return "Tu quittes la rue. Tu n'oublieras jamais ceux qui y sont restés.";}},
+ {r:[3,7],p:.35,cond:S=>S.f.homeless,text:"Une travailleuse sociale ne lâche pas ton dossier. Après des mois, un logement social à Faa'a : quatre murs, une porte qui ferme, une clé à toi.",fx:{joie:10,stress:-6,emo:4},set:S=>{S.f.homeless=false;S.st.argent=Math.max(S.st.argent,15);S.mems.push("la clé du logement de Faa'a");}},
+ {r:[3,7],p:.3,cond:S=>S.f.homeless,text:"Les policiers municipaux démantèlent le campement. Tes papiers, tes photos, tout part à la benne.",fx:{sante:-4,stress:6,reco:-3,joie:-5}},
+ {r:[3,6],p:.12,cond:S=>!S.f.homeless&&S.st.argent<35,text:"Un ticket de loto acheté par hasard au magasin du coin. Pas une fortune, mais assez pour effacer les dettes.",fx:{argent:15,joie:6,stress:-5}},
+ {r:[4,6],p:.12,cond:S=>S.f.house,text:"Trois jours de pluie. Un glissement de terrain fissure la maison. Elle n'est plus habitable, et l'assurance ne couvre pas tout.",fx:{argent:-12,stress:8,joie:-6},set:S=>{S.f.house=false}},
+ {r:[3,5],p:.12,cond:S=>!!S.f.metier,text:"Ton entreprise ferme du jour au lendemain. Des années de travail, et une lettre de deux lignes.",fx:{stress:6,joie:-4},set:S=>{S.f.lostJob=true}},
+ {r:[3,6],p:.1,text:"Un oncle sans enfant te laisse une parcelle sur la presqu'île. Une chance, et le début d'autres disputes.",fx:{argent:8,joie:3},set:S=>{S.f.terre=true}},
+ {r:[3,6],p:.1,text:"Un diagnostic tombe, sans prévenir : un cancer. Les traitements, l'évasan vers Paris, des mois suspendus.",fx:{sante:-15,stress:8,argent:-6},set:S=>{if(R()<.7)return "Tu t'en sors. Le monde a une autre couleur.";S.st.sante=clamp(S.st.sante-10);return "La maladie reste. Il faudra vivre avec.";}},
+ {r:[6,7],p:.4,cond:S=>S.st.lien<30,text:"Un jeune de la paroisse commence à passer chaque dimanche. Il ne parle pas beaucoup. Toi non plus. Ça suffit.",fx:{lien:10,joie:5}},
+ {r:[5,7],p:.15,text:"Quelqu'un que tu avais aidé il y a trente ans frappe à ta porte, pour te remercier. Tu ne te souvenais même plus de son visage.",fx:{reco:8,joie:6,utile:4}}
+].map(e=>({...e,auto:true}));
+/* Registre : chaque moment a un identifiant, pour sauvegarder la partie en cours */
+const REG={};
+for(const ci in MOM)MOM[ci].forEach((m,j)=>{if(!m.id)m.id=`m${ci}_${j}`;REG[m.id]=m;});
+EVENTS.forEach((e,i)=>{e.id=`e${i}`;REG[e.id]=e;});
+QUIET.forEach((e,i)=>{e.id=`q${i}`;REG[e.id]=e;});
+FATE.forEach((e,i)=>{e.id=`f${i}`;REG[e.id]=e;});
+[["acc",ACCIDENT],["rehab",REHAB],["hev",HOMELESS_EV],["hom",HOMELESS]].forEach(([id,m])=>{m.id=id;REG[id]=m;});
+
+/* ---------- Mécanique ---------- */
+function birth(){
+  const sex=R()<.5?"F":"M";
+  const wealth=wpick([0,1,2,3],[.15,.35,.35,.15]);
+  const place=wpick(PLACES,PLACES.map(p=>p.w[wealth]+.01));
+  const h=wpick([0,1,2,3],[.55,.25,.1,.1]);
+  const pool=FN[sex];
+  const first=h===3?pick(pool.slice(-4)):pick(pool);
+  const orient=wpick(["hetero","gay","bi","ace"],[.86,.06,.06,.02]);
+  const trans=R()<.03;
+  const disease=wpick(DISEASES,[.72,.07,.07,.07,.07]);
+  S={seed:Math.floor(R()*1e9),sex,wealth,place,heritage:h,first,skin:pick(SKIN),hair:pick(HAIR),disease,orient,trans,queer:orient!=="hetero"||trans,
+     pet:pick(PETS),_preg:R()<.3,_widow:R()<.35,_widowHow:R()<.3?"accident":"maladie",_childLoss:R()<.12,locked:0,
+     st:{sante:80+(disease?disease.start:0),argent:[8,22,48,78][wealth],joie:50,stress:[35,25,15,10][wealth],lien:50,reco:20,utile:10,regret:0,emo:30},
+     f:{etu:wealth>=2?1:0},mems:[],plant:[],log:[],ci:-1,dead:false};
+  S.fSex=R()<.5?"F":"M";S.friend=loveName(S.fSex);
+  S.pSex=loveSex();S.partner=loveName(S.pSex);
+}
+function resolve(fx){const o=typeof fx==="function"?fx(S):{...fx};if(o.argent==="var")o.argent=Math.round(-8+R()*20);return o;}
+function applyFx(fx){for(const k in fx){let v=fx[k];if(k==="etu"){S.f.etu+=v;continue;}if(!(k in S.st))continue;if(k==="stress"&&v>0)v=Math.round(v*(1-S.st.emo/250));if(k==="joie"&&v<0)v=Math.round(v*(1-S.st.emo/300));S.st[k]=clamp(S.st[k]+v);}}
+function growPlant(fx){
+  const add=(type,n)=>{for(let i=0;i<Math.min(n,3);i++)S.plant.push({type,ch:Math.max(0,S.ci)});};
+  if(fx.lien>0)add("leaf",Math.ceil(fx.lien/4));
+  if(fx.lien<0){const l=S.plant.find(p=>p.type==="leaf");if(l)l.type="dry";}
+  if(fx.joie>0)add("flower",Math.ceil(fx.joie/5));
+  const fr=Math.max(0,fx.utile||0)+Math.max(0,fx.reco||0);if(fr>0)add("fruit",Math.ceil(fr/7));
+  if(fx.stress>0)add("dry",Math.ceil(fx.stress/5));
+  if(fx.regret>0)add("broken",Math.ceil(fx.regret/6));
+  if(fx.sante>0)add("leaf",1);
+}
+function chapterStart(ci){
+  const notes=[];const add=(fx,note)=>{applyFx(fx);if(note)notes.push(fmt(note));};
+  const decay=[0,0,0,-2,-4,-7,-10,-14][ci];
+  const d=S.disease&&ci>=2?S.disease.decay:0;
+  if(decay||d)add({sante:decay+d},d?`${S.disease.n} : ta santé s'use un peu plus vite.`:null);
+  if(S.f.lostJob&&S.f.metier){const n=fmt(CAREERS[S.f.metier].n).toLowerCase();S.f.metier=null;add({argent:-6,reco:-3,stress:4},`Tu as perdu ton travail (${n}). Il faudra en retrouver un.`);}
+  S.f.lostJob=false;
+  if(S.f.homeless)add({sante:-8,stress:6,joie:-4,reco:-4},"Dormir dehors : la pluie, les regards, la fatigue. Et parfois, une main tendue.");
+  if(S.f.disab)add({argent:-2,stress:2},`${DIS[S.f.disab].n} : les marches, les trottoirs, les regards. Et ta force, aussi.`);
+  const c=S.f.metier&&CAREERS[S.f.metier];
+  if(c&&ci>=4&&ci<=5){const fx=resolve(c.fx);add(fx,`Ton métier, ${fmt(c.n).toLowerCase()} : ${fx.argent<0?"les fins de mois sont dures":"un salaire qui tombe"}, ${fx.lien<0?"peu de temps pour les tiens":"du temps pour les tiens"}.`);}
+  if(c&&ci>=6){const b=c.fx.argent==="var"?2:c.fx.argent;add({argent:Math.round(b/2),stress:-4},"La retraite : le travail s'arrête, les journées s'allongent.");}
+  if(!c&&!S.f.homeless&&ci>=4&&ci<=5)add({argent:-4,stress:3},"Sans métier stable, chaque mois est une inquiétude.");
+  if(S.f.couple&&ci>=4)add({joie:3,lien:4,stress:2},`Avec ${S.partner} : de la tendresse, des disputes, moins de temps pour toi.`);
+  if(S.f.kids&&!S.f.childDead&&ci>=4&&ci<=5)add({joie:3,utile:4,stress:3,argent:-3*Math.min(3,S.f.kids)},"Les enfants : des rires, des factures, des nuits courtes.");
+  if(S.f.kids&&!S.f.childDead&&ci>=6)add({joie:3,lien:3},"Les petits-enfants passent le dimanche.");
+  if(S.f.house&&ci>=4&&ci<=5)add({argent:-3,stress:1},"Les mensualités de la maison.");
+  if(S.f.depression>0){add({joie:-6,stress:5},"La dépression est encore là, comme un ciel bas.");S.f.depression--;}
+  if((S.f.alcool||0)>=2)add({sante:-5,lien:-3,argent:-3},"L'alcool prend sa place, chaque soir un peu plus.");
+  if(S.f.ice)add({sante:-8,argent:-10,lien:-5},"L'ice dévore ton argent et ton sommeil.");
+  if(S.f.gamble)add({argent:-4},"Le bingo du samedi grignote la paie.");
+  if(S.f.sober&&ci>=4)add({emo:2,reco:2},"Tu tiens, sans alcool ni ice. Chaque fête est une victoire silencieuse.");
+  if((S.f.trauma||0)>0)add({emo:-3,stress:3},`Le passé n'est pas guéri : ${S.f.traumaWhy||"les vieilles blessures"} te rend${S.f.trauma>1?"ent":""} plus fragile.`);
+  if(S.f.feud)add({lien:-2,stress:2},"La brouille familiale continue. Les fêtes ont un goût amer.");
+  if(S.st.lien<25&&ci>=3)add({joie:-4,stress:3},"La solitude pèse certains soirs.");
+  if(S.st.stress>75&&ci>=3)add({sante:-5},"Trop de stress : ton corps commence à le payer.");
+  return notes;
+}
+function buildQueue(ci){
+  const pool=MOM[ci]||[];const ok=m=>!m.cond||m.cond(S);
+  const q=pool.filter(m=>m.must&&ok(m));
+  const opt=shuffle(pool.filter(m=>!m.must&&!m.late&&ok(m)&&(!m.p||R()<m.p)&&!(S.seen||[]).includes(m.id)));
+  while(q.length<CH[ci].k&&opt.length)q.push(opt.shift());
+  q.forEach(m=>{if(m.prep)m.prep(S);});
+  const ins=e=>q.splice(ci===0?0:1+Math.floor(R()*q.length),0,e);
+  const bad=EVENTS.filter(e=>!e.good&&e.ci===ci&&(!e.cond||e.cond(S))&&R()<e.p);
+  if(bad.length)ins(pick(bad));
+  const good=EVENTS.filter(e=>e.good&&e.ci===ci&&R()<e.p);
+  if(good.length)ins(pick(good));
+  shuffle(QUIET.filter(e=>e.ci===ci)).slice(0,ci===0?1:2).forEach(ins);
+  const fate=FATE.filter(e=>ci>=e.r[0]&&ci<=e.r[1]&&(!e.cond||e.cond(S))&&R()<e.p);
+  if(fate.length)ins(pick(fate));
+  if(!S.f.disab&&R()<[0,.01,.03,.04,.04,.03,.03,0][ci]){const pos=Math.min(q.length,1+Math.floor(R()*q.length));q.splice(pos,0,ACCIDENT,REHAB);}
+  return q.concat(pool.filter(m=>m.late)).map(m=>m.id);
+}
+function deathCheck(ci){
+  const base=[0,0,.008,.02,.03,.07,.18,1][ci];
+  const p=base+(S.st.sante<30?(30-S.st.sante)/60:0)+(S.f.alcool||0)*.02+(S.f.ice?.08:0)+(S.f.homeless?.05:0);
+  return R()<p;
+}
+function cause(ci){
+  if(ci===7)return S.st.lien>50?"dans ton sommeil, entouré{e} des tiens":"un matin calme, la radio allumée";
+  if(S.f.ice)return "d'une overdose, ou d'un cœur brisé par l'ice";
+  if((S.f.alcool||0)>=3)return "le foie, usé par l'alcool";
+  if(ci<=3&&R()<.6)return "dans un accident sur la route de ceinture";
+  if(S.disease&&S.disease.k==="diabete")return "des complications du diabète";
+  if(S.st.stress>70)return "le cœur, usé trop tôt";
+  return pick(["d'un cancer découvert trop tard","le cœur, un soir de pluie","d'une longue maladie"]);
+}
+
+/* ---------- Sauvegarde ---------- */
+function save(){try{if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function loadSave(){try{const s=localStorage.getItem(SAVE_KEY);if(!s)return null;const o=JSON.parse(s);return o&&o.first?o:null;}catch(e){return null;}}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+function saveBox(){const b=$("#saveBox");if(!S||S.dead){b.innerHTML="";return;}b.innerHTML=`<span>Partie sauvegardée sur cet appareil</span><button class="linkbtn" id="quit">Faire une pause</button>`;$("#quit").onclick=()=>{save();intro();};}
+
+/* ---------- Affichage ---------- */
+const card=$("#card");
+function setCard(html){card.classList.remove("fade");void card.offsetWidth;card.classList.add("fade");card.innerHTML=html;saveBox();}
+function header(ci){
+  $("#tl").innerHTML=TL.map((t,i)=>`<li class="${i<ci?"done":i===ci?"now":""}">${t}</li>`).join("");
+  if(ci<0){$("#chNum").textContent="Prologue";$("#chTitle").textContent="Avant la naissance";$("#chAge").textContent="";return;}
+  $("#chNum").textContent=CH[ci].n;$("#chTitle").textContent=CH[ci].t;
+  $("#chAge").textContent=CH[ci].a?(ci===7?`${CH[ci].a[0]} ans et plus`:`${CH[ci].a[0]} – ${CH[ci].a[1]} ans`):(S&&S.age?`à ${S.age} ans`:"");
+}
+function chips(diff){
+  return `<div class="chips">`+STATS.filter(([k])=>diff[k]).map(([k,l])=>{const v=diff[k];const good=NEG[k]?v<0:v>0;return `<span class="chip ${good?"up":"down"}">${v>0?"+":"−"}${Math.abs(v)} ${l.toLowerCase()}</span>`;}).join("")+`</div>`;
+}
+function mood(){
+  const st=S.st,L=[];
+  L.push(st.sante>=70?"Ton corps te porte bien.":st.sante>=40?"Ton corps fatigue.":"Ton corps est fragile.");
+  L.push(st.joie>=65?"Il y a de la lumière en toi.":st.joie>=35?"Les jours alternent, gris et clairs.":"La tristesse pèse.");
+  L.push(st.lien>=65?fmt("Tu es bien entouré{e}."):st.lien>=35?"Quelques personnes comptent pour toi.":"La solitude gagne.");
+  if(st.stress>=65)L.push("Tu portes trop.");
+  if(st.emo>=60)L.push("Tu sais écouter ce que tu ressens.");
+  return L.join(" ");
+}
+function updateAside(){
+  const who=$("#who");
+  if(!S){who.innerHTML=`<p class="who-name">Pas encore né</p><p class="who-sub">Le hasard choisira ta famille, ton île, ton corps.</p>`;$("#stats").innerHTML="";return;}
+  const st=[];
+  if(S.f.metier)st.push(fmt(CAREERS[S.f.metier].n));
+  if(S.ci>=3)st.push(S.f.couple?`En couple avec ${S.partner}`:S.f.widow?"Veu{f|ve}":S.f.divorced?"Séparé{e}":"Seul{e}");
+  if(S.f.kids)st.push(S.f.kids===1?"1 enfant":`${S.f.kids} enfants`);
+  if(S.f.animal)st.push(`${S.pet}, ton animal`);
+  if(S.f.house)st.push("Propriétaire");
+  if(S.f.out)st.push("Vit au grand jour");
+  if(S.f.disab)st.push(DIS[S.f.disab].n);
+  if(S.f.homeless)st.push("À la rue");
+  if((S.f.alcool||0)>=2)st.push("L'alcool, chaque jour");
+  if(S.f.ice)st.push("Sous l'emprise de l'ice");
+  if(S.f.sober)st.push("Sobre");
+  if(S.f.casier)st.push("Casier judiciaire");
+  if((S.f.trauma||0)>0)st.push("Blessures non soignées");
+  if(S.f.dependent)st.push("A besoin d'aide chaque jour");
+  who.innerHTML=`<p class="who-name">${S.first}</p><p class="who-sub">${S.sex==="F"?"Fille":"Garçon"} · ${S.place.short} · famille ${WEALTH[S.wealth]}</p><p class="who-sub mood">${mood()}</p>${st.length?`<div class="status">${st.map(s=>`<span>${fmt(s)}</span>`).join("")}</div>`:""}`;
+  $("#stats").innerHTML=STATS.map(([k,l])=>`<span>${l}</span><span class="bar${NEG[k]?" neg":""}"><b style="width:${S.st[k]}%"></b></span><span class="v">${S.st[k]}</span>`).join("");
+}
+function intro(){
+  const sv=loadSave();S=null;header(-1);paint(0);drawPlant();updateAside();
+  setCard(`<p class="lede">Une vie commence au hasard d'une naissance, puis se tisse au fil des choix.</p>
+  <p class="m-text">Ton nom, ta famille, ton île, ton corps, ton cœur : tu ne choisis rien de tout cela. Ensuite, à chaque âge, tu choisis. Aucun choix n'est parfait : chacun donne quelque chose et en coûte une autre. Ta vie sera une plante, et elle poussera avec toi.</p>
+  <p class="m-text">Dans cette histoire, il n'y a ni héros ni méchant. Seulement des gens qui font avec ce qu'ils ont reçu, l'endroit où ils vivent, et les choix qu'ils peuvent faire.</p>
+  <p class="m-text">Parfois, le meilleur choix est de demander de l'aide. Ce n'est pas une preuve de faiblesse, c'est une preuve de force.</p>
+  <p class="hint">Une vie entière dure environ une heure. La partie se sauvegarde toute seule sur cet appareil : tu peux faire une pause et reprendre quand tu veux. Mais comme dans la vraie vie, on ne recommence pas en cours de route : une vie commencée se vit jusqu'au bout.</p>
+  <p class="hint">Ce jeu parle aussi de violence, d'addiction, de deuil et de suicide. Si ces thèmes te touchent de près, prends ton temps, et n'hésite pas à en parler à quelqu'un de confiance.</p>
+  <div class="btns">${sv?`<button class="btn" id="resume">${sv.dead?`Lire la fin de la vie de ${sv.first}`:`Reprendre la vie de ${sv.first}`}</button>`:`<button class="btn" id="go">Naître</button>`}</div>${sv?`<p class="hint">Une autre vie pourra commencer quand celle de ${sv.first} sera terminée.</p>`:""}`);
+  if(sv)$("#resume").onclick=()=>{S=sv;resume();};else $("#go").onclick=()=>{clearSave();birth();showBirth();};
+}
+function resume(){
+  if(S.dead){epilogue();return;}
+  if(S.ci<0){showBirth();return;}
+  header(S.ci);paint(S.ci);drawPlant();updateAside();
+  if(S.qi===0&&S.queue){setCard(`<p class="lede">${CH[S.ci].line}</p><p class="hint">Tu reprends ta vie là où tu l'avais laissée.</p><button class="btn" id="go">Continuer</button>`);$("#go").onclick=nextMoment;}
+  else nextMoment();
+}
+function heartLine(){
+  const same=S.sex==="F"?"les filles":"les garçons",other=S.sex==="F"?"les garçons":"les filles";
+  let t={hetero:`Il ira vers ${other}.`,gay:`Il ira vers ${same}.`,bi:"Il ira vers les garçons comme vers les filles.",ace:"Il aimera autrement, sans désir pour personne."}[S.orient];
+  if(S.trans)t+=fmt(" Un jour, tu sentiras que tu n'es pas {le garçon|la fille} que les autres voient.");
+  return t+" Tu le découvriras en grandissant. Ce n'est pas un choix.";
+}
+function showBirth(){
+  header(-1);paint(0);drawPlant();updateAside();save();
+  setCard(`<p class="step">Ta naissance</p>
+  <p class="lede">Tu nais un matin, à ${S.place.n}.</p>
+  <dl class="birth">
+   <dt>Ton prénom</dt><dd>${S.first}</dd>
+   <dt>Sexe</dt><dd>${S.sex==="F"?"Fille":"Garçon"}</dd>
+   <dt>Famille</dt><dd>${WEALTH[S.wealth][0].toUpperCase()+WEALTH[S.wealth].slice(1)}. ${WDESC[S.wealth]}</dd>
+   <dt>Origines</dt><dd>${fmt(HERITAGE[S.heritage])}</dd>
+   <dt>Apparence</dt><dd>${S.skin[0].toUpperCase()+S.skin.slice(1)}, ${S.hair}</dd>
+   <dt>Héritage</dt><dd>${S.disease?S.disease.n+".":"Aucune maladie héritée."}</dd>
+   <dt>Ton cœur</dt><dd>${heartLine()}</dd>
+  </dl>
+  <p class="hint">Tu n'as rien choisi de tout cela. La suite, en partie, t'appartient.</p>
+  <button class="btn" id="go">Commencer la vie</button>`);
+  $("#go").onclick=()=>startChapter(0);
+}
+function startChapter(ci){
+  S.ci=ci;S.qi=0;
+  const notes=chapterStart(ci);
+  const fall=ci>=3&&!S.f.homeless&&S.st.argent<=6&&(S.st.lien<40||R()<.5);
+  S.queue=buildQueue(ci);
+  if(fall)S.queue.unshift("hev","hom");
+  save();
+  header(ci);paint(ci);drawPlant();updateAside();
+  setCard(`<p class="lede">${CH[ci].line}</p>${notes.length?`<ul class="notes">${notes.map(n=>`<li>${n}</li>`).join("")}</ul>`:""}<button class="btn" id="go">Vivre ce chapitre</button>`);
+  $("#go").onclick=nextMoment;
+  if(ci>0){const top=$("#stage").getBoundingClientRect().top;if(top<0)$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});}
+}
+function nextMoment(){
+  while(S.qi<S.queue.length){const m=REG[S.queue[S.qi]];if(m&&(!m.cond||m.cond(S)))break;S.qi++;}
+  if(S.qi>=S.queue.length)return endChapter();
+  const m=REG[S.queue[S.qi++]];
+  S.seen=S.seen||[];if(!S.seen.includes(m.id))S.seen.push(m.id);
+  const left=S.queue.slice(S.qi).map(id=>REG[id]).filter(x=>x&&(!x.cond||x.cond(S))).length;
+  const step=left?`Encore ${left} moment${left>1?"s":""} dans ce chapitre`:"Dernier moment de ce chapitre";
+  if(m.auto){if(m.prep)m.prep(S);return showEvent(m,step);}
+  const choices=typeof m.choices==="function"?m.choices(S):m.choices;
+  setCard(`<p class="step">${step}</p>${bridge()}<p class="m-text">${fmt(m.text)}</p><div class="choices" id="ch"></div>`);
+  const box=$("#ch");
+  choices.forEach(c=>{
+    const reason=c.lock?c.lock(S):null;if(reason)S.locked++;
+    const b=document.createElement("button");b.className="choice";
+    b.innerHTML=`<span>${fmt(c.t)}</span>`+(reason?`<span class="c-lock">${fmt(reason)}</span>`:"");
+    if(reason){b.disabled=true;b.classList.add("locked");}else b.onclick=()=>choose(c);
+    box.append(b);
+  });
+}
+const TIMEP=["Quelques mois passent.","Une saison des pluies, puis une saison sèche.","Le temps file, sans prévenir.","Les jours se ressemblent, puis un jour ne ressemble à aucun autre.","Une année passe, puis une autre.","Le vent tourne, comme il tourne toujours."];
+function ctxLines(){
+  const f=S.f,st=S.st,ci=S.ci,L=[];
+  if(ci<=1){L.push("Les poules traversent la cour, et quelqu'un chante dans la cuisine.","L'odeur du pain coco monte de chez la voisine.");
+    if(S.wealth<=1)L.push("Le toit fuit quand il pleut fort. On met des casseroles partout.","On dort à quatre dans la même chambre. On se tient chaud.");
+    if(S.wealth>=3)L.push("La piscine brille sous le soleil. Tu ne sais pas encore que ce n'est pas normal.");
+    if(f.faaamu)L.push("Ta tante te coiffe chaque matin. Tu ne te souviens plus très bien du visage de ta mère.");}
+  if(ci===2)L.push("Le téléphone ne quitte plus ta main.","Tu te regardes longtemps dans le miroir, sans savoir qui tu vois.","Le bus du lycée passe à six heures, plein de rires et de musique.");
+  if(ci>=3&&ci<=5){if(f.metier)L.push("Le réveil sonne avant le soleil. Le travail, encore.");
+    if(f.couple)L.push(fmt("{partner} dort contre toi, la fenêtre ouverte sur le bruit de la mer."),fmt("Avec {partner}, vous vous disputez pour la vaisselle, et vous vous réconciliez sans un mot."));
+    if(f.kids&&!f.childDead)L.push("Les enfants courent dans la cour. Les factures s'empilent sur le frigo.","Le soir, il faut faire les devoirs, laver le linge, écouter une histoire de récréation.");
+    if(!f.couple)L.push("Le soir, tu manges devant la télé. Le silence a pris sa place à table.");}
+  if(ci>=6)L.push("Tes mains ont des taches, comme celles de ta grand-mère autrefois.","Tu te lèves tôt, sans réveil. Le corps sait.","Les anciens de ton âge partent un à un. On chante beaucoup aux enterrements.");
+  if(f.homeless)L.push("Tu dors sous l'auvent d'un magasin, ton sac sous la tête. Les autres de la rue veillent sur toi, et toi sur eux.");
+  if(f.disab)L.push("Tu as appris de nouveaux gestes, de nouveaux chemins. Les autres regardent encore, toi un peu moins.");
+  if((f.alcool||0)>=2)L.push("La bouteille t'attend dans le placard. Tu fais semblant de ne pas la voir.");
+  if(f.ice)L.push("Tu n'as pas dormi depuis trois jours. Tout va trop vite.");
+  if((f.trauma||0)>0)L.push("Certaines nuits, tu te réveilles en sursaut, le cœur battant, sans savoir pourquoi.");
+  if(f.feud)L.push("Au marché, tu croises un cousin. Vous détournez les yeux en même temps.");
+  if(st.stress>65)L.push("Tu dors mal. Ta mâchoire reste serrée, même la nuit.");
+  if(st.joie>65)L.push("Il y a des matins où tout semble léger, sans raison.");
+  if(st.lien<25)L.push("Le téléphone sonne rarement.");
+  if(st.lien>70)L.push("Il y a toujours quelqu'un qui passe dire bonjour, un plat à la main.");
+  if(f.animal)L.push(fmt("{pet} dort à tes pieds, une oreille ouverte."));
+  if(f.dependent)L.push("On t'aide à t'asseoir près de la fenêtre. La mer est toujours là.");
+  return L;
+}
+function bridge(){
+  const ci=S.ci,a=CH[ci].a;if(!a)return "";
+  const frac=Math.max(0,S.qi-1)/Math.max(1,S.queue.length);
+  const age=Math.min(a[1],a[0]+Math.round((a[1]-a[0])*frac));
+  const lines=ctxLines().filter(x=>x!==S.lastCtx);
+  const ctx=lines.length?pick(lines):"";S.lastCtx=ctx;
+  const t=age===S.lastAge?pick(["Quelques semaines plus tard.","Peu de temps après.","Un soir, sans prévenir."]):`Tu as ${age} an${age>1?"s":""}. ${S.qi>1?pick(TIMEP):""}`;
+  S.lastAge=age;
+  return `<p class="narr">${(t+" "+ctx).replace(/\s+/g," ").trim()}</p>`;
+}
+function snapshot(){return {...S.st};}
+function diffOf(before){const d={};for(const k in S.st){const v=S.st[k]-before[k];if(v)d[k]=v;}return d;}
+function showEvent(m,step){
+  const before=snapshot();const text=fmt(m.text);const fx=resolve(m.fx);applyFx(fx);growPlant(fx);const note=(m.set&&m.set(S))||"";
+  drawPlant();updateAside();save();
+  setCard(`<p class="step">${step}</p>${bridge()}<p class="m-text">${text}</p>${note?`<p class="note">${fmt(note)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
+  $("#go").onclick=nextMoment;
+}
+function choose(c){
+  const before=snapshot();const fx=resolve(c.fx);const label=fmt(c.t);
+  if(c.mem)S.mems.push(fmt(c.mem));
+  S.log.push({ci:S.ci,t:label});
+  applyFx(fx);growPlant(fx);
+  let note=(c.set&&c.set(S))||"";
+  if((fx.emo||0)>=5&&R()<.3){applyFx({stress:4,joie:-3});note=(note?note+" ":"")+pick(WISE_COST);}
+  let help="";if(HELP.has(c.t)){S.f.helped=(S.f.helped||0)+1;help=pick(HELP_NOTE);}
+  drawPlant();updateAside();save();
+  setCard(`<p class="picked">Tu as choisi : <b>${label}</b></p>
+  <div class="sides"><div class="side good"><h4>Ce que ça t'apporte</h4><p>${fmt(c.ok)}</p></div><div class="side bad"><h4>Ce que ça te coûte</h4><p>${fmt(c.ko)}</p></div></div>
+  ${note?`<p class="note">${fmt(note)}</p>`:""}${help?`<p class="note help">${fmt(help)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
+  $("#go").onclick=nextMoment;
+}
+function endChapter(){
+  const ci=S.ci;
+  if(ci===7||(ci>=2&&deathCheck(ci)))return die(ci);
+  startChapter(ci+1);
+}
+function die(ci){
+  const [lo,hi]=CH[ci].a;
+  S.age=ci===7?Math.min(102,75+Math.round(S.st.sante/100*20)+Math.floor(R()*4)):lo+Math.floor(R()*(hi-lo+1));
+  const why=fmt(cause(ci));S.dead=true;S.deathCi=ci;save();
+  header(8);paint(8);drawPlant(true);updateAside();
+  const early=ci<6?`<p class="note">La vie s'arrête plus tôt que prévu. Certains chapitres resteront blancs.</p>`:"";
+  const recap=[];for(let i=0;i<=ci;i++){const ch=S.log.filter(l=>l.ci===i);if(ch.length)recap.push(`<li><b>${CH[i].t}</b> : ${ch.map(l=>l.t).join(" · ")}</li>`);}
+  setCard(`<p class="step">Ta vie, en poème</p><div class="poem">${poem(S.age,why)}</div>${early}
+  <details><summary>Relire tes choix</summary><ul class="recap">${recap.join("")}</ul></details>
+  <button class="btn" id="go">Voir ce qui reste après toi</button>`);
+  $("#go").onclick=epilogue;
+  $("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
+}
+function epilogue(){
+  header(9);paint(9);drawPlant(true);
+  const P=[];const st=S.st,f=S.f;
+  // Qui était là
+  if(S.f.dependent==="aide")P.push("Ton auxiliaire de vie est venue à l'enterrement. Elle a pleuré au fond, discrètement, comme on pleure quelqu'un de sa famille.");
+  if(S.deathCi<6)P.push(fmt("Tu es parti{e} trop tôt. Ceux qui restent ont gardé une chaise vide pendant longtemps."));
+  else if(f.endHome)P.push("Tu es parti{e} à la maison, dans les voix et les odeurs de ta vie.");
+  else if(st.lien<25)P.push(fmt("Tu es parti{e} seul{e}. On a mis plusieurs jours à s'en apercevoir. Un voisin a chanté pour toi, par pitié ou par respect."));
+  else P.push("Ta famille est venue, de toutes les îles. On a chanté toute la nuit.");
+  if(f.oldTogether&&f.couple)P.push(`${S.partner} t'a survécu de peu. On dit qu'${S.pSex==="F"?"elle":"il"} s'est laissé${S.pSex==="F"?"e":""} partir.`);
+  else if(f.widow)P.push(`Tu as rejoint ${S.partner}, dans la même terre.`);
+  // Les enfants
+  if(f.kids>0){
+    const care=(f.care||0)+(st.emo>=55?1:0)+((f.helped||0)>=2?1:0)-(f.hit?1:0)-(f.violent?2:0)-((f.alcool||0)>=2?1:0)-(f.ice?1:0)-(f.everHomeless?1:0);
+    const n=f.kids-(f.childDead?1:0);const C=S.childName;
+    if(f.childDead)P.push(`${C} t'attendait déjà.`);
+    if(n>0){
+      const first=f.childDead?(n>1?"Tes autres enfants":"Ton autre enfant"):(n>1?"Tes enfants":C);
+      if(care>=3)P.push(`${first} ${n>1||f.childDead?"ont":"a"} grandi avec ce que tu ${n>1?"leur":"lui"} as donné : du temps, des mots, de la patience. ${n>1?"Ils sont":"Il est"} devenu${n>1?"s":""} ${n>1?"des gens":"quelqu'un"} qui écoute${n>1?"nt":""} et qui tend${n>1?"ent":""} la main. On ${n>1?"les":"le"} appelle quand ça va mal.`);
+      else if(care>=1)P.push(`${first} ${n>1||f.childDead?"se débrouillent":"se débrouille"}. Des joies, des erreurs, une vie ordinaire. ${n>1?"Ils parlent":"Il parle"} de toi avec tendresse, et parfois avec un soupir.`);
+      else if(care>=-1)P.push(`${first} ${n>1||f.childDead?"ont":"a"} appris à se débrouiller sans toi. ${n>1?"Ils":"Il"} t'en ${n>1?"veulent":"veut"} un peu, et ${n>1?"se le reprochent":"se le reproche"}.`);
+      else P.push(`${first} ${n>1||f.childDead?"portent":"porte"} ce que tu ${n>1?"leur":"lui"} as transmis sans le vouloir : la colère, la fuite, ${f.violent||f.hit?"la main qui part trop vite":"le verre qui console"}. ${n>1?"L'un d'eux a":"Il a"} déjà connu le tribunal. Le cercle n'est pas encore brisé.`);
+      if((f.helped||0)>=2&&care>=1)P.push(`Tu leur as appris, sans le dire, qu'on a le droit de demander de l'aide. ${n>1?"Ils":"Il"} s'en souviendr${n>1?"ont":"a"} un soir difficile.`);
+      if(f.childAway)P.push("L'un d'eux vit toujours en France. Il est revenu pour l'enterrement, et repartira.");
+    }
+  }else P.push(f.kids===0&&st.utile>=50?"Tu n'as pas eu d'enfant, mais des dizaines de jeunes t'appellent encore tonton ou tata.":"Tu n'as pas eu d'enfant. Ton nom s'efface doucement, comme tous les noms.");
+  // L'héritage
+  const assets=(f.house?1:0)+(f.terre?1:0);
+  if(assets===0)P.push("Tu ne laisses ni maison ni terre. Rien à partager, donc rien à disputer. Quelques photos, un ukulele, un cahier peut-être.");
+  else if(f.papers&&!f.unfair)P.push("Les papiers étaient faits. Le notaire a lu, chacun a signé, et la famille est restée une famille.");
+  else if(f.papers&&f.unfair)P.push("Tu avais tout laissé à un seul. Les autres ont contesté le testament. Deux ans de procédure, et un Noël en moins.");
+  else if(f.kids>1||f.terre)P.push("Tu n'avais rien écrit. La maison et la terre sont entrées en indivision : tes enfants, puis leurs enfants, se disputent encore une parcelle que personne n'entretient. Au fenua, c'est l'histoire d'une famille sur trois.");
+  else P.push("Tu n'avais rien écrit, mais il n'y avait qu'un héritier. Il a eu de la chance.");
+  // Trace
+  if(st.reco>=60)P.push("On parle encore de toi au marché, au temple, sur le quai. Une salle, une pirogue ou un enfant porte ton prénom.");
+  else if(st.utile>=55)P.push("Peu de gens connaissent ton nom, mais beaucoup vivent mieux grâce à ce que tu as fait sans le dire.");
+  if(f.sober)P.push("Quelqu'un, quelque part, a arrêté de boire parce que tu lui as montré que c'était possible.");
+  if(f.friendDead)P.push(`On t'a enterré${S.sex==="F"?"e":""} près de ${S.friend}.`);
+  else if(f.friend)P.push(`${S.friend} est venu${S.fSex==="F"?"e":""}, courbé${S.fSex==="F"?"e":""} sur une canne, et n'a rien dit. ${S.fSex==="F"?"Elle":"Il"} est resté${S.fSex==="F"?"e":""} jusqu'à la dernière pelletée.`);
+  P.push("La plante retourne à la terre. Les graines, elles, ont déjà germé ailleurs.");
+  setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p><button class="btn" id="go">Vivre une autre vie</button>`);
+  $("#go").onclick=()=>{clearSave();birth();showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};
+  $("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
+}
+function lesson(){
+  const L=[],n=S.locked,f=S.f;
+  if(n)L.push(`Au cours de cette vie, ${n} porte${n>1?"s":""} t'${n>1?"ont":"a"} été fermée${n>1?"s":""} par ta naissance, ton corps, ton passé ou le sort.`);
+  if(S.wealth<=1)L.push(fmt("Tu es né{e} avec peu. Chaque choix te coûtait plus cher qu'à d'autres."));
+  if(S.wealth===3)L.push(fmt("Tu es né{e} avec beaucoup de portes ouvertes. D'autres, juste à côté, ne les ont jamais vues."));
+  if(f.everHomeless)L.push("Tu as connu la rue. La personne que tu croiseras demain près de la cathédrale a, elle aussi, un premier chapitre.");
+  if(f.disab)L.push("Tu as vécu avec un corps blessé. Le monde n'est pas construit pour tous les corps.");
+  if(f.casier)L.push("Tu as connu le tribunal. Un casier ferme des portes pour toujours, même quand on a changé.");
+  if(f.ice||(f.alcool||0)>=2||f.sober)L.push("L'alcool ou l'ice ont traversé ta vie. Ce n'est pas une faiblesse de caractère : c'est une maladie, et on en sort rarement seul.");
+  if((f.trauma||0)>0)L.push("Tu portais des blessures que personne n'a soignées. Elles ont décidé à ta place plus souvent que tu ne le crois.");
+  if(S.queer)L.push(fmt("Tu as aimé ou vécu autrement que la majorité. Être accepté{e} n'aurait dû rien te coûter."));
+  if(f.survived)L.push("Tu as parfois fait des choix pour survivre. Survivre n'est pas une faute.");
+  if(f.violent)L.push("Ta main est partie, un jour. La violence s'apprend, souvent dans l'enfance. Elle se désapprend aussi, mais seulement si on le décide.");
+  const h=f.helped||0;
+  if(h>0)L.push(`Tu as demandé de l'aide ${h===1?"une fois":h+" fois"}. Chaque fois, il a fallu plus de courage que pour te taire.`);
+  else if((f.trauma||0)>0||f.everHomeless||(f.alcool||0)>=2||f.ice||f.depression)L.push(fmt("Tu as presque toujours tout porté seul{e}. Demander de l'aide n'aurait pas été une faiblesse, mais une force."));
+  if(S.st.emo>=60)L.push("Tu as appris à comprendre tes émotions et celles des autres. C'est peut-être ce qui a le plus adouci ta vie.");
+  else if(S.st.emo<30)L.push(fmt("Tes émotions t'ont souvent débordé{e}. Personne ne nous apprend vraiment à les écouter."));
+  L.push("Aucune vie n'est parfaite. Chacun fait de son mieux avec les cartes qu'il a reçues. La personne en face de toi aussi.");
+  L.push("Dans cette histoire, il n'y avait ni héros ni méchant : seulement des gens, l'endroit où ils vivaient, et leurs choix.");
+  return `<div class="lesson"><h4>Ce que cette vie t'apprend</h4>${L.map(x=>`<p>${x}</p>`).join("")}</div>`;
+}
+function poem(age,why){
+  const st=S.st,P=[];
+  P.push([`${S.first},`,fmt(`né{e} à ${S.place.n},`),["dans le dénuement.","dans une famille modeste.","dans une maison tranquille.","dans une maison aisée."][S.wealth]]);
+  let m=S.mems.slice();
+  if(m.length>8){const out=[];for(let i=0;i<8;i++)out.push(m[Math.floor(i*m.length/8)]);m=out;}
+  if(m.length){P.push(["Il y eut"].concat(m.map((x,i)=>x+(i===m.length-1?".":","))));}
+  const L=[];
+  if(st.joie>=60)L.push("Tu as beaucoup ri.");else if(st.joie<30)L.push("La joie t'a souvent fui.");
+  if(st.lien>=60)L.push(fmt("Tu n'as jamais marché seul{e}."));else if(st.lien<30)L.push("Tu as connu le silence des maisons vides.");
+  if(st.utile>=55)L.push("Tes mains ont nourri d'autres bouches que la tienne.");
+  if(st.reco>=55)L.push("On a dit ton nom avec respect.");else if(st.reco<20)L.push("On a peu dit ton nom, et pourtant tu étais là.");
+  if(st.stress>=60)L.push("Tu as porté trop de pierres.");
+  if(st.regret>=40)L.push("Il reste des mots que tu n'as pas dits.");else if(st.regret<12)L.push("Tu pars presque sans regret.");
+  if(L.length)P.push(L);
+  P.push(["Tu as fait de ton mieux avec ce que la vie t'a donné,","et c'était beaucoup."]);
+  P.push([fmt(`Tu es parti{|e} à ${age} ans, ${why}.`),"Ta plante retourne à la terre,","et la terre se souvient de toi."]);
+  return P.map(s=>`<p>${s.join("<br>")}</p>`).join("");
+}
+/* ---------- Peinture à la gouache ---------- */
+const PAL=[
+ {sky:["#f2b9a6","#f6d9c0","#d7e8e1"],sun:"#fff3d0",sx:.74,sy:.5,sea:"#7bb8b5",seaHi:"#e9f3ea",far:"#97b8a6",near:"#55836b",sand:"#e8d2a8",grass:"#7da35c"},
+ {sky:["#8fcbe6","#c7e6ee","#eef3e2"],sun:"#fffbe6",sx:.82,sy:.16,sea:"#2aa1a6",seaHi:"#a9e6de",far:"#83b29c",near:"#3e7a5a",sand:"#efdcae",grass:"#6fa04e"},
+ {sky:["#4fa8d8","#8ccbe4","#d3eef0"],sun:"#ffffff",sx:.52,sy:.11,sea:"#0f93a2",seaHi:"#9be8df",far:"#7aab92",near:"#2f6e4b",sand:"#f1e0b4",grass:"#5f9a44"},
+ {sky:["#6aaed6","#acd3dd","#efe2c0"],sun:"#fff4d4",sx:.3,sy:.28,sea:"#1f8795",seaHi:"#a8dcd2",far:"#86a993",near:"#3d6f51",sand:"#e9d3a2",grass:"#6c9848"},
+ {sky:["#e4a95f","#efcb8e","#f4e2bd"],sun:"#fff0b5",sx:.24,sy:.46,sea:"#3b8a8c",seaHi:"#f2d595",far:"#a29a76",near:"#536f4a",sand:"#e2c48c",grass:"#7a8f45"},
+ {sky:["#b9504a","#e6824f","#f4c26a"],sun:"#ffd679",sx:.42,sy:.55,sea:"#3e5f74",seaHi:"#f0a85e",far:"#8a5d5d",near:"#3f3f3e",sand:"#c99566",grass:"#5a5a36",tint:["#5b2a3a",.12]},
+ {sky:["#34355f","#6f5582","#c98573"],sun:"#f3a084",sx:.56,sy:.63,sea:"#2a4660",seaHi:"#c98573",far:"#5c4e70",near:"#2b2c40",sand:"#7f6a6a",grass:"#3c3f3a",tint:["#1d1d3d",.2]},
+ {sky:["#0c1731","#1b2a4b","#34466a"],sun:"#efe9cf",sx:.7,sy:.17,stars:true,sea:"#11283b",seaHi:"#efe9cf",far:"#26344f",near:"#141d2d",sand:"#3a3a48",grass:"#1c2622",tint:["#0a1430",.28]},
+ {sky:["#050a1a","#0f1a36","#22335a"],sun:"#f6f1dc",sx:.5,sy:.58,stars:true,soul:true,sea:"#0a1a2c",seaHi:"#e9e4c8",far:"#1a2540",near:"#0d1322",sand:"#2a2a38",grass:"#151c1e",tint:["#050a20",.25]}
+];
+let GRAIN=null;
+function grain(){if(GRAIN)return GRAIN;const c=document.createElement("canvas");c.width=c.height=160;const g=c.getContext("2d");const id=g.createImageData(160,160);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=46;}g.putImageData(id,0,0);GRAIN=c;return c;}
+function fit(cv,ratio){const dpr=Math.min(2,window.devicePixelRatio||1);const W=cv.clientWidth||600,H=Math.round(W*ratio);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,W,H};}
+function poly(ctx,Rr,pts,col,jit=2,alpha=1){for(let l=0;l<3;l++){ctx.globalAlpha=alpha*(l?.3:1);ctx.fillStyle=col;ctx.beginPath();pts.forEach((p,i)=>{const j=jit*(l?2.6:1);const x=p[0]+(Rr()-.5)*j,y=p[1]+(Rr()-.5)*j;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();ctx.fill();}ctx.globalAlpha=1;}
+function disc(ctx,Rr,x,y,r,col,alpha=1){const pts=[];for(let i=0;i<18;i++){const a=i/18*Math.PI*2,rr=r*(.93+Rr()*.12);pts.push([x+Math.cos(a)*rr,y+Math.sin(a)*rr]);}poly(ctx,Rr,pts,col,r*.05,alpha);}
+function rect(ctx,Rr,x,y,w,h,col,jit=1.2){poly(ctx,Rr,[[x,y],[x+w,y],[x+w,y+h],[x,y+h]],col,jit);}
+function palm(ctx,Rr,x,y,h,lean,trunk,leaf){
+  const tx=x+lean*h*.38,ty=y-h;ctx.lineCap="round";
+  for(let k=0;k<3;k++){ctx.globalAlpha=k?.35:1;ctx.strokeStyle=trunk;ctx.lineWidth=Math.max(2,h*.045-k);ctx.beginPath();ctx.moveTo(x+(Rr()-.5)*2,y);ctx.quadraticCurveTo(x+lean*h*.04,y-h*.55,tx,ty);ctx.stroke();}
+  ctx.globalAlpha=1;
+  for(let i=0;i<8;i++){
+    const a=-Math.PI/2+(i-3.5)*.5+(Rr()-.5)*.2,len=h*(.3+Rr()*.1);
+    const ex=tx+Math.cos(a)*len,ey=ty+Math.sin(a)*len*.55+len*.32;
+    const mx=tx+Math.cos(a)*len*.5,my=ty+Math.sin(a)*len*.5-len*.1;
+    for(let k=0;k<2;k++){ctx.globalAlpha=k?.35:1;ctx.fillStyle=leaf;ctx.beginPath();ctx.moveTo(tx,ty);ctx.quadraticCurveTo(mx,my-len*.08-k*2,ex,ey);ctx.quadraticCurveTo(mx,my+len*.06,tx,ty);ctx.fill();}
+  }
+  ctx.globalAlpha=1;disc(ctx,Rr,tx,ty+2,h*.025,trunk);
+}
+function vaa(ctx,Rr,x,y,s,people,col){
+  poly(ctx,Rr,[[x-s,y],[x+s,y-s*.05],[x+s*.8,y+s*.1],[x-s*.8,y+s*.1]],col,1);
+  ctx.strokeStyle=col;ctx.lineWidth=Math.max(1,s*.04);ctx.beginPath();ctx.moveTo(x-s*.2,y);ctx.lineTo(x-s*.2,y+s*.35);ctx.moveTo(x+s*.3,y);ctx.lineTo(x+s*.3,y+s*.35);ctx.stroke();
+  poly(ctx,Rr,[[x-s*.5,y+s*.33],[x+s*.6,y+s*.33],[x+s*.55,y+s*.4],[x-s*.45,y+s*.4]],col,1);
+  for(let i=0;i<people;i++){const px=x-s*.5+i*s*.5;ctx.lineWidth=Math.max(1.5,s*.08);ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y-s*.32);ctx.stroke();disc(ctx,Rr,px,y-s*.4,s*.08,col);}
+}
+function paint(ci){
+  const cv=$("#painting");const {ctx,W,H}=fit(cv,9/16);const P=PAL[Math.min(ci,8)];
+  const Rr=rng((S?S.seed:4242)+ci*97);
+  const hz=H*.58;
+  const g=ctx.createLinearGradient(0,0,0,hz);g.addColorStop(0,P.sky[0]);g.addColorStop(.55,P.sky[1]);g.addColorStop(1,P.sky[2]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,hz+2);
+  for(let i=0;i<70;i++){ctx.globalAlpha=.07+Rr()*.05;ctx.fillStyle=Rr()<.5?"#ffffff":P.sky[Math.floor(Rr()*3)];ctx.beginPath();ctx.ellipse(Rr()*W,Rr()*hz,30+Rr()*120,2+Rr()*4,0,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  if(P.stars)for(let i=0;i<110;i++){ctx.globalAlpha=.4+Rr()*.6;ctx.fillStyle="#f6f1dc";ctx.beginPath();ctx.arc(Rr()*W,Rr()*hz*.9,Rr()*1.3+.3,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  const sx=W*P.sx,sy=H*P.sy,sr=W*(ci===8?.02:.045);
+  const gl=ctx.createRadialGradient(sx,sy,0,sx,sy,sr*5);gl.addColorStop(0,P.sun+"cc");gl.addColorStop(1,P.sun+"00");ctx.fillStyle=gl;ctx.fillRect(0,0,W,hz);
+  if(sy<hz)disc(ctx,Rr,sx,sy,sr,P.sun);
+  if(ci>=1&&ci<=4)for(let c=0;c<4;c++){const cx=Rr()*W,cy=H*(.08+Rr()*.25);for(let k=0;k<5;k++)disc(ctx,Rr,cx+(k-2)*W*.025,cy+(Rr()-.5)*H*.02,W*(.02+Rr()*.02),"#ffffff",.45);}
+  const type=S?S.place.type:"high";
+  if(type==="high"){
+    const layer=(col,amp,shift,yoff)=>{const pts=[[-10,hz+2]];const n=30;for(let i=0;i<=n;i++){const t=i/n;const env=Math.pow(Math.max(0,Math.sin(Math.PI*Math.min(1,Math.max(0,(t-shift)/(1-Math.abs(shift)))))),.8);pts.push([-10+t*(W+20),hz+yoff-H*amp*env*(.5+Rr()*.5)]);}pts.push([W+10,hz+2]);poly(ctx,Rr,pts,col,2);};
+    layer(P.far,.34,-.05,0);layer(P.near,.2,.15,2);
+  }else{
+    poly(ctx,Rr,[[W*.04,hz],[W*.96,hz-2],[W*.96,hz+4],[W*.04,hz+5]],P.near,1.5);
+    for(let i=0;i<16;i++){const x=W*(.07+i*.055+Rr()*.02);palm(ctx,Rr,x,hz+1,H*(.05+Rr()*.03),(Rr()-.5)*.6,P.near,P.near);}
+  }
+  ctx.fillStyle=P.sea;ctx.fillRect(0,hz,W,H*.82-hz);
+  if(type==="atoll"){ctx.globalAlpha=.45;ctx.fillStyle=P.seaHi;ctx.fillRect(0,H*.66,W,H*.16);ctx.globalAlpha=1;}
+  for(let i=0;i<55;i++){ctx.globalAlpha=.12+Rr()*.12;ctx.fillStyle=P.seaHi;ctx.beginPath();ctx.ellipse(Rr()*W,hz+Rr()*(H*.82-hz),10+Rr()*50,.8+Rr()*1.5,0,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  if(sy<hz+5)for(let i=0;i<18;i++){const t=i/18;ctx.globalAlpha=.55*(1-t);ctx.fillStyle=P.seaHi;ctx.beginPath();ctx.ellipse(sx+(Rr()-.5)*W*.03,hz+4+t*(H*.8-hz),W*.06*(1-t*.5)*(.5+Rr()*.5),1.6,0,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  if(P.soul){const pg=ctx.createLinearGradient(0,hz,0,H*.82);pg.addColorStop(0,"rgba(246,241,220,.55)");pg.addColorStop(1,"rgba(246,241,220,.05)");ctx.fillStyle=pg;ctx.beginPath();ctx.moveTo(sx-3,hz);ctx.lineTo(sx+3,hz);ctx.lineTo(sx+W*.12,H*.82);ctx.lineTo(sx-W*.12,H*.82);ctx.fill();}
+  const beach=[[0,H*.8]];for(let i=0;i<=12;i++)beach.push([i*W/12,H*(.795+Math.sin(i*1.3)*.008)]);beach.push([W,H],[0,H]);poly(ctx,Rr,beach,P.sand,2);
+  poly(ctx,Rr,[[W*.48,H],[W*.52,H*.86],[W*.7,H*.835],[W*.9,H*.84],[W+5,H*.83],[W+5,H]],P.grass,3);
+  const trunk=ci>=6?P.near:"#6b5640",leaf=ci>=5?P.near:"#3e6b3d";
+  palm(ctx,Rr,W*.1,H*1.02,H*.62,.35,trunk,leaf);palm(ctx,Rr,W*.22,H*1.0,H*.44,.15,trunk,leaf);
+  const wins=house(ctx,Rr,W,H,S?S.st.argent:50);
+  motif(ctx,Rr,W,H,ci,P,hz,sx);
+  if(P.tint){ctx.globalCompositeOperation="multiply";ctx.globalAlpha=P.tint[1];ctx.fillStyle=P.tint[0];ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;ctx.globalCompositeOperation="source-over";}
+  if(ci>=5&&ci<=7)wins.forEach(w=>{rect(ctx,Rr,w[0],w[1],w[2],w[3],"#ffcf6e",.6);const lg=ctx.createRadialGradient(w[0]+w[2]/2,w[1]+w[3]/2,0,w[0]+w[2]/2,w[1]+w[3]/2,w[2]*2);lg.addColorStop(0,"rgba(255,207,110,.35)");lg.addColorStop(1,"rgba(255,207,110,0)");ctx.fillStyle=lg;ctx.fillRect(w[0]-w[2]*2,w[1]-w[2]*2,w[2]*5,w[2]*5);});
+  if(ci===8){ctx.strokeStyle="#f6f1dc";ctx.lineWidth=1.6;ctx.globalAlpha=.9;const bx=sx+W*.08,by=hz-H*.12,s=W*.018;ctx.beginPath();ctx.moveTo(bx-s*2,by);ctx.quadraticCurveTo(bx-s,by-s,bx,by);ctx.quadraticCurveTo(bx+s,by-s,bx+s*2,by);ctx.stroke();ctx.globalAlpha=1;}
+  ctx.globalCompositeOperation="overlay";ctx.fillStyle=ctx.createPattern(grain(),"repeat");ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation="source-over";
+  const vg=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.75);vg.addColorStop(0,"rgba(40,25,10,0)");vg.addColorStop(1,"rgba(40,25,10,.28)");ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
+function house(ctx,Rr,W,H,arg){
+  const x=W*.66,y=H*.9,wins=[];
+  if(arg<30){
+    const w=W*.11,h=W*.055;rect(ctx,Rr,x,y-h,w,h,"#a2734c");
+    ctx.strokeStyle="rgba(60,35,20,.35)";ctx.lineWidth=1;for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(x+i*w/6,y-h);ctx.lineTo(x+i*w/6,y);ctx.stroke();}
+    poly(ctx,Rr,[[x-w*.08,y-h+2],[x+w*1.08,y-h-w*.08],[x+w*1.08,y-h-w*.08+5],[x-w*.08,y-h+7]],"#9a6a46",1.5);
+    rect(ctx,Rr,x+w*.62,y-h*.7,w*.18,h*.7,"#4a3424");const wn=[x+w*.15,y-h*.65,w*.22,h*.3];rect(ctx,Rr,...wn,"#2e3b3f");wins.push(wn);
+  }else if(arg<66){
+    const w=W*.15,h=W*.065;rect(ctx,Rr,x,y-h,w,h,"#ebe3d1");
+    poly(ctx,Rr,[[x-w*.07,y-h],[x+w*.5,y-h-w*.24],[x+w*1.07,y-h]],"#b9473b",1.5);
+    const a=[x+w*.1,y-h*.68,w*.2,h*.32],b=[x+w*.7,y-h*.68,w*.2,h*.32];rect(ctx,Rr,...a,"#5f8fa6");rect(ctx,Rr,...b,"#5f8fa6");wins.push(a,b);
+    rect(ctx,Rr,x+w*.42,y-h*.72,w*.16,h*.72,"#6b4a33");
+  }else{
+    const w=W*.24,h=W*.07;
+    poly(ctx,Rr,[[x-w*.35,y+H*.015],[x-w*.02,y+H*.012],[x-w*.04,y+H*.05],[x-w*.38,y+H*.05]],"#55c3cc",1.5);
+    rect(ctx,Rr,x,y-h,w,h,"#f1ede3");rect(ctx,Rr,x-w*.06,y-h-W*.012,w*1.12,W*.014,"#5b4636");
+    const a=[x+w*.06,y-h*.75,w*.38,h*.6],b=[x+w*.56,y-h*.75,w*.3,h*.6];rect(ctx,Rr,...a,"#8cc3cf");rect(ctx,Rr,...b,"#8cc3cf");wins.push(a,b);
+    rect(ctx,Rr,x-w*.02,y-2,w*1.04,4,"#8a6a50");
+  }
+  return wins;
+}
+function motif(ctx,Rr,W,H,ci,P,hz,sx){
+  const dark="#2b2119";
+  if(ci===0){const fx=W*.4,fy=H*.92;for(let i=0;i<3;i++){ctx.save();ctx.translate(fx+(i-1)*W*.05,fy+(i%2)*H*.02);ctx.fillStyle="#3f7a45";ctx.beginPath();ctx.ellipse(-W*.02,H*.02,W*.03,H*.012,-.5,0,Math.PI*2);ctx.fill();for(let p=0;p<6;p++){ctx.save();ctx.rotate(p*Math.PI/3+i);ctx.fillStyle="#fbf7ea";ctx.beginPath();ctx.ellipse(W*.012,0,W*.013,W*.005,0,0,Math.PI*2);ctx.fill();ctx.restore();}ctx.fillStyle="#e9c44a";ctx.beginPath();ctx.arc(0,0,W*.004,0,Math.PI*2);ctx.fill();ctx.restore();}}
+  if(ci===1)vaa(ctx,Rr,W*.42,H*.7,W*.05,1,dark);
+  if(ci===2){const fx=W*.44,fy=H*.86;const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,W*.08);fg.addColorStop(0,"rgba(255,170,60,.5)");fg.addColorStop(1,"rgba(255,170,60,0)");ctx.fillStyle=fg;ctx.fillRect(fx-W*.1,fy-W*.1,W*.2,W*.2);disc(ctx,Rr,fx,fy,W*.016,"#f08a2a");disc(ctx,Rr,fx,fy-W*.008,W*.009,"#ffd25a");for(let i=0;i<4;i++){const px=fx+(i-1.5)*W*.035;ctx.strokeStyle=dark;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(px,fy+H*.035);ctx.lineTo(px,fy+H*.005);ctx.stroke();disc(ctx,Rr,px,fy-H*.004,W*.006,dark);}}
+  if(ci===3){ctx.strokeStyle="#2a2a2a";ctx.lineWidth=1.6;for(let i=0;i<3;i++){const bx=W*(.35+i*.08),by=H*(.15+Rr()*.1),s=W*.02;ctx.beginPath();ctx.moveTo(bx-s,by);ctx.quadraticCurveTo(bx-s*.5,by-s*.5,bx,by);ctx.quadraticCurveTo(bx+s*.5,by-s*.5,bx+s,by);ctx.stroke();}
+    if(S&&S.f.france){ctx.fillStyle="#f4f4f4";ctx.beginPath();ctx.ellipse(W*.85,H*.12,W*.025,W*.005,-.15,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle="#ffffff";ctx.beginPath();ctx.moveTo(W*.83,H*.125);ctx.lineTo(W*.6,H*.17);ctx.stroke();ctx.globalAlpha=1;}}
+  if(ci===4){const y=H*.83;ctx.strokeStyle=dark;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(W*.5,y+H*.06);ctx.lineTo(W*.5,y);ctx.moveTo(W*.63,y+H*.06);ctx.lineTo(W*.63,y);ctx.moveTo(W*.5,y+2);ctx.quadraticCurveTo(W*.565,y+8,W*.63,y+2);ctx.stroke();["#d9534f","#f0b429","#2a9d8f"].forEach((c,i)=>rect(ctx,Rr,W*(.515+i*.035),y+3+i,W*.022,H*.04,c,1));}
+  if(ci===5)vaa(ctx,Rr,sx-W*.12,H*.71,W*.05,2,"#1e1a1a");
+  if(ci===6)vaa(ctx,Rr,W*.3,H*.66,W*.03,1,"#191923");
+  if(ci===7){for(let i=0;i<14;i++){ctx.globalAlpha=.5*(1-i/14);ctx.fillStyle="#efe9cf";ctx.beginPath();ctx.ellipse(W*.7+(Rr()-.5)*W*.02,hz+6+i*H*.016,W*.03*(1-i/20),1.2,0,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;}
+}
+
+/* ---------- La plante ---------- */
+function drawPlant(final){
+  const cv=$("#plant");const {ctx,W,H}=fit(cv,4.6/4);
+  const bg=getComputedStyle(document.documentElement).getPropertyValue("--plant-bg").trim()||"#f1efe3";
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const Rr=rng(S?S.seed*3+1:5);const k=W/280;const gy=H*.84;
+  poly(ctx,Rr,[[0,gy+4],[W*.2,gy-2],[W*.5,gy+1],[W*.8,gy-3],[W,gy+2],[W,H],[0,H]],"#7a5a3e",2);
+  poly(ctx,Rr,[[0,gy+12],[W*.3,gy+8],[W*.6,gy+12],[W,gy+9],[W,H],[0,H]],"#634731",2);
+  if(S&&S.ci>=0){const n=Math.max(1,Math.round(S.st.emo/9));for(let i=0;i<n;i++){const a=Math.PI/2+(i/(n-1||1)-.5)*2.2,len=(H-gy)*(.45+Rr()*.5);ctx.strokeStyle="#d7bf96";ctx.globalAlpha=.85;ctx.lineWidth=(1.8-i*.05)*k;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(W/2,gy+3);ctx.quadraticCurveTo(W/2+Math.cos(a)*len*.6+(Rr()-.5)*10*k,gy+3+Math.sin(a)*len*.4,W/2+Math.cos(a)*len*1.4,gy+3+Math.sin(a)*len);ctx.stroke();}ctx.globalAlpha=1;}
+  if(!S||S.ci<0){disc(ctx,Rr,W/2,gy-1,4*k,"#4a3220");ctx.strokeStyle="#5c8b47";ctx.lineWidth=1.5*k;if(S){ctx.beginPath();ctx.moveTo(W/2,gy-3);ctx.quadraticCurveTo(W/2+3*k,gy-9*k,W/2+1,gy-12*k);ctx.stroke();}return;}
+  const segs=S.ci+1,segL=H*.088;
+  let x=W/2,y=gy,ang=-Math.PI/2;const nodes=[{x,y,ang}];
+  for(let i=0;i<segs;i++){ang+=(Rr()-.5)*.3;if(i>=5)ang+=(i-4)*.06;const L=segL*(i===0?.8:1);x+=Math.cos(ang)*L;y+=Math.sin(ang)*L;nodes.push({x,y,ang});}
+  const fallen=[];
+  for(let i=0;i<segs;i++){
+    const its=S.plant.filter(p=>p.ch===i);if(!its.length)continue;
+    const n=nodes[i+1],side=i%2?-1:1,bA=n.ang+side*(.85+Rr()*.35),bl=segL*(.55+Math.min(its.length,12)*.075);
+    const ex=n.x+Math.cos(bA)*bl,ey=n.y+Math.sin(bA)*bl;
+    for(let l=0;l<2;l++){ctx.globalAlpha=l?.35:1;ctx.strokeStyle="#6a4a31";ctx.lineCap="round";ctx.lineWidth=(2.4-l*.6)*k;ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.quadraticCurveTo((n.x+ex)/2+side*3*k,(n.y+ey)/2-4*k,ex,ey);ctx.stroke();}
+    ctx.globalAlpha=1;
+    its.forEach((it,j)=>{const t=.28+.72*(j+1)/its.length;const px=n.x+(ex-n.x)*t,py=n.y+(ey-n.y)*t;const off=(j%2?1:-1)*(5+Rr()*5)*k;const nx=px+Math.cos(bA+Math.PI/2)*off,ny=py+Math.sin(bA+Math.PI/2)*off;
+      if(final&&(it.type==="leaf"||it.type==="dry")&&Rr()<.4){fallen.push(it.type);return;}
+      drawItem(ctx,Rr,it.type,nx,ny,bA+(j%2?.9:-.9),k);});
+  }
+  for(let i=0;i<segs;i++){const a=nodes[i],b=nodes[i+1];for(let l=0;l<2;l++){ctx.globalAlpha=l?.35:1;ctx.strokeStyle="#6a4a31";ctx.lineCap="round";ctx.lineWidth=Math.max(2,(segs-i)*1.3+1.6-l)*k;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+b.x)/2+(Rr()-.5)*4*k,(a.y+b.y)/2,b.x,b.y);ctx.stroke();}}
+  ctx.globalAlpha=1;
+  const top=nodes[segs];if(!final)for(let i=0;i<3;i++)drawItem(ctx,Rr,"leaf",top.x,top.y,top.ang+(i-1)*.8,k*.85);
+  fallen.forEach(t=>drawItem(ctx,Rr,t,W*(.12+Rr()*.76),gy+(Rr()*6-1)*k,(Rr()-.5)*.6,k));
+}
+function drawItem(ctx,Rr,type,x,y,a,k){
+  ctx.save();ctx.translate(x,y);ctx.rotate(a);
+  if(type==="leaf"||type==="dry"){
+    const col=type==="leaf"?(Rr()<.5?"#3f8a4c":"#57a05a"):(Rr()<.5?"#c9a33f":"#a8803a");
+    ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(7*k,0,8*k,3.6*k,0,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=.35;ctx.beginPath();ctx.ellipse(7.6*k,.9*k,7*k,2.5*k,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle="rgba(0,0,0,.2)";ctx.lineWidth=.8*k;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(14*k,0);ctx.stroke();
+  }else if(type==="flower"){
+    for(let i=0;i<6;i++){ctx.save();ctx.rotate(i*Math.PI/3+Rr()*.2);ctx.fillStyle="#fbf7ea";ctx.strokeStyle="rgba(140,118,70,.45)";ctx.lineWidth=.6*k;ctx.beginPath();ctx.ellipse(4*k,0,4.2*k,1.9*k,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
+    ctx.fillStyle="#e8bf45";ctx.beginPath();ctx.arc(0,0,1.7*k,0,Math.PI*2);ctx.fill();
+  }else if(type==="fruit"){
+    ctx.fillStyle="#86ad3c";ctx.beginPath();ctx.arc(0,0,5.2*k,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#5f7f2a";for(let i=0;i<6;i++){ctx.beginPath();ctx.arc((Rr()-.5)*6*k,(Rr()-.5)*6*k,.7*k,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=.45;ctx.fillStyle="#d8eaa0";ctx.beginPath();ctx.arc(-1.6*k,-1.8*k,1.4*k,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  }else if(type==="broken"){
+    ctx.strokeStyle="#5a3d27";ctx.lineWidth=2*k;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(7*k,0);ctx.lineTo(9*k,-2.2*k);ctx.moveTo(7*k,0);ctx.lineTo(8.6*k,2*k);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{paint(S?(S.dead?8:Math.max(0,S.ci)):0);drawPlant(S&&S.dead);},150);});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>drawPlant(S&&S.dead));
+intro();
+</script>
+
+</body>
+</html>
