@@ -113,6 +113,8 @@ summary{cursor:pointer;color:var(--accent)}
 .lesson{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
 .lesson h4{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
 .lesson p{margin:0;max-width:62ch}
+.lesson details{display:flex;flex-direction:column;gap:8px}
+.lesson details p{margin-top:8px}
 #life{grid-area:life;min-width:0;display:flex;flex-direction:column;gap:14px;align-self:start}
 @media (min-width:881px){#life{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -195,7 +197,7 @@ const CH=[
  {n:"Chapitre V",t:"L'âge adulte",a:[30,44],k:14,line:"Les années passent vite. Tu portes les autres, et parfois on te porte."},
  {n:"Chapitre VI",t:"L'âge mûr",a:[45,59],k:12,line:"Tu as fait une bonne partie du chemin. Tu regardes en arrière autant que devant."},
  {n:"Chapitre VII",t:"La vieillesse",a:[60,74],k:10,line:"Le temps ralentit. Tu as enfin le temps de regarder ceux que tu aimes."},
- {n:"Chapitre VIII",t:"Le grand âge",a:[75,95],k:5,line:"Le corps est fatigué, mais la mémoire est pleine de visages et de rires."},
+ {n:"Chapitre VIII",t:"Le grand âge",a:[75,95],k:8,line:"Le corps est fatigué, mais la mémoire est pleine de visages et de rires."},
  {n:"Chapitre IX",t:"La mort",a:null},
  {n:"Épilogue",t:"Après toi",a:null}
 ];
@@ -262,7 +264,8 @@ function fmt(s){
           .replace(/\{e\}/g,S.sex==="F"?"e":"")
           .replace(/\{pet\}/g,S.pet).replace(/\{partner\}/g,S.partner||"").replace(/\{friend\}/g,S.friend).replace(/\{lover\}/g,S.lover||"").replace(/\{child\}/g,S.childName||"ton enfant")
           .replace(/\{ex\}/g,S.ex||"").replace(/\{sib\}/g,S.sib||"").replace(/\{sibw\}/g,S.sibSex==="F"?"ta sœur":"ton frère").replace(/\{Sibw\}/g,S.sibSex==="F"?"Ta sœur":"Ton frère")
-          .replace(/\{(f|p|l|ci|x|s)(e|il|Il|le)\}/g,(m,w,x)=>{const sx=w==="f"?S.fSex:w==="p"?S.pSex:w==="ci"?S.childSex:w==="x"?S.exSex:w==="s"?S.sibSex:S.lSex;const F=sx==="F";return {e:F?"e":"",il:F?"elle":"il",Il:F?"Elle":"Il",le:F?"la":"le"}[x];})
+          .replace(/\{cw\}/g,S.cw||"")
+          .replace(/\{(f|p|l|ci|x|s|cw)(e|il|Il|le)\}/g,(m,w,x)=>{const sx=w==="f"?S.fSex:w==="p"?S.pSex:w==="ci"?S.childSex:w==="x"?S.exSex:w==="s"?S.sibSex:w==="cw"?S.cwSex:S.lSex;const F=sx==="F";return {e:F?"e":"",il:F?"elle":"il",Il:F?"Elle":"Il",le:F?"la":"le"}[x];})
           .replace(/\{name\}/g,S.first).replace(/\{par\}/g,S.par?S.par.name:"ta mère").replace(/\{parIl\}/g,S.par&&S.par.sex==="F"?"elle":"il");
 }
 function endCouple(S){S.f.couple=false;S.f.divorced=true;S.ex=S.partner;S.exSex=S.pSex;}
@@ -1151,6 +1154,166 @@ const TEND_P=[
 ];
 const TEND={must:true,cond:S=>S.ci>=2&&!S.f.homeless&&!!S.rel,text:"Les liens sont comme des plantes : sans soin, ils se fanent. Mais le temps manque toujours. Ce mois-ci, à qui vas-tu vraiment donner du temps ?",choices:S=>TEND_P.filter(o=>o.c(S)).map(o=>{const v=S.rel[o.k]||0;return {t:o.l(S)+(v<35?" — le fil s'amincit":""),fx:{lien:4,joie:3,stress:1},set:S=>{if(o.k==="friend"&&S.f.friendFaded){if(R()<.7){S.f.friendFaded=false;S.rel.friend=45;return fmt("Tu appelles. Un silence gêné, puis un rire que tu reconnais. « Ça fait si longtemps ! »");}return fmt("Le numéro n'est plus attribué. Tu ne sais pas où {friend} est parti{fe}.");}if(o.k==="sib"&&S.f.sibFaded){S.f.sibFaded=false;S.rel.sib=40;return "Le premier appel est maladroit. Le deuxième, moins.";}S.rel[o.k]=Math.min(100,(S.rel[o.k]||0)+38);if(o.k==="kids")S.f.care=(S.f.care||0)+1;},ok:o.ok,ko:"Les autres fils, eux, s'usent un peu pendant ce temps."};}).concat([{t:"Personne : tu es trop occupé{e} ce mois-ci",fx:{argent:2,stress:-1,lien:-3},set:S=>{Object.keys(S.rel).forEach(k=>{if(S.rel[k]>0)S.rel[k]=Math.max(0,S.rel[k]-6)})},ok:"Tu avances dans ton travail, tes projets.",ko:"Le mois prochain, tu te dis. Le mois prochain."}])};
 [2,3,4,5,6,7].forEach(c=>MOM[c].push(TEND));
+/* Pardon, vengeance, rancune */
+function grudgeList(S){const L=[],has=t=>S.log.some(l=>l.t===t);
+ if(S.ex&&S.f.divorced)L.push({who:S.ex,what:"la façon dont tout s'est terminé entre vous",abuse:!!S.f.leftToxic});
+ if(S.f.feud)L.push({who:"une partie de ta famille",what:"le partage de la terre, et les mots qui ont été dits"});
+ if(has("Couper les ponts"))L.push({who:S.friend,what:"le secret trahi devant tout le quartier"});
+ if(has("Exploser et claquer la porte")||has("Tout garder pour toi"))L.push({who:"ton père",what:"ce dimanche où il t'a humilié{e} devant tout le monde"});
+ if((S.f.discrim||0)>0)L.push({who:"ceux qui t'ont jugé{e}",what:"les portes qu'on t'a fermées pour ce que tu es"});
+ if(S.f.casier)L.push({who:"celui qui t'a entraîné{e} dans les ennuis",what:"le casier que tu portes à sa place"});
+ return L;}
+const GRUDGE={pri:true,cond:S=>grudgeList(S).length>0&&!S.f.grudgeDone,text:S=>{if(S._gtCi!==S.ci){const L=grudgeList(S);S._gt=L[Math.floor(R()*L.length)];S._gtCi=S.ci;}const g=S._gt;return fmt(`La blessure ne passe pas : ${g.who}, et ${g.what}. La nuit, tu rejoues les scènes. Une partie de toi voudrait que l'autre souffre autant que toi.`);},choices:S=>[
+ {t:"Te venger",fx:{joie:3,stress:6,regret:6,emo:-5,lien:-4},set:S=>{S.f.revenge=(S.f.revenge||0)+1;S.f.grudgeDone=true;if(R()<.45){S.st.stress=clamp(S.st.stress+6);S.st.lien=clamp(S.st.lien-4);return "L'autre riposte. La guerre s'installe, et des innocents s'y retrouvent pris : les enfants, les cousins, les amis communs.";}return "Sur le moment, ça soulage. Puis la blessure se rouvre, plus profonde, et tu ne reconnais plus la personne que tu es devenue.";},ok:"Pendant une heure, tu te sens fort{|e}.",ko:"La vengeance promet de guérir la blessure. Elle la garde ouverte."},
+ {t:"Garder la rancune, en silence",fx:{stress:4,joie:-3,emo:-3},set:S=>{S.f.grudge=(S.f.grudge||0)+1;S.f.grudgeWho=S._gt.who;S.f.grudgeDone=true},ok:"Tu ne fais de mal à personne.",ko:"Sauf à toi. La rancune, c'est boire un poison en attendant que l'autre en meure."},
+ {t:"Pardonner, sans oublier",fx:{emo:7,stress:-5,regret:-4,joie:3},set:S=>{S.f.forgave=(S.f.forgave||0)+1;S.f.grudge=0;S.f.grudgeDone=true;return "Pardonner ne veut pas dire que ce qui s'est passé était acceptable. Ni que tu dois revoir la personne. C'est poser un fardeau que tu portais seul{e}.";},ok:"Un poids tombe de tes épaules. Le souvenir reste, mais il ne brûle plus.",ko:"Certains ne comprennent pas : « Après ce qu'il t'a fait ? »"},
+ S._gt&&S._gt.abuse?{t:"Te protéger : couper le contact, pour de bon",fx:{emo:5,stress:-4,lien:-1},set:S=>{S.f.grudge=0;S.f.grudgeDone=true;S.f.protected=true},ok:"Tu n'as pas à pardonner ce qui t'a détruit{e}. Tu as le droit de fermer la porte et de vivre.",ko:"Certains, autour de toi, te disent de « passer à autre chose ». Tu avances à ton rythme."}
+  :{t:"Pardonner, et tendre la main pour renouer",fx:{emo:6,stress:2},set:S=>{S.f.forgave=(S.f.forgave||0)+1;S.f.grudge=0;S.f.grudgeDone=true;if(R()<.5){S.st.lien=clamp(S.st.lien+8);S.st.joie=clamp(S.st.joie+6);if(S.f.feud)S.f.feud=false;return "L'autre pleure. Il ou elle attendait ce pas depuis des années, sans oser le faire.";}return "L'autre ne veut pas. Mais toi, tu es libre maintenant. La porte reste entrouverte.";},ok:"Tu fais le premier pas, même si ce n'est pas à toi de le faire.",ko:"Tendre la main, c'est risquer qu'on la refuse."}
+]};
+const ASK_PARDON={pri:true,cond:S=>(S.f.violent||S.f.hit||(S.f.controlling||0)>=1||S.f.pushy||(S.f.bias||0)>0||S.log.some(l=>l.t==="Fuir"||l.t==="Te venger"))&&!S.f.askedPardon,text:S=>{const w=S.f.violent||S.f.hit?"Ta main est partie, autrefois. ":(S.f.controlling?"Tu as enfermé quelqu'un dans ta peur. ":(S.log.some(l=>l.t==="Fuir")?"Un enfant a grandi sans toi. ":"Tu as blessé quelqu'un, un jour. "));return w+"Tu le sais. L'autre le sait. Personne n'en parle.";},choices:[
+ {t:"Aller demander pardon, sans te justifier",fx:{emo:7,stress:4,regret:-6},set:S=>{S.f.askedPardon=true;S.f.forgave=(S.f.forgave||0)+1;if(R()<.5){S.st.lien=clamp(S.st.lien+6);return "L'autre t'écoute jusqu'au bout. Il ne dit pas « je te pardonne ». Il dit : « Merci de l'avoir dit. » C'est déjà immense.";}return "L'autre ne veut pas t'entendre. C'est son droit. Toi, tu as fait ta part, et tu sais maintenant qui tu ne veux plus être.";},ok:"Demander pardon demande plus de courage que de se défendre.",ko:"Tu ne contrôles pas la réponse."},
+ {t:"Te justifier : « Tu ne comprends pas ce que je vivais »",fx:{stress:3,lien:-3,regret:3},set:S=>{S.f.askedPardon=true},ok:"Ta souffrance aussi était réelle.",ko:"Expliquer n'est pas réparer. L'autre se referme."},
+ {t:"Laisser le temps faire son œuvre",fx:{regret:4},set:S=>{S.f.askedPardon=true},ok:"Pas de scène, pas de larmes.",ko:"Le temps n'efface pas tout. Il range seulement."}
+]};
+/* Le vide */
+const EMPTY={pri:true,cond:S=>!S.f.homeless&&S.st.argent>=30,text:"Tu as tout ce qu'il fallait avoir : un travail, un toit, des gens autour de toi. Et pourtant, un dimanche matin, un vide immense. Tu te demandes : « C'est ça, ma vie ? Et après ? »",choices:[
+ {t:"Le remplir : acheter, sortir, voyager, ne jamais t'arrêter",fx:{argent:-8,joie:3,stress:2},set:S=>{S.f.fillEmpty=(S.f.fillEmpty||0)+1},ok:"Pendant quelques semaines, le vide se tait.",ko:"Il revient, à chaque fois. On ne remplit pas un vide avec des choses."},
+ {t:"Chercher un sens : la foi, le silence, la mer à l'aube",fx:{emo:6,stress:-4,joie:3},set:S=>{S.f.meaning=(S.f.meaning||0)+1;S.f.faith=Math.max(S.f.faith||0,1)},ok:"Tu ne trouves pas toutes les réponses. Mais tu apprends à vivre avec les questions.",ko:"Ceux qui t'entourent ne comprennent pas ce que tu cherches."},
+ {t:"Te rendre utile : une association, des jeunes à guider",fx:{utile:9,lien:5,joie:4,stress:2},set:S=>{S.f.meaning=(S.f.meaning||0)+1;S.f.gave=(S.f.gave||0)+1},ok:"Le vide recule quand tu regardes au-delà de toi.",ko:"Le temps donné aux autres, tu le prends ailleurs."},
+ {t:"Revenir à ton don, à ce qui te faisait vibrer enfant",fx:{joie:6,emo:4},set:S=>{S.f.meaning=(S.f.meaning||0)+1;S.f.bloom=(S.f.bloom||0)+1;S.f.talentLost=false},ok:S=>`Tu retrouves ${tal(S).n}. Le vide avait la forme de ce que tu avais laissé de côté.`,ko:"Il faut accepter d'être débutant{|e} à nouveau."},
+ {t:"En parler à quelqu'un : un proche, ou un psychologue",fx:{emo:6,stress:-3,lien:3},set:S=>{S.f.meaning=(S.f.meaning||0)+1},ok:"Mettre des mots sur le vide, c'est déjà commencer à le traverser.",ko:"Tu as peur de passer pour ingrat{|e} : « Tu as tout, de quoi tu te plains ? »"}
+]};
+const EMPTY_NEST={pri:true,cond:S=>S.f.kids>0&&!S.f.childDead,text:"Le dernier enfant est parti. Sa chambre est vide, son bol aussi. Pendant vingt ans, ta vie tournait autour d'eux. Et maintenant ?",choices:[
+ {t:"Rester dans leur chambre, et attendre leurs appels",fx:{joie:-5,stress:3},ok:"Tu gardes tout intact.",ko:"Le téléphone ne sonne pas assez souvent pour remplir les journées."},
+ {t:"Redécouvrir {partner}, ou toi-même",fx:{joie:5,emo:4,lien:3},ok:"Des dîners à deux, ou seul{e} au bord de l'eau. Une personne que tu avais oubliée réapparaît.",ko:"Il faut réapprendre à être autre chose que parent."},
+ {t:"Accueillir les enfants des autres : soutien scolaire, fa'a'amu",fx:{utile:8,joie:4,lien:4,stress:3},set:S=>{S.f.gave=(S.f.gave||0)+1},ok:"Ta maison se remplit à nouveau, autrement.",ko:"Ce ne sont pas les tiens. Il faut apprendre à aimer sans retenir."}
+]};
+const EMPTY_RETIRE={pri:true,cond:S=>!!S.f.metier,text:"La retraite. Le premier lundi, tu te lèves à cinq heures par habitude, et tu n'as nulle part où aller. Plus personne n'a besoin de toi avant midi.",choices:[
+ {t:"Rester devant la télé, en attendant que la journée passe",fx:{joie:-5,sante:-3},ok:"Tu te reposes enfin.",ko:"Le repos sans but devient un vide."},
+ {t:"Un fa'a'apu : planter, arroser, regarder pousser",fx:{joie:5,sante:4,emo:4},ok:"Les taro, les bananiers, le uru : chaque matin, quelque chose t'attend.",ko:"Le dos proteste, certains jours."},
+ {t:"Transmettre : bénévolat, conseil des anciens, apprentis",fx:{utile:8,reco:4,lien:4},set:S=>{S.f.gave=(S.f.gave||0)+1},ok:"Ton savoir trouve une nouvelle maison.",ko:"Les jeunes ne font pas comme toi. Il faut lâcher prise."}
+]};
+const REPENT={pri:true,cond:S=>!S.f.repented&&(S.f.askedPardon||S.st.regret>=40||S.f.revenge||S.f.violent||S.f.casier||S.log.some(l=>l.t==="Fuir")),text:"Le mal que tu as fait revient la nuit. Demander pardon ne suffit pas toujours. Tu sens qu'il faut autre chose : ne plus être la personne qui a fait ça.",choices:[
+ {t:"Réparer, concrètement : rembourser, aider, être là pour ceux que tu as blessés",fx:{utile:8,regret:-8,emo:5,argent:-5,stress:3},set:S=>{S.f.repented=true;S.f.gave=(S.f.gave||0)+1;return "Ça prend des années. Personne ne te félicite. Mais un jour, quelqu'un dit de toi : « Il a changé. Vraiment. »";},ok:"Le repentir ne se dit pas : il se fait.",ko:"Réparer coûte du temps, de l'argent, de l'orgueil."},
+ {t:"Changer en profondeur : un groupe de parole, un accompagnement, tenir parole chaque jour",fx:{emo:8,regret:-6,stress:2},set:S=>{S.f.repented=true;S.f.trauma=Math.max(0,(S.f.trauma||0)-1)},ok:"Tu comprends d'où venait le mal. Il n'a plus le même pouvoir sur toi.",ko:"Il faut se regarder en face, longtemps, sans détourner les yeux."},
+ {t:"Te confier à Dieu, à la paroisse, et recommencer",fx:{emo:6,regret:-6,lien:4},set:S=>{S.f.repented=true;S.f.faith=Math.max(S.f.faith||0,1)},ok:"On t'accueille sans te réduire à ta faute. Tu reprends ta route, plus humble.",ko:"La foi t'aide à te relever ; elle ne répare pas à ta place ceux que tu as blessés."},
+ {t:"Te punir toi-même : ruminer, te mépriser, te dire que tu es mauvais{|e}",fx:{joie:-6,stress:6,emo:-5},set:S=>{S.f.remorse=true},ok:"Tu ne t'accordes aucune excuse.",ko:"Le remords qui écrase ne répare rien. Il ajoute une victime : toi."}
+]};
+[4,5,6,7].forEach(c=>MOM[c].push(REPENT));
+/* Vieillir : se sentir inutile, ou un poids */
+const USELESS={pri:true,text:"Plus personne ne te demande ton avis. Les jeunes font tout sur leur téléphone. Quand tu proposes d'aider, on te répond gentiment : « Laisse, {papy|mamie}, repose-toi. » Gentiment, et ça fait mal.",choices:[
+ {t:"Insister pour transmettre : la cuisine, la pêche, les légendes, les généalogies",fx:{utile:7,reco:4,lien:3},set:S=>{S.f.stillUseful=true},ok:"Un petit-enfant revient le lendemain : « Tu me montres encore ? » Tu n'as pas fini de servir.",ko:"Il faut accepter qu'ils fassent à leur façon, pas à la tienne."},
+ {t:"Apprendre quelque chose de nouveau : le téléphone avec un petit-enfant, un cours au club",fx:{emo:4,lien:4,joie:3},set:S=>{S.f.stillUseful=true},ok:"Tu envoies ton premier message vocal. Toute la famille l'écoute en riant.",ko:"Tes doigts sont lents. Il faut accepter d'être débutant{|e}, à ton âge."},
+ {t:"Accepter de te reposer : tu as le droit d'être, sans plus avoir à faire",fx:{stress:-4,emo:4,joie:1},set:S=>{S.f.justBe=true},ok:"Tu découvres une paix nouvelle : ta valeur ne tenait pas à ce que tu produisais.",ko:"Certains jours, l'ennui pèse quand même."},
+ {t:"Te retirer, bouder, ne plus rien proposer",fx:{lien:-4,joie:-4},ok:"Tu ne déranges plus personne.",ko:"Et personne ne sait combien tu te sens mis{|e} de côté."}
+]};
+const BURDEN={pri:true,cond:S=>S.f.dependent||S.st.sante<45,text:S=>`Un soir, tu entends ${S.f.kids>0&&!S.f.childDead?"{child}":"ta nièce"} au téléphone, dans la pièce d'à côté : « Je ne peux pas venir, je dois m'occuper de ${S.sex==="F"?"maman":"papa"}. » Tu as toujours porté les autres. Maintenant, c'est toi qu'on porte, et tu te sens un poids.`,choices:[
+ {t:"Le dire, simplement : « J'ai peur d'être un poids pour toi. »",fx:{emo:6,lien:6,stress:-2},ok:S=>S.f.kids>0&&!S.f.childDead?"{child} te prend la main : « Tu nous as portés pendant trente ans. C'est notre tour. Ce n'est pas un poids, c'est un retour. »":"Elle s'assoit près de toi : « Tu m'as appris à nager, à lire, à pêcher. Laisse-moi te rendre un peu. »",ko:"Dire sa peur, c'est montrer sa faiblesse. À ton âge, c'est encore difficile."},
+ {t:"Te faire tout petit : ne plus rien demander, cacher tes douleurs",fx:{sante:-5,lien:-3,stress:3},ok:"Tu ne dérange plus.",ko:"Tes proches découvrent trop tard ce que tu leur as caché, et ils s'en veulent."},
+ {t:"Trouver encore une façon de donner : écouter, conseiller, prier pour chacun",fx:{utile:6,joie:4,emo:3},set:S=>{S.f.stillUseful=true},ok:"Les petits viennent te confier ce qu'ils ne disent pas à leurs parents. Ta chambre devient un refuge.",ko:"Ce que tu donnes ne se voit pas. Il faut l'accepter."},
+ {t:"Te dire que tout le monde serait mieux sans toi",fx:{joie:-8,emo:-3},set:S=>{S.st.lien=clamp(S.st.lien+4);return "Ce n'est pas vrai, même si ça en a l'air. Ta tristesse se devine : on appelle le médecin, on t'écoute, on soigne cette douleur-là aussi. Chez les anciens, elle est fréquente, et elle se soigne.";},ok:"Tu crois protéger les autres.",ko:"Ces pensées sont un signal, pas une vérité. Elles demandent de l'aide."}
+]};
+MOM[6].push(USELESS);MOM[7].push(USELESS,BURDEN);
+/* Alzheimer et Parkinson */
+const ALZ_DIAG={must:true,cond:S=>S.f.neuro==="alz"&&!S.f.neuroKnown,text:"Les oublis se multiplient : un rendez-vous, le chemin du marché, le prénom d'un petit-enfant. Le neurologue du Taaone prononce le mot : Alzheimer. La maladie avancera lentement. Ta mémoire va partir, morceau par morceau.",choices:[
+ {t:"Le dire à ta famille, et préparer la suite tant que tu peux décider",fx:{emo:6,lien:6,stress:3},set:S=>{S.f.neuroKnown=true;S.f.papers=true;return "Vous parlez de tout : la maison, les soins, ce que tu veux et ne veux pas. Le notaire passe. Tu choisis encore, pendant que tu peux.";},ok:"Tu restes maître de ta vie, aussi longtemps que possible.",ko:"Les larmes de tes enfants sont dures à voir."},
+ {t:"Écrire un carnet de souvenirs, avant qu'ils ne s'effacent",fx:{utile:6,emo:5,joie:2},set:S=>{S.f.neuroKnown=true;S.mems.push("le carnet écrit avant l'oubli")},ok:"Les noms, les lieux, les histoires, les recettes : tout est écrit. Un jour, ce sont tes enfants qui te le liront.",ko:"Chaque page est une course contre la montre."},
+ {t:"Le cacher, faire comme si de rien n'était",fx:{stress:6,lien:-3},set:S=>{S.f.neuroKnown=true;if(R()<.5){S.st.sante=clamp(S.st.sante-6);return "Un soir, on te retrouve perdu{e} sur la route de ceinture, à cinq kilomètres de chez toi. Ta famille apprend tout d'un coup.";}},ok:"Tu protèges ta fierté.",ko:"La maladie, elle, ne se cache pas longtemps."}
+]};
+const ALZ_LATE={must:true,cond:S=>S.f.neuro==="alz"&&S.ci===7,text:S=>`Tu ne sais plus très bien quel jour on est, ni qui est cette personne qui te tient la main. Elle dit qu'elle s'appelle ${S.f.kids>0&&!S.f.childDead?"{child}":"ta nièce"}. Mais quand quelqu'un chante un himene, les mots reviennent tous, intacts.`,choices:[
+ {t:"Te laisser guider par les voix douces",fx:{joie:4,stress:-4},ok:"Tu ne sais pas qui ils sont. Tu sais qu'ils t'aiment.",ko:"Le monde est flou, et parfois il fait peur."},
+ {t:"Chanter avec eux",fx:{joie:6,lien:5},ok:"Pendant trois minutes, tu es là, entier{|e}. Tes enfants pleurent en souriant.",ko:"La chanson finit. Le brouillard revient."},
+ {t:"Chercher ta mère, et vouloir rentrer « à la maison »",fx:{stress:5,joie:-3},ok:"Tu parles de ton enfance comme si c'était hier. Pour toi, c'est hier.",ko:"Personne ne peut t'y ramener. Alors ils t'écoutent, et ils disent « oui, demain »."}
+]};
+const PARK_DIAG={must:true,cond:S=>S.f.neuro==="park"&&!S.f.neuroKnown,text:"Ta main tremble au repos. Tes pas raccourcissent. Ton écriture devient minuscule. Le neurologue dit : Parkinson. Ça ne se guérit pas, mais ça se soigne, et on peut vivre longtemps avec.",choices:[
+ {t:"Suivre le traitement et bouger chaque jour : la marche, la danse, la piscine",fx:{sante:8,emo:5,stress:2},set:S=>{S.f.neuroKnown=true},ok:"Le mouvement est un médicament. Les jours avec bougent mieux que les jours sans.",ko:"La discipline de chaque jour, à ton âge, demande du courage."},
+ {t:"Rejoindre une association de malades",fx:{lien:6,emo:5},set:S=>{S.f.neuroKnown=true},ok:"Des gens qui tremblent comme toi, et qui rient quand même. Tu n'es plus seul{e} avec ça.",ko:"Voir les plus avancés te fait peur, au début."},
+ {t:"Cacher tes mains dans tes poches, ne plus sortir",fx:{stress:5,lien:-5,joie:-4},set:S=>{S.f.neuroKnown=true},ok:"Personne ne voit tes tremblements.",ko:"La honte t'enferme plus vite que la maladie."}
+]};
+const PARK_LATE={must:true,cond:S=>S.f.neuro==="park"&&S.ci===7,text:"Le corps se fige un peu plus chaque saison. Boutonner une chemise prend dix minutes. Tu tombes, parfois. Mais ta tête est claire, et tu as encore des choses à dire.",choices:[
+ {t:"Accepter l'aide pour les gestes, garder ta voix pour l'essentiel",fx:{emo:5,lien:4},ok:"On t'habille, et toi, tu racontes. Tes petits-enfants enregistrent tes histoires sur leur téléphone.",ko:"Laisser quelqu'un boutonner ta chemise, c'est une petite défaite chaque matin."},
+ {t:"Tout faire seul{e}, coûte que coûte",fx:{sante:-6,stress:4,reco:2},ok:"Ta fierté reste debout.",ko:"Les chutes se multiplient."}
+]};
+MOM[6].push(ALZ_DIAG,PARK_DIAG);
+/* Argent, dettes, entreprise, travail */
+const CREDIT={cond:S=>!S.f.homeless&&(S.f.debt||0)<2,text:"Le vendeur de voitures sourit : « Pas besoin d'apport, on vous fait un crédit sur sept ans. » Le même mois, il y a le mariage d'une cousine à payer, et les fêtes de fin d'année.",choices:[
+ {t:"Signer le crédit, tout le monde le fait",fx:{joie:4,reco:2,stress:3},set:S=>{S.f.debt=(S.f.debt||0)+1},ok:"Une voiture neuve devant le fare. Les cousins sont impressionnés.",ko:"Sept ans de mensualités. Et la voiture perd la moitié de sa valeur en trois ans."},
+ {t:"Acheter d'occasion, avec ce que tu as",fx:{argent:-4,emo:3},ok:"Pas de dette. La voiture fait du bruit, mais elle est à toi.",ko:"Certains te regardent de haut à la sortie du temple."},
+ {t:"Dire non à tout, même au mariage de la cousine",fx:{argent:3,lien:-4,stress:2},ok:"Tes comptes sont propres.",ko:"La famille trouve que tu « fais le fier » avec ton argent."}
+]};
+const OVERDEBT={must:true,cond:S=>(S.f.debt||0)>=2&&!S.f.homeless,text:"Les lettres de la banque s'empilent, sans être ouvertes. Un crédit pour payer l'autre. Le téléphone sonne : un recouvrement. Tu ne dors plus.",choices:[
+ {t:"Déposer un dossier de surendettement, avec une assistante sociale",fx:{stress:-6,emo:5,reco:-3,argent:4},set:S=>{S.f.debt=0;S.f.survived=true;return "Un plan de remboursement étalé, des dettes en partie effacées. Pendant des années, pas de nouveau crédit. Mais tu redors.";},ok:"Il existe une procédure pour ça. Tu n'es ni le premier, ni le dernier.",ko:"Avouer qu'on n'y arrive plus, c'est dur. Ton nom est inscrit sur un fichier."},
+ {t:"Emprunter à la famille pour rembourser la banque",fx:{argent:6,lien:-4,stress:2},set:S=>{S.f.debt=Math.max(0,S.f.debt-1);S.f.familyDebt=true},ok:"La banque te laisse tranquille.",ko:"À chaque repas de famille, la dette est assise à table."},
+ {t:"Prendre un deuxième travail, le soir",fx:{argent:6,sante:-6,lien:-5,stress:5},set:S=>{S.f.debt=Math.max(0,S.f.debt-1)},ok:"Tu rembourses, petit à petit.",ko:"Ton corps et ta famille paient l'autre moitié."},
+ {t:"Ne plus ouvrir les lettres",fx:{stress:6,argent:-8},set:S=>{if(R()<.6)return "L'huissier frappe à la porte. Saisie sur salaire, sur les meubles. La honte devant les voisins.";},ok:"Pendant quelques semaines, tu n'y penses plus.",ko:"Les dettes, elles, ne dorment jamais : elles grossissent."}
+]};
+const MORTGAGE={must:true,cond:S=>S.f.house&&(S.f.lostJob||S.st.argent<15)&&!S.f.mortgageHit,text:"Le prêt de la maison court encore sur quinze ans. Avec moins d'argent, les mensualités ne passent plus. La banque t'écrit, poliment, puis moins poliment.",choices:[
+ {t:"Aller voir la banque avant qu'il ne soit trop tard, et renégocier",fx:{stress:3,emo:4,argent:3},set:S=>{S.f.mortgageHit=true},ok:"Le prêt est allongé, les mensualités baissent. Tu paieras plus longtemps, mais tu gardes ta maison.",ko:"Il faut montrer tes comptes, ta fragilité."},
+ {t:"Vendre la maison, pour repartir sans dette",fx:{argent:8,joie:-8,regret:5,stress:-3},set:S=>{S.f.house=false;S.f.mortgageHit=true},ok:"Tu respires. Plus rien ne te menace.",ko:"Les manguiers, la chambre des enfants, les fêtes : tout reste derrière."},
+ {t:"Tenir en coupant tout le reste",fx:{stress:7,joie:-4,lien:-3},set:S=>{S.f.mortgageHit=true},ok:"La maison reste à toi.",ko:"Plus de sorties, plus de cadeaux, plus de souffle."}
+]};
+const BIZ_IDEA={pri:true,cond:S=>!S.f.biz&&!S.f.homeless,text:"Une idée te tourne dans la tête depuis des mois : ta propre entreprise. Un food truck, un atelier, une petite agence, un service qui manque au quartier. Tu en rêves la nuit.",choices:[
+ {t:"Te lancer en grand, avec un prêt bancaire",fx:{stress:6,argent:-6,joie:4},set:S=>{S.f.biz="running";S.f.bizRisk=.45;S.f.debt=(S.f.debt||0)+1},ok:"Ton nom sur une enseigne. Ton rêve, enfin.",ko:"Si ça échoue, tu devras rembourser quand même."},
+ {t:"Commencer petit, le soir et le week-end, sans emprunter",fx:{stress:4,lien:-3,joie:3},set:S=>{S.f.biz="running";S.f.bizRisk=.3},ok:"Tu testes ton idée sans tout risquer.",ko:"Tes soirées et tes week-ends disparaissent."},
+ {t:"T'associer avec {friend}",fx:{stress:3,lien:3,joie:3},set:S=>{S.f.biz="running";S.f.bizRisk=.35;S.f.bizFriend=true},ok:"À deux, on ose plus. Et on se relaie.",ko:"L'argent et l'amitié ne font pas toujours bon ménage."},
+ {t:"Garder ton idée pour plus tard",fx:{regret:4},ok:"Pas de risque.",ko:"« Plus tard » devient souvent « jamais »."}
+]};
+const BIZ_OUTCOME={must:true,cond:S=>S.f.biz==="running"&&S.ci>(S.f.bizCi??99),text:"Deux ans ont passé depuis le lancement de ton entreprise. L'heure des comptes est arrivée.",choices:[
+ {t:"Ouvrir les livres de comptes",fx:{stress:3},set:S=>{if(R()>(S.f.bizRisk||.4)+(S.f.bizTries?-.15:0)){S.f.biz="success";S.st.argent=clamp(S.st.argent+15);S.st.reco=clamp(S.st.reco+10);S.st.joie=clamp(S.st.joie+8);S.f.bloom=(S.f.bloom||0)+1;return "Ça marche. Des clients fidèles, deux employés, ton nom connu dans le quartier. Tu crées du travail pour d'autres.";}S.f.biz="failed";S.st.argent=clamp(S.st.argent-15);S.st.reco=clamp(S.st.reco-6);S.st.joie=clamp(S.st.joie-10);S.st.stress=clamp(S.st.stress+8);if(S.f.bizFriend){S.st.lien=clamp(S.st.lien-6);if(S.rel)S.rel.friend=Math.max(0,S.rel.friend-30);}return "Faillite. Liquidation judiciaire, les dettes, le matériel vendu à bas prix. La honte, surtout, devant ceux qui disaient « je te l'avais dit ».";},ok:"Tu regardes la vérité en face.",ko:"Quelle qu'elle soit."}
+]};
+const BIZ_GROW={cond:S=>S.f.biz==="success",text:"Ton entreprise tourne. On te propose de grandir : un deuxième local, cinq employés de plus, un gros prêt.",choices:[
+ {t:"Grandir",fx:{argent:6,reco:5,stress:8,lien:-6},set:S=>{if(R()<.3){S.f.biz="failed";S.st.argent=clamp(S.st.argent-12);return "Trop vite, trop grand. Une mauvaise saison suffit à tout faire tomber.";}},ok:"Tu fais vivre plusieurs familles.",ko:"Tu ne vois plus les tiens."},
+ {t:"Rester à taille humaine",fx:{joie:4,emo:3,lien:3},ok:"Tu connais chaque client par son prénom.",ko:"D'autres te dépassent, et on te dit que tu manques d'ambition."},
+ {t:"Vendre l'entreprise",fx:{argent:12,joie:2,regret:3},set:S=>{S.f.biz="sold"},ok:"Une belle somme, et du temps libre.",ko:"Ton bébé appartient à quelqu'un d'autre."}
+]};
+const BIZ_RETRY={must:true,cond:S=>S.f.biz==="failed"&&!S.f.bizRetryAsked,text:"Après la faillite, les mois sont gris. Puis, un matin, une nouvelle idée revient, avec tout ce que l'échec t'a appris.",choices:[
+ {t:"Réessayer, autrement, avec les leçons de l'échec",fx:{stress:5,emo:5,joie:3},set:S=>{S.f.bizRetryAsked=true;S.f.bizTries=(S.f.bizTries||0)+1;S.f.biz="running";S.f.bizCi=S.ci;S.f.bizRisk=.3},ok:"L'échec n'était pas une fin. C'était une école chère.",ko:"Ta famille a peur que tout recommence."},
+ {t:"Retrouver un emploi salarié, et la sécurité",fx:{stress:-4,argent:4,regret:2},set:S=>{S.f.bizRetryAsked=true},ok:"Un salaire chaque mois, enfin.",ko:"Le rêve se range dans un tiroir."},
+ {t:"Ne plus jamais rien tenter",fx:{stress:-2,regret:5,emo:-3},set:S=>{S.f.bizRetryAsked=true;S.f.bizQuit=true},ok:"Plus jamais ça.",ko:"La peur de l'échec décide désormais à ta place."}
+]};
+const HARASS={cond:S=>!!S.f.metier,text:S=>S.sex==="F"&&R()<.5?"Ton supérieur multiplie les remarques sur ton corps, les mains qui s'attardent, les messages le soir. Tu as peur de perdre ton poste.":"Ton supérieur te rabaisse devant tout le monde, chaque jour. Tes erreurs sont affichées, tes réussites ignorées. Le dimanche soir, tu as la boule au ventre.",choices:[
+ {t:"Tenir bon en silence",fx:{stress:8,emo:-4,sante:-3},ok:"Tu gardes ton travail.",ko:"Le harcèlement grignote ta confiance, jour après jour."},
+ {t:"Tout noter, réunir des preuves, et alerter l'inspection du travail ou un syndicat",fx:{stress:4,emo:5,reco:3},set:S=>{S.f.rights=(S.f.rights||0)+1;if(R()<.55)return "L'enquête confirme. Le supérieur est muté. D'autres collègues osent enfin parler : tu n'étais pas seul{e}.";return "La procédure est longue et l'ambiance devient glaciale. Mais ton dossier existe.";},ok:"Le harcèlement est puni par la loi. Tu le rappelles.",ko:"Il faut du courage, et des preuves."},
+ {t:"Démissionner pour te protéger",fx:{stress:-6,argent:-6,emo:3},set:S=>{S.f.lostJob=true},ok:"Tu retrouves le sommeil.",ko:"C'est toi qui pars, alors que ce n'est pas toi le fautif."}
+]};
+const STRIKE={cond:S=>!!S.f.metier&&S.f.metier!=="commerce",text:"Les syndicats appellent à la grève générale : salaires bloqués, vie trop chère, réforme imposée. Le port est fermé, les stations-service vides, toute l'île est à l'arrêt.",choices:[
+ {t:"Faire grève avec les autres",fx:{argent:-5,lien:5,reco:2,stress:3},set:S=>{S.f.rights=(S.f.rights||0)+1;if(R()<.5)return "Après dix jours, un accord est signé. Une petite hausse pour tous, y compris pour ceux qui n'ont pas fait grève.";return "Après trois semaines, rien n'est obtenu. Les jours de grève ne sont pas payés.";},ok:"La solidarité, sur les piquets, la nuit, autour du feu.",ko:"Dix jours sans salaire, quand on a déjà du mal."},
+ {t:"Continuer à travailler",fx:{argent:2,lien:-4},ok:"Ton salaire tombe.",ko:"Certains collègues ne te parlent plus. « Jaune », te dit-on."},
+ {t:"Prendre la parole pour négocier",fx:{reco:6,stress:6,emo:3},set:S=>{S.f.rights=(S.f.rights||0)+1},ok:"On t'écoute. Tu deviens délégué{e}.",ko:"La direction te garde à l'œil, désormais."}
+]};
+const RIGHTS={cond:S=>!!S.f.metier,text:"Depuis des mois, tes heures supplémentaires ne sont pas payées, et ton contrat est renouvelé tous les six mois, sans jamais devenir définitif.",choices:[
+ {t:"Faire valoir tes droits devant le tribunal du travail",fx:{stress:6,argent:4,reco:3},set:S=>{S.f.rights=(S.f.rights||0)+1;if(R()<.6){S.st.argent=clamp(S.st.argent+6);return "Le tribunal te donne raison : rappels de salaire, et un contrat définitif.";}return "Le jugement traîne. Ton contrat n'est pas renouvelé.";},ok:"Le droit du travail existe pour ça.",ko:"Ton patron le prend personnellement."},
+ {t:"En parler calmement avec ton patron",fx:{emo:4,stress:2},set:S=>{if(R()<.5){S.st.argent=clamp(S.st.argent+3);return "Il reconnaît le problème et régularise.";}return "Il promet. Rien ne change.";},ok:"Tu essaies d'abord le dialogue.",ko:"Les promesses ne paient pas les factures."},
+ {t:"Te taire, de peur de perdre ta place",fx:{stress:4,regret:3},ok:"Ta place est gardée.",ko:"Tu travailles gratuitement, en silence."}
+]};
+const COLLEAGUE={cond:S=>!!S.f.metier,text:"Au travail, la tension monte avec un collègue. Il prend le mérite de ton travail, et l'ambiance devient irrespirable.",choices:[
+ {t:"Le confronter devant tout le monde",fx:{stress:5,reco:2,lien:-3},ok:"La vérité éclate.",ko:"Le conflit s'installe pour des mois."},
+ {t:"Lui parler seul à seul, calmement",fx:{emo:5,stress:2},set:S=>{if(R()<.5)return "Il s'excuse. Il avait peur pour son poste, lui aussi.";},ok:"Tu cherches l'humain derrière le conflit.",ko:"Ça ne marche pas à tous les coups."},
+ {t:"Laisser filer",fx:{stress:3,regret:3},ok:"Pas de vagues.",ko:"Il recommence."}
+]};
+/* L'amitié au travail */
+const wr=n=>S=>{S.f.workRel=Math.max(0,Math.min(100,(S.f.workRel??35)+n))};
+const WORK_FRIEND={pri:true,cond:S=>!!S.f.metier&&!S.f.workFriend,text:"À la pause, {cw}, {une collègue|un collègue} de ton service, partage son ma'a avec toi sans rien demander. {cwIl} rit fort, connaît le prénom de tout le monde, et remarque quand quelqu'un ne va pas.",choices:[
+ {t:"Lui rendre la pareille, et apprendre à {cwle} connaître",fx:{lien:5,joie:4},set:S=>{wr(25)(S);S.f.workFriend=true},ok:"Les pauses deviennent le meilleur moment de la journée. Un ami, là où tu ne l'attendais pas.",ko:"Quand {cwil} a des soucis, ce sont aussi un peu les tiens."},
+ {t:"Rester poli{|e}, mais garder tes distances : le travail, c'est le travail",fx:{stress:-1},ok:"Pas de mélange entre ta vie et ton travail.",ko:"Huit heures par jour à côté de gens que tu ne connais pas vraiment."},
+ {t:"Profiter de la pause pour critiquer les autres collègues",fx:{lien:2,reco:-2},set:wr(-5),ok:"Vous riez ensemble.",ko:"Tu te demandes ce qu'on dit de toi quand tu n'es pas là."}
+]};
+const WORK_SPORT={cond:S=>!!S.f.metier,text:"Le comité d'entreprise inscrit une équipe au tournoi inter-entreprises : va'a, football, pétanque. Il manque quelqu'un.",choices:[
+ {t:"T'inscrire, même sans être très doué{e}",fx:{sante:5,joie:5,lien:3},set:wr(15),ok:"Vous perdez en demi-finale, mais vous rentrez en chantant dans le truck. Le directeur rame à côté du stagiaire.",ko:"Des courbatures pendant une semaine."},
+ {t:"Venir encourager, avec une glacière",fx:{joie:3,lien:2},set:wr(8),ok:"Tu cries plus fort que tout le monde.",ko:"Tu restes un peu sur le bord."},
+ {t:"Rester chez toi",fx:{stress:-2},ok:"Ton samedi t'appartient.",ko:"Le lundi, tout le monde parle d'un moment que tu n'as pas vécu."}
+]};
+const WORK_PARTY={cond:S=>!!S.f.metier,text:"La fête de fin d'année de l'entreprise : buffet, kaina music, karaoké. Le chef chante faux. Tout le monde rit.",choices:[
+ {t:"Danser, chanter, rire avec tout le monde",fx:{joie:6,lien:3},set:wr(15),ok:"Tu découvres tes collègues autrement : la comptable danse le 'ori comme personne.",ko:"Le lendemain, la vidéo de ton karaoké tourne dans le service."},
+ {t:"Boire un peu trop",fx:{joie:3,sante:-2,reco:-3},set:S=>{wr(5)(S);S.f.alcool=(S.f.alcool||0)+(R()<.3?1:0);if(R()<.35)return "Tu dis à ton chef ce que tu penses vraiment de lui. Le lundi est très long.";},ok:"Tu te lâches enfin.",ko:"Certaines choses dites ne se reprennent pas."},
+ {t:"Faire une apparition, puis rentrer tôt",fx:{stress:-1},set:wr(2),ok:"Tu es poli{|e}, et dans ton lit à dix heures.",ko:"On te trouve un peu distant{|e}."}
+]};
+const SURPRISE_BDAY={auto:true,good:true,cond:S=>!!S.f.metier&&(S.f.workRel??0)>=50&&(S.f.surprise||0)<2,text:S=>`C'est ton anniversaire. ${S.st.lien<50||!S.f.couple?"Ce matin, personne n'y a pensé. Pas un message, pas un appel. Tu n'as rien dit.":"Ce matin, à la maison, tout le monde était pressé. Personne n'a rien dit. Tu as cru qu'ils avaient oublié."} À midi, {cw} t'appelle dans la salle de réunion pour « un problème urgent ». La lumière s'allume : tous tes collègues sont là, avec un gâteau coco, des colliers de tiare et une carte signée par tout le service.`,fx:{joie:12,lien:6,reco:3,stress:-5},set:S=>{S.f.surprise=(S.f.surprise||0)+1;S.mems.push("le gâteau surprise des collègues");return "Tu pleures devant tout le monde, et personne ne se moque. Ces gens-là sont aussi ta famille, d'une certaine façon.";}};
+MOM[3].push(CREDIT,BIZ_IDEA,COLLEAGUE,RIGHTS,WORK_FRIEND,WORK_SPORT,WORK_PARTY);
+[4,5].forEach(c=>MOM[c].push(WORK_FRIEND,WORK_SPORT,WORK_PARTY));
+[4,5].forEach(c=>MOM[c].push(CREDIT,OVERDEBT,MORTGAGE,BIZ_IDEA,BIZ_OUTCOME,BIZ_GROW,BIZ_RETRY,HARASS,STRIKE,RIGHTS,COLLEAGUE));
+MOM[6].push(OVERDEBT,BIZ_OUTCOME,BIZ_RETRY);MOM[7].push(ALZ_DIAG,PARK_DIAG,ALZ_LATE,PARK_LATE);
+[3,4,5,6].forEach(c=>MOM[c].push(GRUDGE));[4,5,6].forEach(c=>MOM[c].push(ASK_PARDON));[4,5].forEach(c=>MOM[c].push(EMPTY));MOM[5].push(EMPTY_NEST);MOM[6].push(EMPTY_RETIRE);
 MOM[6].push(KNEES);
 MOM[7].unshift(CARE,DIGNITY,FORGET);
 
@@ -1185,7 +1348,7 @@ const EVENTS=[
  {good:true,ci:7,p:.5,text:"Pour ton anniversaire, les enfants du quartier dansent pour toi.",fx:{joie:7,lien:5,reco:3}}
 ].map(e=>({...e,auto:true}));
 
-const HELP=new Set(["Accepter la main tendue","Faire valoir tes droits : signaler, porter plainte","Le montrer à un adulte qui s'y connaît","Poser tes questions à l'infirmière scolaire","En parler à {friend} avant de décider","Refuser, bloquer, et le dire à un adulte de confiance","Accepter d'aller voir un médecin","Pleurer, et accepter qu'elle t'emmène consulter","Rappeler l'équipe qui t'a soigné{e}","En parler à l'infirmière scolaire","Signaler, et le dire à un adulte de confiance","Le dire à mamie, le soir","Dire la vérité à une seule personne : « En ce moment, je me sens seul{e}. »","Appeler la maison, même si ça coûte cher","En parler à {friend}, même si {partner} n'aime pas ça","Appeler une association d'aide aux victimes","Voir une assistante sociale pour connaître tes droits","Consulter quelqu'un sur cette peur d'être abandonné{e}","Suivre ton oncle pêcheur, fort et doux à la fois","Suivre ta tante, cheffe d'entreprise, qui fait les choses autrement","En parler à un adulte","En parler à ta tante","En parler d'abord à {friend}, ton ami{fe}","En parler à {friend}","Voir l'infirmière scolaire","Appeler les mutoi, la police municipale","Consulter un psychologue","Aller au centre de consultation gratuit, après des mois d'attente","En parler au pasteur, ou à un ancien de la famille","Demander de l'aide à ta famille","Aller voir une association, une assistante sociale","Accepter le foyer d'accueil et un accompagnement social","Accepter l'aide des autres","Accepter la main tendue : cure, groupe de parole, croix bleue","Demander l'hospitalisation, même si c'est en psychiatrie","Partir toi-même, et chercher de l'aide pour ta colère","Appeler le numéro d'écoute, ou aller aux urgences","Appeler {friend}","Vous battre pour le couple, avec une conseillère","Demander de l'aide : enfants, infirmière, auxiliaire","Te laisser aider, en racontant ta jeunesse","En parler au médecin","Voir ton médecin, et accepter un arrêt","Dire à tes proches que tu n'y arrives plus","Demander conseil à l'assistante sociale du collège","Porter plainte","Rentrer chez ta famille, demander pardon s'il le faut","Laisser ta famille t'enfermer chez un oncle sur un atoll, loin de tout"]);
+const HELP=new Set(["Déposer un dossier de surendettement, avec une assistante sociale","Aller voir la banque avant qu'il ne soit trop tard, et renégocier","Tout noter, réunir des preuves, et alerter l'inspection du travail ou un syndicat","Le dire à ta famille, et préparer la suite tant que tu peux décider","Rejoindre une association de malades","Accepter l'aide pour les gestes, garder ta voix pour l'essentiel","Le dire, simplement : « J'ai peur d'être un poids pour toi. »","En parler à quelqu'un : un proche, ou un psychologue","Accepter la main tendue","Faire valoir tes droits : signaler, porter plainte","Le montrer à un adulte qui s'y connaît","Poser tes questions à l'infirmière scolaire","En parler à {friend} avant de décider","Refuser, bloquer, et le dire à un adulte de confiance","Accepter d'aller voir un médecin","Pleurer, et accepter qu'elle t'emmène consulter","Rappeler l'équipe qui t'a soigné{e}","En parler à l'infirmière scolaire","Signaler, et le dire à un adulte de confiance","Le dire à mamie, le soir","Dire la vérité à une seule personne : « En ce moment, je me sens seul{e}. »","Appeler la maison, même si ça coûte cher","En parler à {friend}, même si {partner} n'aime pas ça","Appeler une association d'aide aux victimes","Voir une assistante sociale pour connaître tes droits","Consulter quelqu'un sur cette peur d'être abandonné{e}","Suivre ton oncle pêcheur, fort et doux à la fois","Suivre ta tante, cheffe d'entreprise, qui fait les choses autrement","En parler à un adulte","En parler à ta tante","En parler d'abord à {friend}, ton ami{fe}","En parler à {friend}","Voir l'infirmière scolaire","Appeler les mutoi, la police municipale","Consulter un psychologue","Aller au centre de consultation gratuit, après des mois d'attente","En parler au pasteur, ou à un ancien de la famille","Demander de l'aide à ta famille","Aller voir une association, une assistante sociale","Accepter le foyer d'accueil et un accompagnement social","Accepter l'aide des autres","Accepter la main tendue : cure, groupe de parole, croix bleue","Demander l'hospitalisation, même si c'est en psychiatrie","Partir toi-même, et chercher de l'aide pour ta colère","Appeler le numéro d'écoute, ou aller aux urgences","Appeler {friend}","Vous battre pour le couple, avec une conseillère","Demander de l'aide : enfants, infirmière, auxiliaire","Te laisser aider, en racontant ta jeunesse","En parler au médecin","Voir ton médecin, et accepter un arrêt","Dire à tes proches que tu n'y arrives plus","Demander conseil à l'assistante sociale du collège","Porter plainte","Rentrer chez ta famille, demander pardon s'il le faut","Laisser ta famille t'enfermer chez un oncle sur un atoll, loin de tout"]);
 const HELP_NOTE=["Demander de l'aide n'est pas une faiblesse. Il t'a fallu du courage.","Il faut plus de force pour tendre la main que pour serrer les dents.","Personne ne traverse la vie seul. Tu viens de le reconnaître, et c'est une force.","Dire « je n'y arrive pas seul{e} », c'est déjà commencer à y arriver.","Tu as laissé quelqu'un t'aider. C'est aussi un cadeau que tu lui fais."];
 function ripple(fx){
   const f=S.f,ci=S.ci,L=[];
@@ -1265,6 +1428,7 @@ const HAND={id:"hand",text:S=>{if(!S._hand||S._handCi!==S.ci){const ok=GIVERS.fi
  {t:"Refuser, par fierté : « Ça va aller. »",fx:{stress:3,regret:4},ok:"Tu ne dois rien à personne.",ko:"La main se retire. Elle reviendra peut-être, peut-être pas."}
 ]};
 REG.hand=HAND;
+const HEAVY=new Set([BETRAYAL,FRIEND_BETRAYAL,VIOLENCE_V,VIOLENCE_A,ICE,DRINK,DESPAIR,CYBER,PHOTO,HARASS,OVERDEBT,GRUDGE,CONTROL,GASLIGHT,MONEYCTRL,JEALOUS,LOVE_COUPLE,BURDEN,ED_START,BIZ_RETRY,COMPARE,EXNEW,SOCIAL,ALCO,KIDS_TEEN,SURVIVAL].filter(Boolean));SURPRISE_BDAY.id='bday';REG.bday=SURPRISE_BDAY;
 [["acc",ACCIDENT],["rehab",REHAB],["hev",HOMELESS_EV],["hom",HOMELESS]].forEach(([id,m])=>{m.id=id;REG[id]=m;});
 
 /* ---------- Mécanique ---------- */
@@ -1352,6 +1516,16 @@ function chapterStart(ci){
     if(S.sib&&!S.f.sibFaded&&R1.sib<10&&ci>=3){S.f.sibFaded=true;add({lien:-3,regret:3},fmt("{sib} et toi, vous ne vous voyez plus qu'aux enterrements. Vous ne savez plus quoi vous dire."));}
     if(S.f.couple&&R1.partner<25)add({lien:-3,joie:-3},fmt("Avec {partner}, vous vivez côte à côte, comme deux colocataires polis. L'amour ne meurt pas d'un coup : il s'endort, faute de soin."));
     if(S.f.kids>0&&!S.f.childDead&&R1.kids<25&&ci>=4){S.f.care=(S.f.care||0)-1;add({lien:-2},fmt("{child} ne te raconte plus rien. Tu ne sais plus qui sont ses amis."));}}
+  if((S.f.grudge||0)>0&&ci>=3)add({emo:-2,stress:2},`La rancune contre ${fmt(S.f.grudgeWho||"l'autre")} est toujours là. Elle te prend plus qu'elle ne lui prend.`);
+  if(ci>=6&&!S.f.neuro){const r=R();if(r<[0,0,0,0,0,0,.07,.12][ci])S.f.neuro="alz";else if(r<[0,0,0,0,0,0,.12,.18][ci])S.f.neuro="park";}
+  if(S.f.neuro==="alz"&&S.f.neuroKnown&&ci===7)add({lien:-2},S.f.couple?`${S.partner} s'occupe de toi jour et nuit. ${S.pSex==="F"?"Elle":"Il"} s'épuise, et tu ne t'en rends plus compte.`:"Tu oublies de plus en plus. Les visages restent, les prénoms s'en vont.");
+  if(ci>=6&&S.st.utile<25&&!S.f.stillUseful)add({joie:-3},"Tu te demandes parfois à quoi tu sers encore.");
+  if(S.f.metier&&!S.cw){S.cwSex=R()<.5?"F":"M";S.cw=loveName(S.cwSex);if(S.f.workRel==null)S.f.workRel=35;}
+  if(S.f.metier&&S.f.workRel!=null&&ci>=4)S.f.workRel=Math.max(0,S.f.workRel-5);
+  if(!S.f.metier&&S.f.workFriend&&ci>=6)S.f.workFriend=S.f.workFriend;
+  if((S.f.debt||0)>0&&ci>=3)add({argent:-3*S.f.debt,stress:2*S.f.debt},S.f.debt>1?"Les crédits s'additionnent. Chaque fin de mois commence le 10.":"Le crédit tombe chaque mois. Tu fais attention à tout.");
+  if(S.f.biz==="running"&&S.f.bizCi==null)S.f.bizCi=ci-1;
+  if(S.f.biz==="success"&&ci>=4&&ci<=6)add({argent:4,reco:2,stress:2},"Ton entreprise tourne. Des familles vivent du travail que tu as créé.");
   if(S.f.depression>0){add({joie:-6,stress:5},"La dépression est encore là, comme un ciel bas.");S.f.depression--;}
   if((S.f.alcool||0)>=2)add({sante:-5,lien:-3,argent:-3},"L'alcool prend sa place, chaque soir un peu plus.");
   if(S.f.ice)add({sante:-8,argent:-10,lien:-5},"L'ice dévore ton argent et ton sommeil.");
@@ -1368,15 +1542,17 @@ function buildQueue(ci){
   const q=pool.filter(m=>m.must&&ok(m));
   const opt=shuffle(pool.filter(m=>!m.must&&!m.late&&ok(m)&&(!m.p||R()<m.p)&&!(S.seen||[]).includes(m.id)));
   opt.sort((a,b)=>(b.pri?1:0)-(a.pri?1:0));
+  {const cap=(S.heavy||0)>=10?1:2;let n=0;for(let i=opt.length-1;i>=0;i--){}const keep=[];for(const m of opt){if(HEAVY.has(m)){if(n>=cap)continue;n++;}keep.push(m);}opt.length=0;opt.push(...keep);}
   while(q.length<CH[ci].k&&opt.length)q.push(opt.shift());
   q.forEach(m=>{if(m.prep)m.prep(S);});
   const ins=e=>q.splice(ci===0?0:1+Math.floor(R()*q.length),0,e);
-  const bad=EVENTS.filter(e=>!e.good&&e.ci===ci&&(!e.cond||e.cond(S))&&R()<e.p);
+  const bad=EVENTS.filter(e=>!e.good&&e.ci===ci&&(!e.cond||e.cond(S))&&R()<e.p*((S.heavy||0)>=10?.4:1));
   if(bad.length)ins(pick(bad));
+  if(ci>=3&&ci<=6&&SURPRISE_BDAY.cond(S)&&R()<.55)ins(SURPRISE_BDAY);
   const good=EVENTS.filter(e=>e.good&&e.ci===ci&&R()<e.p);
   if(good.length)ins(pick(good));
   shuffle(QUIET.filter(e=>e.ci===ci)).slice(0,ci===0?1:2).forEach(ins);
-  const fate=FATE.filter(e=>ci>=e.r[0]&&ci<=e.r[1]&&(!e.cond||e.cond(S))&&R()<e.p);
+  const fate=FATE.filter(e=>(e.fx&&(e.fx.joie||0)>=0||(S.heavy||0)<10||R()<.4)&&ci>=e.r[0]&&ci<=e.r[1]&&(!e.cond||e.cond(S))&&R()<e.p);
   if(fate.length)ins(pick(fate));
   if(!S.f.disab&&R()<[0,.01,.03,.04,.04,.03,.03,0][ci]){const pos=Math.min(q.length,1+Math.floor(R()*q.length));q.splice(pos,0,ACCIDENT,REHAB);}
   return q.concat(pool.filter(m=>m.late)).map(m=>m.id);
@@ -1434,6 +1610,7 @@ function webPeople(){
   if(f.couple)out.push({c:"#c0574f",n:S.partner,r:S.pSex==="F"?"ta compagne":"ton compagnon",k:"partner"});
   const k=(f.kids||0)-(f.childDead?1:0);
   if(k>0){if(!f.childDead&&S.childName)out.push({c:"#2a9d8f",n:S.childName,r:S.childSex==="F"?"ta fille":"ton fils",k:"kids"});for(let i=out.filter(o=>o.c==="#2a9d8f").length;i<Math.min(3,k);i++)out.push({c:"#2a9d8f",n:"",r:"un autre de tes enfants",k:"kids"});}
+  if(S.cw&&(f.workRel||0)>=55&&(f.metier||ci>=6))out.push({c:"#6b8f71",n:S.cw,r:S.cwSex==="F"?"ton amie du travail":"ton ami du travail"});
   if(f.animal&&S.pet)out.push({c:"#a8803a",n:S.pet,r:"ton animal"});
   if(S.st.lien>60){out.push({c:"#8a7a5a",n:"",r:"tes cousins, tes voisins"});out.push({c:"#8a7a5a",n:"",r:"ta paroisse, ton quartier"});}
   return out;
@@ -1473,13 +1650,9 @@ function updateAside(){
 function intro(){
   const sv=loadSave();S=null;header(-1);paint(0);drawPlant();updateAside();
   setCard(`<p class="lede">Une vie commence au hasard d'une naissance, puis se tisse au fil des choix.</p>
-  <p class="m-text">Ton nom, ta famille, ton île, ton corps, ton cœur : tu ne choisis rien de tout cela. Ensuite, à chaque âge, tu choisis. Aucun choix n'est parfait : chacun donne quelque chose et en coûte une autre. Ta vie sera une plante, et elle poussera avec toi.</p>
-  <p class="m-text">Dans cette histoire, il n'y a ni héros ni méchant. Seulement des gens qui font avec ce qu'ils ont reçu, l'endroit où ils vivent, et les choix qu'ils peuvent faire.</p>
-  <p class="m-text">Le but d'une vie n'est pas seulement de fonder une famille. C'est aussi de s'épanouir : tes talents, ton métier, ta créativité, ce que toi seul peux apporter au monde.</p>
-  <p class="m-text">Personne ne vit pour soi seul. Tes choix font des ricochets sur ceux qui t'entourent, et leurs choix font des ricochets sur toi. L'humanité est comme une toile : chaque fil est relié aux autres.</p>
-  <p class="m-text">Parfois, le meilleur choix est de demander de l'aide. Ce n'est pas une preuve de faiblesse, c'est une preuve de force.</p>
-  <p class="hint">Une vie entière dure environ une heure. La partie se sauvegarde toute seule sur cet appareil : tu peux faire une pause et reprendre quand tu veux. Mais comme dans la vraie vie, on ne recommence pas en cours de route : une vie commencée se vit jusqu'au bout.</p>
-  <p class="hint">Ce jeu parle aussi de violence, d'addiction, de troubles alimentaires, de deuil et de suicide. Si ces thèmes te touchent de près, prends ton temps, et n'hésite pas à en parler à quelqu'un de confiance.</p>
+  <p class="m-text">Ton nom, ta famille, ton île, ton corps, ton cœur : tu ne choisis rien de tout cela. Ensuite, à chaque âge, tu choisis. Aucun choix n'est parfait. Personne ne vit pour soi seul. Et demander de l'aide n'est jamais une faiblesse.</p>
+  <p class="m-text">Il n'y a ni héros ni méchant dans cette histoire : seulement des gens, l'endroit où ils vivent, et leurs choix. Ta vie sera une plante, et un livre.</p>
+  <p class="hint">Une vie dure environ une heure, et se sauvegarde sur cet appareil : tu peux faire une pause quand tu veux. Mais on ne recommence pas en cours de route. Ce livre parle aussi de violence, d'addiction, de troubles alimentaires, de deuil et de suicide : prends ton temps.</p>
   <div class="btns">${sv?`<button class="btn" id="resume">${sv.dead?`Lire la fin de la vie de ${sv.first}`:`Reprendre la vie de ${sv.first}`}</button>`:`<button class="btn" id="go">Naître</button>`}</div>${sv?`<p class="hint">Une autre vie pourra commencer quand celle de ${sv.first} sera terminée.</p>`:""}`);
   if(sv)$("#resume").onclick=()=>{S=sv;resume();};else $("#go").onclick=()=>{clearSave();birth();showBirth();};
 }
@@ -1535,6 +1708,7 @@ function nextMoment(){
   if(S.qi>=S.queue.length)return endChapter();
   if(S.ci>=1&&S._handGiven!==S.ci&&S.queue[S.qi]!=="hand"&&hardness()>=2&&R()<handChance()){S._handGiven=S.ci;S.queue.splice(S.qi,0,"hand");}
   const m=REG[S.queue[S.qi++]];
+  if(HEAVY.has(m))S.heavy=(S.heavy||0)+1;
   if(!m.auto)S.curQ=fmt(m.text).replace(/^Ce n'est pas ton choix, mais il te touche\. /,"").split(/(?<=[.!?])\s/)[0];
   S.seen=S.seen||[];if(!S.seen.includes(m.id))S.seen.push(m.id);
   const left=S.queue.slice(S.qi).map(id=>REG[id]).filter(x=>x&&(!x.cond||x.cond(S))).length;
@@ -1582,6 +1756,8 @@ function ctxLines(){
   if(st.lien>70)L.push("Il y a toujours quelqu'un qui passe dire bonjour, un plat à la main.");
   if(f.animal)L.push(fmt("{pet} dort à tes pieds, une oreille ouverte."));
   if(ci>=2&&ci<=5)L.push("Ton téléphone vibre. Tu le regardes avant même de savoir pourquoi.");
+  if(f.neuro==="alz"&&f.neuroKnown)L.push("Tu cherches tes lunettes. Elles sont sur ta tête.","Tu racontes la même histoire pour la troisième fois. Personne ne t'arrête.","Tu as mis le sucre dans le frigo, et le lait dans le placard.");
+  if(f.neuro==="park"&&f.neuroKnown)L.push("Ta tasse tremble un peu. Tu la tiens à deux mains.","Tes pas sont courts, mais tu marches encore jusqu'à la mer.");
   if(f.dependent)L.push("On t'aide à t'asseoir près de la fenêtre. La mer est toujours là.");
   return L;
 }
@@ -1646,11 +1822,13 @@ function choose(c){
   S.log.push({ci:S.ci,t:label,ok:fmt(c.ok),ko:fmt(c.ko),w,q:S.curQ});
   if(S.rel&&(fx.lien||0)>0){const tt=c.t+" "+(S.curQ||"");[["{friend}","friend"],["{partner}","partner"],["{child}","kids"],["{sib}","sib"]].forEach(([tag,k])=>{if(tt.includes(tag)||(k==="friend"&&tt.includes(S.friend))||(k==="partner"&&S.partner&&tt.includes(S.partner)))S.rel[k]=Math.min(100,(S.rel[k]||0)+12);});}
   if((fx.utile||0)>=5)S.f.gave=(S.f.gave||0)+1;
+  const WR={"L'inviter à manger avec toi":15,"Lui parler seul à seul, calmement":10,"Faire grève avec les autres":10,"Prendre la parole pour négocier":8,"Continuer à travailler":-10,"Le confronter devant tout le monde":-10,"Dire aux autres d'arrêter":8};
+  if(WR[c.t]!=null&&S.f.metier)wr(WR[c.t])(S);
   applyFx(fx);growPlant(fx);
   let note=(c.set&&c.set(S))||"";
   if((fx.emo||0)>=5&&R()<.3){applyFx({stress:4,joie:-3});note=(note?note+" ":"")+pick(WISE_COST);}
   let help="";if(HELP.has(c.t)){S.f.helped=(S.f.helped||0)+1;help=pick(HELP_NOTE);}
-  const rip=ripple(fx);
+  let rip=ripple(fx);if(help&&note)rip="";else if(help&&rip&&R()<.5)rip="";
   drawPlant();updateAside();save();
   setCard(`<p class="picked">Tu as choisi : <b>${label}</b></p>
   <div class="sides"><div class="side good"><h4>Ce que ça t'apporte</h4><p>${fmt(c.ok)}</p></div><div class="side bad"><h4>Ce que ça te coûte</h4><p>${fmt(c.ko)}</p></div></div>
@@ -1766,13 +1944,17 @@ function epilogue(){
   else if(f.kids>1||f.terre)P.push("Tu n'avais rien écrit. La maison et la terre sont entrées en indivision : tes enfants, puis leurs enfants, se disputent encore une parcelle que personne n'entretient. Au fenua, c'est l'histoire d'une famille sur trois.");
   else P.push("Tu n'avais rien écrit, mais il n'y avait qu'un héritier. Il a eu de la chance.");
   // Trace
+  if(f.neuro==="alz"&&f.neuroKnown)P.push("Les derniers mois, tu ne savais plus les prénoms. Mais tu souriais quand on chantait, et tu serrais les mains qui tenaient les tiennes. Ce qu'on oublie avec la tête, on le garde parfois avec le cœur.");
+  if(f.neuro==="park"&&f.neuroKnown)P.push("Tes mains tremblaient, mais tes histoires, elles, ne tremblaient pas. Elles sont enregistrées quelque part, dans le téléphone d'un petit-enfant.");
+  if(f.repented)P.push("Ceux qui t'ont connu{e} jeune, puis vieux, disent que tu avais changé. Certains te devaient leur deuxième chance, parce que tu leur avais montré que c'était possible.");
   if((f.bloom||0)>=3)P.push(tal(S).trace);
   else if(f.talentLost)P.push(`Ton don pour ${tal(S).n} est resté en toi, endormi. Personne ne saura jamais ce qu'il aurait pu devenir.`);
   if(st.reco>=60)P.push("On parle encore de toi au marché, au temple, sur le quai. Une salle, une pirogue ou un enfant porte ton prénom.");
   else if(st.utile>=55)P.push("Peu de gens connaissent ton nom, mais beaucoup vivent mieux grâce à ce que tu as fait sans le dire.");
   if(f.sober)P.push("Quelqu'un, quelque part, a arrêté de boire parce que tu lui as montré que c'était possible.");
   if(f.friendDead)P.push(`On t'a enterré${S.sex==="F"?"e":""} près de ${S.friend}.`);
-  else if(f.friend)P.push(`${S.friend} est venu${S.fSex==="F"?"e":""}, courbé${S.fSex==="F"?"e":""} sur une canne, et n'a rien dit. ${S.fSex==="F"?"Elle":"Il"} est resté${S.fSex==="F"?"e":""} jusqu'à la dernière pelletée.`);
+  else if(f.friend&&!f.friendFaded)P.push(`${S.friend} est venu${S.fSex==="F"?"e":""}, courbé${S.fSex==="F"?"e":""} sur une canne, et n'a rien dit. ${S.fSex==="F"?"Elle":"Il"} est resté${S.fSex==="F"?"e":""} jusqu'à la dernière pelletée.`);
+  if((f.workRel||0)>=55&&S.cw)P.push(fmt(f.surprise?"Tes anciens collègues sont venus en groupe, avec une couronne de fleurs. {cw} a raconté le gâteau surprise, et tout le monde a ri en pleurant.":"Tes anciens collègues sont venus en groupe, avec une couronne de fleurs. {cw} a parlé de toi mieux que personne."));
   if(S.par)P.push(`Tu étais l'enfant de ${S.par.name}. Tu as reçu ses fils, ses blessures et ses forces. Tu en as gardé certains, coupé d'autres, tissé de nouveaux.`);
   P.push("La plante retourne à la terre. Les graines, elles, ont déjà germé ailleurs.");
   setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p>${(()=>{const L=legacyOf();return L?`<div class="btns"><button class="btn" id="heir">Continuer la lignée : vivre la vie ${L.heirName?"de "+L.heirName:"d'un de tes enfants"}</button><button class="btn2" id="go">Vivre une autre vie</button></div>`:`<button class="btn" id="go">Vivre une autre vie</button>`})()}`);
@@ -1787,7 +1969,7 @@ function legacyOf(){
   const alive=!f.childDead&&S.childName;
   return {name:S.first,sex:S.sex,partner:(f.couple||f.widow||f.divorced)?(f.couple||f.widow?S.partner:S.ex):null,pSex:f.couple||f.widow?S.pSex:S.exSex,
     heirName:alive?S.childName:null,heirSex:alive?S.childSex:null,wealth:w,place:S.place,heritage:S.heritage,disease:S.disease,
-    care,bloom:f.bloom||0,talent:S.talent||0,violent:!!f.violent,controlling:(f.controlling||0)>=2,hit:!!f.hit,alcool:(f.alcool||0)>=2,sober:!!f.sober,helped:f.helped||0,emo:S.st.emo,
+    care,bloom:f.bloom||0,grudge:f.grudge||0,repented:!!f.repented,grudgeWho:f.grudgeWho,forgave:f.forgave||0,talent:S.talent||0,violent:!!f.violent,controlling:(f.controlling||0)>=2,hit:!!f.hit,alcool:(f.alcool||0)>=2,sober:!!f.sober,helped:f.helped||0,emo:S.st.emo,
     terre:!!f.terre,papers:!!f.papers,unfair:!!f.unfair,house:!!f.house,divorced:!!f.divorced,gen:(S.gen||1),lineage:[...(S.lineage||[]),S.first]};
 }
 function bornFrom(L){
@@ -1804,6 +1986,9 @@ function bornFrom(L){
   if(L.controlling)notes.push(`Tu as grandi en voyant ${L.name} surveiller, interdire, avoir peur. Tu sauras peut-être reconnaître ces signes, ou tu les répéteras.`);
   if(L.violent||L.hit){trauma(1,"les coups de ton enfance");notes.push("La violence a traversé ta famille avant toi. Tu peux la porter plus loin, ou l'arrêter.");}
   if(L.bloom>=3&&R()<.5){S.talent=L.talent;notes.push(`Tu as hérité du don de ${L.name} pour ${TALENTS[L.talent].n}.`);}
+  if(L.grudge>0){S.f.feud=true;notes.push(`Tu hérites d'une rancune que tu ne comprends pas : dans ta famille, on ne parle pas à ${fmt(L.grudgeWho||'certains')}. Personne ne se souvient très bien pourquoi.`);}
+  if(L.repented)notes.push(`On raconte que ${L.name} avait fait du mal, autrefois, et qu'${L.sex==="F"?"elle":"il"} a passé sa vie à réparer. Tu grandis en sachant qu'on peut changer.`);
+  if(L.forgave>0)notes.push(`${L.name} a su pardonner. On dit dans la famille que ça a changé l'air de la maison.`);
   if(L.helped>=2){S.st.emo+=5;notes.push("On t'a appris qu'on peut demander de l'aide. C'est un héritage qui ne se voit pas.");}
   if(L.terre&&!L.papers){S.f.terre=true;S.f.feud=true;notes.push("Tu hérites d'une part de terre en indivision, et des disputes qui vont avec.");}
   else if(L.terre&&L.papers){S.f.terre=true;notes.push(L.unfair?"Le testament a divisé la famille. Tu en portes la trace.":"La terre familiale a été partagée proprement. Un souci de moins.");}
@@ -1846,6 +2031,23 @@ function lesson(){
   if(f.childfree&&!f.infertile)L.push("Tu as vécu sans enfant. Une vie sans enfant est une vie entière, et elle peut être pleine.");
   if(f.pushy)L.push("Un jour, tu as insisté alors que l'autre hésitait. Le consentement ne s'arrache pas : seul un oui libre est un oui.");
   if(f.bodyHate)L.push("On t'a appris à détester ton corps à travers un écran. Il t'a porté{e} toute une vie, pourtant.");
+  if((f.workRel||0)>=55)L.push("Au travail aussi, tu as tissé des fils. On passe une grande partie de sa vie avec ses collègues : certains deviennent une famille.");
+  if(f.biz==="failed"&&!f.bizQuit)L.push("Tu as connu la faillite. L'échec n'est pas une identité : c'est une expérience. Beaucoup de réussites sont nées sur les ruines d'un premier essai.");
+  if(f.bizQuit)L.push("Après un échec, tu n'as plus jamais rien tenté. La peur de tomber est parfois plus lourde que la chute elle-même.");
+  if(f.biz==="success"||f.biz==="sold")L.push("Tu as créé quelque chose qui n'existait pas, et du travail pour d'autres. Une entreprise, c'est aussi une toile.");
+  if((f.debt||0)>0||f.familyDebt)L.push("Les dettes ont pesé sur ta vie, et sur celle des tiens. Au fenua, tout coûte cher, et le crédit promet ce que le salaire ne peut pas donner.");
+  if((f.rights||0)>0)L.push("Tu as défendu tes droits au travail. Ces droits ont été arrachés par ceux d'avant ; tu les as gardés vivants pour ceux d'après.");
+  if(f.forgave)L.push("Tu as pardonné, ou demandé pardon. Le pardon n'efface pas le passé, et il n'oblige à rien : il libère d'abord celui qui le donne.");
+  if(f.neuro==="alz"&&f.neuroKnown)L.push("La maladie a pris ta mémoire. Elle n'a pas pris qui tu étais pour les autres : eux se sont souvenus pour toi.");
+  if(f.neuro==="park"&&f.neuroKnown)L.push("Ton corps s'est figé peu à peu. Tu as appris à demander de l'aide pour les gestes, et à garder ta voix pour l'essentiel.");
+  if(S.ci>=6&&(f.justBe||f.stillUseful))L.push("Vieillir t'a appris que ta valeur ne tenait pas à ce que tu faisais. Être là, écouter, transmettre, ou simplement être : c'était déjà donner.");
+  if(f.repented)L.push("Tu as connu le repentir : pas la honte qui écrase, mais le changement qui répare. Personne n'est réduit à ce qu'il a fait de pire.");
+  else if(f.remorse)L.push("Tu t'es puni{e} toi-même, longtemps. Le remords qui écrase ne répare rien ; seul le changement répare.");
+  if(f.revenge)L.push("Tu t'es vengé{e}, un jour. La vengeance promettait de fermer la blessure ; elle l'a gardée ouverte, et elle a touché d'autres fils de la toile.");
+  if((f.grudge||0)>0)L.push("Tu as gardé une rancune jusqu'au bout. Elle était peut-être juste. Mais c'est toi qui l'as portée, toute ta vie.");
+  if(f.protected)L.push("Tu as coupé le contact avec quelqu'un qui t'avait détruit{e}. Se protéger n'est pas de la rancune : c'est se choisir.");
+  if(f.meaning)L.push("Tu as connu le vide, même au milieu de tout. Il n'était pas un défaut : c'était une question. Tu y as répondu en cherchant un sens, pas en remplissant.");
+  else if(f.fillEmpty)L.push("Tu as essayé de remplir le vide avec des choses. Il ne demandait pas des choses : il demandait du sens.");
   if(f.hands)L.push(`Quand tout était trop lourd, une main s'est tendue${f.hands>1?`, ${f.hands} fois`:""}. Ce n'était pas seulement de la chance : plus tu avais donné et tissé de fils, plus il y avait de mains pour se tendre.`);
   else if((f.gave||0)<2&&S.st.lien<35)L.push("Quand la vie est devenue lourde, peu de mains se sont tendues. Les fils qu'on ne tisse pas ne peuvent pas nous retenir.");
   if(f.friendFaded||f.sibFaded)L.push("Certains liens se sont effacés sans dispute, simplement faute de temps. Les liens sont comme des plantes : il faut les arroser, même quand tout va bien.");
@@ -1856,7 +2058,13 @@ function lesson(){
   L.push(`Personne ne vit pour soi seul. Tes choix ont fait des ricochets sur ceux qui t'entouraient${f.rip?`, au moins ${f.rip} fois que tu as pu voir`:""}, et les choix des autres ont fait des ricochets sur ta vie. L'humanité est une toile : chaque fil tire sur les autres.`);
   L.push("Aucune vie n'est parfaite. Chacun fait de son mieux avec les cartes qu'il a reçues. La personne en face de toi aussi.");
   L.push("Dans cette histoire, il n'y avait ni héros ni méchant : seulement des gens, l'endroit où ils vivaient, et leurs choix.");
-  return `<div class="lesson"><h4>Ce que cette vie t'apprend</h4>${L.map(x=>`<p>${x}</p>`).join("")}</div>`;
+  for(let i=0;i<L.length;i++)L[i]=fmt(L[i]);
+  const closing=L.splice(-2,2);
+  const PRI=[/coups|main est partie|violence/,/la rue/,/l'ice|alcool/,/faillite|jamais rien tenté/,/repentir|remords/,/pardon|vengé|rancune|protéger : couper|coupé le contact/,/main s'est tendue|peu de mains/,/blessures/,/maladie du rapport|stérilité|mémoire|figé/,/don pour/,/enfermait|peur de perdre|petite|pleure pas/,/jugé|préjugés/,/porte|portes/,/demandé de l'aide|tout porté seul/,/fils|toile|solitude|liens/];
+  const rank=x=>{const i=PRI.findIndex(r=>r.test(x));return i<0?99:i;};
+  const ordered=L.map((x,i)=>({x,i,r:rank(x)})).sort((a,b)=>a.r-b.r||a.i-b.i);
+  const top=ordered.slice(0,4).sort((a,b)=>a.i-b.i).map(o=>o.x),rest=ordered.slice(4).sort((a,b)=>a.i-b.i).map(o=>o.x);
+  return `<div class="lesson"><h4>Ce que cette vie t'apprend</h4>${top.map(x=>`<p>${x}</p>`).join("")}${rest.length?`<details><summary>Tout ce que cette vie t'a appris (${rest.length} de plus)</summary>${rest.map(x=>`<p>${x}</p>`).join("")}</details>`:""}<p><i>${closing[0]} ${closing[1]}</i></p></div>`;
 }
 function poem(age,why){
   const st=S.st,P=[];

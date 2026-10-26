@@ -41,6 +41,11 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - S'épanouir : un don tiré au hasard (musique, danse, mots, mer…), à cultiver ou abandonner ; les discriminations subies, et nos propres préjugés.
 - Quand la vie devient trop dure, une main tendue peut surgir au hasard : à toi de l'accepter.
 - Les liens doivent s'entretenir : sans soin, les fils s'amincissent puis s'effacent. Plus on a donné, plus les mains se tendent.
+- Le pardon, la vengeance, la rancune, le repentir et le vide : ce qui libère, et ce qui enferme.
+- La vieillesse : se sentir inutile ou un poids, et découvrir que sa valeur ne tient pas à ce qu'on fait.
+- La maladie d'Alzheimer et la maladie de Parkinson dans la vieillesse.
+- La vie professionnelle et l'argent : crédits, surendettement, prêt immobilier, créer son entreprise (réussite ou faillite, et réessayer), harcèlement, grèves, droits au travail.
+- L'amitié au travail : sport d'entreprise, fêtes, et parfois un anniversaire surprise des collègues.
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
