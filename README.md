@@ -25,6 +25,7 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - Aucun chiffre ni score : la plante et quelques mots disent comment va la vie.
 - Des moments calmes, et des coups du sort, bons ou mauvais, pour tout le monde.
 - Demander de l'aide n'est pas une faiblesse mais une force : le jeu le reconnaît à chaque fois.
+- Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
 

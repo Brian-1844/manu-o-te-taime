@@ -59,6 +59,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16p
 .chips,#stats{display:none}
 .mood{font-style:italic;color:var(--ink)}
 .note.help{border-left-color:var(--accent);color:var(--accent)}
+.note.rip{border-left-style:dotted;color:var(--muted)}
+.note.rip b{font-weight:600;color:var(--sun);letter-spacing:.04em}
 .narr+.m-text{border-top:1px dashed var(--line);padding-top:12px}
 .notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
 .notes li{font-size:.93rem;color:var(--muted)}
@@ -146,6 +148,7 @@ summary{cursor:pointer;color:var(--accent)}
         <li><i style="background:#c9a33f"></i>Feuilles jaunies : le stress</li>
         <li><i style="background:#5a3d27"></i>Branches cassées : les regrets</li>
         <li><i style="background:#d7bf96"></i>Racines : ton calme intérieur</li>
+        <li><i style="background:#c0574f"></i>Fils : ceux qui sont reliés à toi</li>
       </ul>
     </div>
     <div class="panel" id="whoPanel">
@@ -776,6 +779,46 @@ const BURNOUT={cond:S=>!!S.f.metier&&!S.f.homeless,text:"Tu n'en peux plus. Le t
 ]};
 MOM[4].push(BURNOUT);MOM[5].push(BURNOUT);
 KIDS_TEEN.choices.splice(2,0,{t:"Demander conseil à l'assistante sociale du collège",fx:{emo:4,lien:3,stress:2},set:S=>{S.f.care=(S.f.care||0)+2},ok:"Tu n'es plus seul{e} face à ça. {child} non plus.",ko:"Tu as peur qu'on te juge comme un mauvais parent."});
+const OTHERS=[
+ [[1,2],{text:"Ce n'est pas ton choix, mais il te touche. Ton père a pris un crédit à la consommation pour une voiture neuve. Les mensualités mangent tout. Plus de cantine, plus de sorties.",choices:[
+  {t:"Chercher un petit travail le week-end pour aider",fx:{utile:6,argent:3,etu:-1,stress:4},ok:"Tu rapportes un peu d'air à la maison.",ko:"Tu portes une dette qui n'est pas la tienne."},
+  {t:"En vouloir à ton père, en silence",fx:{stress:4,lien:-4,regret:2},ok:"Ta colère est juste.",ko:"Elle ne paie rien, et elle t'éloigne de lui."},
+  {t:"Lui demander pourquoi",fx:{emo:5,lien:3},ok:"Il avoue : il voulait que la famille soit fière de lui devant les voisins.",ko:"Il se fâche d'abord. Les pères n'aiment pas les questions."}
+ ]}],
+ [[2,3],{text:"Ce n'est pas ton choix, mais il te touche. Ton grand frère sort de Nuutania. Personne ne veut l'héberger. Il frappe à ta porte.",choices:[
+  {t:"L'accueillir",fx:{lien:5,utile:6,stress:6,argent:-4},set:S=>{if(R()<.35){S.st.argent=clamp(S.st.argent-6);S.st.lien=clamp(S.st.lien-4);return "Ses anciens amis reviennent avec lui. Un soir, ta télé disparaît.";}return "Il se tient droit. Six mois plus tard, il a un travail et une chambre.";},ok:"Tu lui donnes une chance que d'autres lui refusent.",ko:"Tu prends aussi le risque de son passé."},
+  {t:"Refuser, mais l'aider à trouver un foyer",fx:{emo:4,utile:3,lien:-1},ok:"Tu l'aides sans te mettre en danger.",ko:"Il te regarde comme si tu l'avais abandonné."},
+  {t:"Fermer la porte",fx:{stress:-2,lien:-6,regret:6},ok:"Ta maison reste tranquille.",ko:"Tu apprends deux mois plus tard qu'il dort sur le front de mer."}
+ ]}],
+ [[3,5],{cond:S=>S.f.couple,text:"Ce n'est pas ton choix, mais il te touche. {partner} a signé un crédit sans t'en parler, pour aider sa sœur. La banque vous réclame tout, à deux.",choices:[
+  {t:"Payer ensemble, sans reproches",fx:{argent:-10,lien:4,stress:5},ok:"Vous restez une équipe.",ko:"Tes projets attendront deux ans de plus."},
+  {t:"Exploser de colère",fx:{argent:-10,lien:-7,stress:7,emo:-3},ok:"Tu dis ce que tu ressens.",ko:"La dette reste, et la confiance s'en va."},
+  {t:"Payer, mais séparer vos comptes désormais",fx:{argent:-8,emo:4,lien:-2,stress:3},ok:"Tu te protèges pour l'avenir.",ko:"{partner} le vit comme un manque de confiance."}
+ ]}],
+ [[4,5],{cond:S=>S.f.couple,text:"Ce n'est pas ton choix, mais il te touche. {partner} tombe malade : les reins. La dialyse, trois fois par semaine, à vie. Votre vie entière s'organise autour des séances.",choices:[
+  {t:"Réduire ton travail pour l'accompagner",fx:{lien:8,utile:8,argent:-8,stress:6,reco:-2},ok:"Tu es là, à chaque séance.",ko:"Ta carrière s'arrête là, et l'argent manque."},
+  {t:"Travailler plus pour payer ce qui n'est pas remboursé",fx:{argent:4,stress:8,lien:-4,sante:-4},ok:"Les factures sont payées.",ko:"{partner} passe ses séances seul{pe}, et tu t'épuises."},
+  {t:"Demander de l'aide : la famille, l'association des malades",fx:{lien:5,emo:4,stress:2},ok:"Vous n'êtes plus seuls. Les cousins se relaient pour les trajets.",ko:"Il faut accepter que d'autres entrent dans votre intimité."}
+ ]}],
+ [[4,6],{cond:S=>S.f.couple&&!!S.f.metier,text:"Ce n'est pas ton choix, mais il te touche. {partner} reçoit une offre de travail à Nouméa, la chance de sa vie. {pIl} veut que tu suives.",choices:[
+  {t:"Suivre, et tout recommencer là-bas",fx:{lien:-5,joie:3,stress:6,reco:-2},set:S=>{S.f.lostJob=true},ok:"Tu lui offres sa chance.",ko:"Tu laisses ton travail, ta famille, ton île."},
+  {t:"Lui demander de refuser",fx:{lien:2,regret:3},set:S=>{if(R()<.5){S.st.lien=clamp(S.st.lien-6);return "{partner} refuse, et te le reprochera longtemps.";}return "{partner} refuse, sans rancune. Mais tu sais ce que ça lui a coûté.";},ok:"Votre vie reste ici.",ko:"Tu as éteint un rêve qui n'était pas le tien."},
+  {t:"Vivre à distance quelque temps",fx:{lien:-4,emo:3,stress:4,argent:-4},ok:"Chacun garde sa vie.",ko:"Les billets d'avion, les appels du soir, les doutes."}
+ ]}],
+ [[3,6],{cond:S=>!!S.f.friend&&!S.f.friendDead,text:"Ce n'est pas ton choix, mais il te touche. {friend} parle de toi à son patron, sans te prévenir : une place se libère, et c'est toi qu'{fil} a recommandé{e}.",choices:[
+  {t:"Accepter, et ne pas {fle} décevoir",fx:{argent:6,reco:4,lien:4,stress:3},ok:"Une porte s'ouvre grâce à un fil tissé à l'école primaire.",ko:"Si tu échoues, c'est son nom aussi qui en souffre."},
+  {t:"Refuser : tu veux réussir par toi-même",fx:{reco:2,lien:-3,regret:3},ok:"Ta fierté reste intacte.",ko:"{friend} se sent blessé{fe}."}
+ ]}],
+ [[5,6],{cond:S=>S.f.kids>0&&!S.f.childDead,text:"Ce n'est pas ton choix, mais il te touche. {child} se sépare, et revient vivre chez toi avec ses deux petits.",choices:[
+  {t:"Ouvrir la maison en grand",fx:{lien:7,utile:7,stress:6,argent:-5,joie:3},ok:"Le fare est plein de rires à nouveau.",ko:"Ta retraite tranquille s'envole."},
+  {t:"Aider, mais fixer un temps",fx:{emo:4,lien:3,stress:3},ok:"Tu aides sans te perdre.",ko:"{child} se sent mis{cie} à la porte."}
+ ]}],
+ [[1,4],{good:true,text:"Ce n'est pas ton choix, mais il te touche. Une cousine que ta mère avait aidée il y a vingt ans passe à la maison avec des enveloppes : elle a réussi, et elle n'a pas oublié.",choices:[
+  {t:"Accepter avec reconnaissance",fx:{argent:6,lien:4,joie:4},ok:"Un vieux fil se resserre.",ko:"Tu te sens redevable à ton tour."},
+  {t:"Lui dire de garder son argent pour quelqu'un qui en a plus besoin",fx:{utile:4,emo:3,reco:2},ok:"Le geste continue plus loin.",ko:"La cousine est un peu vexée."}
+ ]}]
+];
+OTHERS.forEach(([r,m])=>{for(let c=r[0];c<=r[1];c++)MOM[c].push(m);});
 MOM[6].push(KNEES);
 MOM[7].unshift(CARE,DIGNITY,FORGET);
 
@@ -812,6 +855,22 @@ const EVENTS=[
 
 const HELP=new Set(["En parler à un adulte","En parler à ta tante","En parler d'abord à {friend}, ton ami{fe}","En parler à {friend}","Voir l'infirmière scolaire","Appeler les mutoi, la police municipale","Consulter un psychologue","Aller au centre de consultation gratuit, après des mois d'attente","En parler au pasteur, ou à un ancien de la famille","Demander de l'aide à ta famille","Aller voir une association, une assistante sociale","Accepter le foyer d'accueil et un accompagnement social","Accepter l'aide des autres","Accepter la main tendue : cure, groupe de parole, croix bleue","Demander l'hospitalisation, même si c'est en psychiatrie","Partir toi-même, et chercher de l'aide pour ta colère","Appeler le numéro d'écoute, ou aller aux urgences","Appeler {friend}","Vous battre pour le couple, avec une conseillère","Demander de l'aide : enfants, infirmière, auxiliaire","Te laisser aider, en racontant ta jeunesse","En parler au médecin","Voir ton médecin, et accepter un arrêt","Dire à tes proches que tu n'y arrives plus","Demander conseil à l'assistante sociale du collège","Porter plainte","Rentrer chez ta famille, demander pardon s'il le faut","Laisser ta famille t'enfermer chez un oncle sur un atoll, loin de tout"]);
 const HELP_NOTE=["Demander de l'aide n'est pas une faiblesse. Il t'a fallu du courage.","Il faut plus de force pour tendre la main que pour serrer les dents.","Personne ne traverse la vie seul. Tu viens de le reconnaître, et c'est une force.","Dire « je n'y arrive pas seul{e} », c'est déjà commencer à y arriver.","Tu as laissé quelqu'un t'aider. C'est aussi un cadeau que tu lui fais."];
+function ripple(fx){
+  const f=S.f,ci=S.ci,L=[];
+  const kid=f.kids>0&&!f.childDead&&ci>=4,cp=f.couple&&ci>=3,young=ci<=2;
+  if((fx.lien||0)<=-4){if(cp)L.push("{partner} t'attend ce soir-là, puis mange seul{pe}.");if(kid)L.push("{child} remarque ton absence, sans rien dire.");if(young)L.push("Ta mère sent que tu t'éloignes, et ne sait pas comment te retenir.");if(f.friend&&!f.friendDead)L.push("{friend} t'appelle un peu moins souvent.");}
+  if((fx.stress||0)>=6){if(kid)L.push("Ta tension passe dans les murs. {child} dort mal, sans savoir pourquoi.");if(cp)L.push("{partner} porte une partie de ton poids, sans le dire.");if(young)L.push("Tes petits frères et sœurs sentent l'orage avant qu'il éclate.");}
+  if((fx.argent||0)<=-6&&(cp||kid||young))L.push("Le budget de toute la maison se resserre. D'autres que toi s'en privent.");
+  if((fx.argent||0)>=6&&(cp||kid||young))L.push("Toute la maisonnée respire un peu mieux ce mois-ci.");
+  if((fx.utile||0)>=5)L.push("Ce que tu donnes repart plus loin, de main en main, vers des gens que tu ne connaîtras jamais.","Quelqu'un dort mieux ce soir grâce à toi.");
+  if((fx.joie||0)>=6&&S.st.lien>40)L.push("Ta joie déborde. Autour de toi, on rit plus facilement.");
+  if((fx.emo||0)>=5)L.push("Ta façon de réagir montre aux autres qu'il existe un autre chemin.",kid?"{child} t'observe, et apprend.":"Quelqu'un qui t'a vu{e} faire s'en souviendra un jour.");
+  if((fx.regret||0)>=6)L.push("Ceux qui t'aiment voient le poids que tu portes, et ne savent pas comment t'aider.");
+  if((fx.sante||0)<=-6&&(cp||kid))L.push("Ta santé n'appartient pas qu'à toi. "+(cp?"{partner}":"{child}")+" s'inquiète la nuit.");
+  if((fx.reco||0)<=-5&&ci>=3)L.push("La honte éclabousse aussi ta famille. Au marché, on chuchote leur nom avec le tien.");
+  if(!L.length||R()<.25)return "";
+  f.rip=(f.rip||0)+1;return pick(L);
+}
 const WISE_COST=["Cette fois, l'autre n'a pas voulu entendre. Ta patience n'a rien changé.","Tu as ravalé ta colère. Elle reviendra plus tard, ailleurs.","On a pris ta douceur pour de la faiblesse.","Tu as compris l'autre. Personne n'a cherché à te comprendre, toi.","Tu as bien fait. Ça ne t'a pas empêché{e} de pleurer en rentrant."];
 const QUIET=[
  [0,"Ta grand-mère te berce dans le hamac, sous le manguier. Le vent fait le reste."],
@@ -998,6 +1057,7 @@ function intro(){
   setCard(`<p class="lede">Une vie commence au hasard d'une naissance, puis se tisse au fil des choix.</p>
   <p class="m-text">Ton nom, ta famille, ton île, ton corps, ton cœur : tu ne choisis rien de tout cela. Ensuite, à chaque âge, tu choisis. Aucun choix n'est parfait : chacun donne quelque chose et en coûte une autre. Ta vie sera une plante, et elle poussera avec toi.</p>
   <p class="m-text">Dans cette histoire, il n'y a ni héros ni méchant. Seulement des gens qui font avec ce qu'ils ont reçu, l'endroit où ils vivent, et les choix qu'ils peuvent faire.</p>
+  <p class="m-text">Personne ne vit pour soi seul. Tes choix font des ricochets sur ceux qui t'entourent, et leurs choix font des ricochets sur toi. L'humanité est comme une toile : chaque fil est relié aux autres.</p>
   <p class="m-text">Parfois, le meilleur choix est de demander de l'aide. Ce n'est pas une preuve de faiblesse, c'est une preuve de force.</p>
   <p class="hint">Une vie entière dure environ une heure. La partie se sauvegarde toute seule sur cet appareil : tu peux faire une pause et reprendre quand tu veux. Mais comme dans la vraie vie, on ne recommence pas en cours de route : une vie commencée se vit jusqu'au bout.</p>
   <p class="hint">Ce jeu parle aussi de violence, d'addiction, de deuil et de suicide. Si ces thèmes te touchent de près, prends ton temps, et n'hésite pas à en parler à quelqu'un de confiance.</p>
@@ -1118,10 +1178,11 @@ function choose(c){
   let note=(c.set&&c.set(S))||"";
   if((fx.emo||0)>=5&&R()<.3){applyFx({stress:4,joie:-3});note=(note?note+" ":"")+pick(WISE_COST);}
   let help="";if(HELP.has(c.t)){S.f.helped=(S.f.helped||0)+1;help=pick(HELP_NOTE);}
+  const rip=ripple(fx);
   drawPlant();updateAside();save();
   setCard(`<p class="picked">Tu as choisi : <b>${label}</b></p>
   <div class="sides"><div class="side good"><h4>Ce que ça t'apporte</h4><p>${fmt(c.ok)}</p></div><div class="side bad"><h4>Ce que ça te coûte</h4><p>${fmt(c.ko)}</p></div></div>
-  ${note?`<p class="note">${fmt(note)}</p>`:""}${help?`<p class="note help">${fmt(help)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
+  ${note?`<p class="note">${fmt(note)}</p>`:""}${rip?`<p class="note rip"><b>Ricochet.</b> ${fmt(rip)}</p>`:""}${help?`<p class="note help">${fmt(help)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
   $("#go").onclick=nextMoment;
 }
 function endChapter(){
@@ -1204,6 +1265,7 @@ function lesson(){
   else if((f.trauma||0)>0||f.everHomeless||(f.alcool||0)>=2||f.ice||f.depression)L.push(fmt("Tu as presque toujours tout porté seul{e}. Demander de l'aide n'aurait pas été une faiblesse, mais une force."));
   if(S.st.emo>=60)L.push("Tu as appris à comprendre tes émotions et celles des autres. C'est peut-être ce qui a le plus adouci ta vie.");
   else if(S.st.emo<30)L.push(fmt("Tes émotions t'ont souvent débordé{e}. Personne ne nous apprend vraiment à les écouter."));
+  L.push(`Personne ne vit pour soi seul. Tes choix ont fait des ricochets sur ceux qui t'entouraient${f.rip?`, au moins ${f.rip} fois que tu as pu voir`:""}, et les choix des autres ont fait des ricochets sur ta vie. L'humanité est une toile : chaque fil tire sur les autres.`);
   L.push("Aucune vie n'est parfaite. Chacun fait de son mieux avec les cartes qu'il a reçues. La personne en face de toi aussi.");
   L.push("Dans cette histoire, il n'y avait ni héros ni méchant : seulement des gens, l'endroit où ils vivaient, et leurs choix.");
   return `<div class="lesson"><h4>Ce que cette vie t'apprend</h4>${L.map(x=>`<p>${x}</p>`).join("")}</div>`;
@@ -1363,6 +1425,12 @@ function drawPlant(final){
   }
   for(let i=0;i<segs;i++){const a=nodes[i],b=nodes[i+1];for(let l=0;l<2;l++){ctx.globalAlpha=l?.35:1;ctx.strokeStyle="#6a4a31";ctx.lineCap="round";ctx.lineWidth=Math.max(2,(segs-i)*1.3+1.6-l)*k;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+b.x)/2+(Rr()-.5)*4*k,(a.y+b.y)/2,b.x,b.y);ctx.stroke();}}
   ctx.globalAlpha=1;
+  const ppl=[];if(S.ci<=5)ppl.push("#b9850f","#b9850f");if(S.f.friend&&!S.f.friendDead)ppl.push("#5f8fa6");if(S.f.couple)ppl.push("#c0574f");
+  for(let i=0;i<Math.min(3,(S.f.kids||0)-(S.f.childDead?1:0));i++)ppl.push("#2a9d8f");if(S.st.lien>60)ppl.push("#8a7a5a","#8a7a5a");
+  ppl.forEach((col,i)=>{const t=(i+.5)/ppl.length,px=W*(.08+.84*t),py=H*(.07+.06*Math.sin(i*2.1)),n=nodes[1+Math.floor(Rr()*segs)];
+    ctx.strokeStyle="rgba(150,138,110,.5)";ctx.lineWidth=.8*k;ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.quadraticCurveTo((n.x+px)/2,(n.y+py)/2+12*k,px,py);ctx.stroke();
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(px,py,3.6*k,0,Math.PI*2);ctx.fill();});
+  for(let i=0;i<ppl.length-1;i++){const a=(i+.5)/ppl.length,b=(i+1.5)/ppl.length;ctx.strokeStyle="rgba(150,138,110,.35)";ctx.lineWidth=.6*k;ctx.beginPath();ctx.moveTo(W*(.08+.84*a),H*(.07+.06*Math.sin(i*2.1)));ctx.lineTo(W*(.08+.84*b),H*(.07+.06*Math.sin((i+1)*2.1)));ctx.stroke();}
   const top=nodes[segs];if(!final)for(let i=0;i<3;i++)drawItem(ctx,Rr,"leaf",top.x,top.y,top.ang+(i-1)*.8,k*.85);
   fallen.forEach(t=>drawItem(ctx,Rr,t,W*(.12+Rr()*.76),gy+(Rr()*6-1)*k,(Rr()-.5)*.6,k));
 }
