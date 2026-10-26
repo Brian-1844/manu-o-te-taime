@@ -161,6 +161,7 @@ summary{cursor:pointer;color:var(--accent)}
         <li><i style="background:#5a3d27"></i>Branches cassées : les regrets</li>
         <li><i style="background:#d7bf96"></i>Racines : ton calme intérieur</li>
         <li><i style="background:#c0574f"></i>Fils : les personnes reliées à toi (voir « Ta toile »)</li>
+        <li><i style="background:#7fb069"></i>Petites plantes : tes enfants</li>
       </ul>
     </div>
     <div class="panel" id="whoPanel">
@@ -268,7 +269,7 @@ function newCouple(S){if(S.f.couple&&S.partner){S.ex=S.partner;S.exSex=S.pSex;S.
 function prepLover(S){S.lSex=loveSex();S.lover=loveName(S.lSex);}
 function loveSex(){const o=S.sex==="F"?"M":"F";if(S.orient==="hetero")return o;if(S.orient==="gay")return S.sex;return R()<.5?"F":"M";}
 function loveName(sx){const pool=FN[sx].slice(0,12).filter(n=>n!==S.first&&n!==S.partner&&n!==S.friend);return pick(pool);}
-function addKids(n){S.f.kids=(S.f.kids||0)+n;if(!S.childName){S.childSex=R()<.5?"F":"M";S.childName=loveName(S.childSex);}}
+function addKids(n){S.f.kids=(S.f.kids||0)+n;if(S.f.kidsCi==null)S.f.kidsCi=S.ci;if(!S.childName){S.childSex=R()<.5?"F":"M";S.childName=loveName(S.childSex);}}
 /* ---------- Moments de vie ---------- */
 const MOM={
 0:[
@@ -1729,8 +1730,23 @@ function drawPlant(final){
     ctx.strokeStyle="rgba(150,138,110,.5)";ctx.lineWidth=.8*k;ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.quadraticCurveTo((n.x+px)/2,(n.y+py)/2+12*k,px,py);ctx.stroke();
     ctx.fillStyle=col;ctx.beginPath();ctx.arc(px,py,3.6*k,0,Math.PI*2);ctx.fill();});
   for(let i=0;i<ppl.length-1;i++){const a=(i+.5)/ppl.length,b=(i+1.5)/ppl.length;ctx.strokeStyle="rgba(150,138,110,.35)";ctx.lineWidth=.6*k;ctx.beginPath();ctx.moveTo(W*(.08+.84*a),H*(.07+.06*Math.sin(i*2.1)));ctx.lineTo(W*(.08+.84*b),H*(.07+.06*Math.sin((i+1)*2.1)));ctx.stroke();}
+  const nk=Math.min(4,S.f.kids||0);
+  if(nk>0){const size=Math.max(.15,Math.min(1,(S.ci-(S.f.kidsCi??4)+1)/4)),care=S.f.care||0,slots=[-.3,.3,-.42,.42];
+    for(let i=0;i<nk;i++){const cx=W*(.5+slots[i]),dead=S.f.childDead&&i===0;
+      ctx.strokeStyle="rgba(215,191,150,.7)";ctx.lineWidth=1.1*k;ctx.beginPath();ctx.moveTo(W/2,gy+5*k);ctx.quadraticCurveTo((W/2+cx)/2,gy+(14+i*4)*k,cx,gy+4*k);ctx.stroke();
+      childPlant(ctx,rng(S.seed*7+i*13),cx,gy,k,size,care,dead);}}
   const top=nodes[segs];if(!final)for(let i=0;i<3;i++)drawItem(ctx,Rr,"leaf",top.x,top.y,top.ang+(i-1)*.8,k*.85);
   fallen.forEach(t=>drawItem(ctx,Rr,t,W*(.12+Rr()*.76),gy+(Rr()*6-1)*k,(Rr()-.5)*.6,k));
+}
+function childPlant(ctx,Rk,x,gy,k,size,care,dead){
+  if(dead){ctx.strokeStyle="#8a7258";ctx.lineWidth=1.6*k;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x,gy);ctx.lineTo(x+2*k,gy-14*k);ctx.stroke();
+    drawItem(ctx,Rk,"flower",x-6*k,gy-2*k,.3,k*.9);return;}
+  const h=(16+46*size)*k,lean=(Rk()-.5)*.5;
+  ctx.strokeStyle="#6a4a31";ctx.lineWidth=(1.4+size*1.6)*k;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x,gy);ctx.quadraticCurveTo(x+lean*h*.6,gy-h*.55,x+lean*h,gy-h);ctx.stroke();
+  const leaves=2+Math.round(size*5),sad=care<0;
+  for(let j=0;j<leaves;j++){const t=.35+.65*(j+1)/leaves,lx=x+lean*h*t*t,ly=gy-h*t,side=j%2?1:-1;
+    drawItem(ctx,Rk,sad&&Rk()<.5?"dry":"leaf",lx,ly,-Math.PI/2+side*(.9+Rk()*.4),k*(.55+size*.35));}
+  if(care>=2&&size>.4)for(let j=0;j<1+Math.round(size);j++)drawItem(ctx,Rk,"flower",x+lean*h*(.8-j*.2),gy-h*(.95-j*.25),0,k*(.6+size*.2));
 }
 function drawItem(ctx,Rr,type,x,y,a,k){
   ctx.save();ctx.translate(x,y);ctx.rotate(a);
