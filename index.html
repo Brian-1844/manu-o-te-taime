@@ -94,6 +94,18 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16p
 .hint{margin:0;color:var(--muted);font-style:italic}
 .poem{font-family:var(--display);font-size:1.12rem;line-height:1.75;display:flex;flex-direction:column;gap:14px}
 .poem p{margin:0}
+.poem i{color:var(--accent)}
+.poem .refrain{font-style:italic;color:var(--muted)}
+.share{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.share img{width:100%;max-width:400px;border-radius:4px;border:1px solid var(--line)}
+.share a{color:var(--accent)}
+.web{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.web h4{margin:0;font-family:var(--display);font-weight:400;font-size:1.05rem}
+.web p{margin:0;font-size:.82rem;color:var(--muted);font-style:italic}
+.web ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:.84rem}
+.web li i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
+.web li span{color:var(--muted)}
+.lineage{font-size:.82rem;color:var(--muted)}
 details{border-top:1px solid var(--line);padding-top:10px}
 summary{cursor:pointer;color:var(--accent)}
 .recap{margin:10px 0 0;padding-left:18px;font-size:.92rem;color:var(--muted)}
@@ -148,12 +160,13 @@ summary{cursor:pointer;color:var(--accent)}
         <li><i style="background:#c9a33f"></i>Feuilles jaunies : le stress</li>
         <li><i style="background:#5a3d27"></i>Branches cassées : les regrets</li>
         <li><i style="background:#d7bf96"></i>Racines : ton calme intérieur</li>
-        <li><i style="background:#c0574f"></i>Fils : ceux qui sont reliés à toi</li>
+        <li><i style="background:#c0574f"></i>Fils : les personnes reliées à toi (voir « Ta toile »)</li>
       </ul>
     </div>
     <div class="panel" id="whoPanel">
       <div id="who"></div>
       <div class="stats" id="stats"></div>
+      <div class="web" id="web"></div>
     </div>
   </aside>
 </main>
@@ -246,11 +259,12 @@ function fmt(s){
   return s.replace(/\{([^{}|]*)\|([^{}|]*)\}/g,(m,a,b)=>S.sex==="M"?a:b)
           .replace(/\{e\}/g,S.sex==="F"?"e":"")
           .replace(/\{pet\}/g,S.pet).replace(/\{partner\}/g,S.partner||"").replace(/\{friend\}/g,S.friend).replace(/\{lover\}/g,S.lover||"").replace(/\{child\}/g,S.childName||"ton enfant")
-          .replace(/\{(f|p|l|ci)(e|il|Il|le)\}/g,(m,w,x)=>{const sx=w==="f"?S.fSex:w==="p"?S.pSex:w==="ci"?S.childSex:S.lSex;const F=sx==="F";return {e:F?"e":"",il:F?"elle":"il",Il:F?"Elle":"Il",le:F?"la":"le"}[x];})
-          .replace(/\{name\}/g,S.first);
+          .replace(/\{ex\}/g,S.ex||"").replace(/\{sib\}/g,S.sib||"").replace(/\{sibw\}/g,S.sibSex==="F"?"ta sœur":"ton frère").replace(/\{Sibw\}/g,S.sibSex==="F"?"Ta sœur":"Ton frère")
+          .replace(/\{(f|p|l|ci|x|s)(e|il|Il|le)\}/g,(m,w,x)=>{const sx=w==="f"?S.fSex:w==="p"?S.pSex:w==="ci"?S.childSex:w==="x"?S.exSex:w==="s"?S.sibSex:S.lSex;const F=sx==="F";return {e:F?"e":"",il:F?"elle":"il",Il:F?"Elle":"Il",le:F?"la":"le"}[x];})
+          .replace(/\{name\}/g,S.first).replace(/\{par\}/g,S.par?S.par.name:"ta mère").replace(/\{parIl\}/g,S.par&&S.par.sex==="F"?"elle":"il");
 }
-function endCouple(S){S.f.couple=false;S.f.divorced=true;}
-function newCouple(S){S.f.couple=true;S.partner=S.lover;S.pSex=S.lSex;S.f.coupleSince=S.ci;}
+function endCouple(S){S.f.couple=false;S.f.divorced=true;S.ex=S.partner;S.exSex=S.pSex;}
+function newCouple(S){if(S.f.couple&&S.partner){S.ex=S.partner;S.exSex=S.pSex;S.f.divorced=true;}S.f.couple=true;S.partner=S.lover;S.pSex=S.lSex;S.f.coupleSince=S.ci;}
 function prepLover(S){S.lSex=loveSex();S.lover=loveName(S.lSex);}
 function loveSex(){const o=S.sex==="F"?"M":"F";if(S.orient==="hetero")return o;if(S.orient==="gay")return S.sex;return R()<.5?"F":"M";}
 function loveName(sx){const pool=FN[sx].slice(0,12).filter(n=>n!==S.first&&n!==S.partner&&n!==S.friend);return pick(pool);}
@@ -819,6 +833,54 @@ const OTHERS=[
  ]}]
 ];
 OTHERS.forEach(([r,m])=>{for(let c=r[0];c<=r[1];c++)MOM[c].push(m);});
+const kidsHere=S=>S.f.kids>0&&!(S.f.childDead&&S.f.kids<2);
+const CUSTODY={must:true,cond:S=>S.f.divorced&&kidsHere(S)&&!S.f.custody&&S.ex,text:"Le juge aux affaires familiales doit décider : où vivront les enfants ? {ex} et toi, vous ne vous parlez plus que par avocats.",choices:[
+ {t:"Demander la garde complète",fx:{stress:7,argent:-6},set:S=>{const win=R()<(S.sex==="F"?.65:.4);S.f.custody=win?"moi":"ex";if(win){S.st.lien=clamp(S.st.lien+4);return "Le juge te confie les enfants. Chaque soir, ils sont là. Et tu portes tout.";}S.st.joie=clamp(S.st.joie-8);S.f.care=(S.f.care||0)-1;return "Le juge confie les enfants à {ex}. Tu auras un week-end sur deux et la moitié des vacances.";},ok:"Tu te bats pour eux.",ko:"Les enfants entendent tout. Une bataille au tribunal laisse des traces chez eux aussi."},
+ {t:"Proposer la garde alternée, une semaine sur deux",fx:{emo:4,stress:3},set:S=>{S.f.custody="alt"},ok:"Les enfants gardent leurs deux parents.",ko:"Les valises chaque dimanche. Les enfants n'ont plus vraiment de chambre à eux."},
+ {t:"Laisser la garde à {ex}, avec un droit de visite",fx:{stress:-3,joie:-6,regret:5},set:S=>{S.f.custody="ex";S.f.care=(S.f.care||0)-1},ok:"Moins de disputes, moins de tribunal.",ko:"Tu deviens un parent du week-end. La maison est vide le mardi soir."}
+]};
+const PENSION={pri:true,cond:S=>(S.f.custody==="ex"||S.f.custody==="moi")&&S.ex,text:S=>S.f.custody==="ex"?"Chaque mois, la pension alimentaire. Les fins de mois sont dures, et {ex} trouve que ce n'est jamais assez.":"{ex} ne paie plus la pension alimentaire depuis des mois. Les chaussures des enfants sont trop petites.",choices:S=>S.f.custody==="ex"?[
+ {t:"Payer chaque mois, sans faute",fx:{argent:-7,emo:2},set:S=>{S.f.care=(S.f.care||0)+1},ok:"Tes enfants ne manquent de rien de ton côté.",ko:"Toi, tu manges du riz la dernière semaine du mois."},
+ {t:"Payer moins, ou en retard",fx:{argent:-2,lien:-5,stress:4},set:S=>{S.f.care=(S.f.care||0)-1;if(R()<.35)return "Un courrier du tribunal : {ex} a porté plainte pour abandon de famille.";},ok:"Tu respires un peu.",ko:"Les enfants entendent {ex} dire que tu ne paies pas."},
+ {t:"Payer, et ajouter du temps : les devoirs, le sport, les dimanches",fx:{argent:-6,lien:6,stress:4},set:S=>{S.f.care=(S.f.care||0)+2},ok:"L'argent ne suffit pas. Ta présence, si.",ko:"Ton temps libre disparaît."}
+]:[
+ {t:"Saisir la justice pour obtenir la pension",fx:{argent:5,stress:5,lien:-4},ok:"La loi est de ton côté.",ko:"Les enfants se retrouvent encore entre deux feux."},
+ {t:"Appeler {ex} calmement, pour les enfants",fx:{emo:5,stress:2},set:S=>{if(R()<.5){S.st.argent=clamp(S.st.argent+5);return "{ex} avait perdu son travail et avait honte. {xIl} paie à nouveau, un peu.";}return "{ex} raccroche. Rien ne change.";},ok:"Tu cherches à comprendre avant d'accuser.",ko:"Il faut avaler ta colère."},
+ {t:"Laisser tomber, et te débrouiller seul{e}",fx:{argent:-6,stress:4,emo:2},ok:"Pas de guerre.",ko:"Tu fais deux métiers à la fois : père et mère."}
+]};
+const VISIT={pri:true,cond:S=>S.f.custody==="ex",text:"Le week-end de visite. Les enfants arrivent avec leur sac, et des silences qu'ils n'avaient pas avant.",choices:[
+ {t:"Tout préparer : sorties, cadeaux, restaurants",fx:{argent:-4,joie:3},ok:"Ils repartent les bras pleins.",ko:"Tu achètes ce que tu ne peux pas leur donner : du temps ordinaire."},
+ {t:"Juste être là, sans programme : la plage, la cuisine, parler",fx:{emo:4,lien:4},set:S=>{S.f.care=(S.f.care||0)+2},ok:"{child} finit par te raconter sa semaine.",ko:"Les premiers week-ends, ils s'ennuient et le disent."},
+ {t:"Annuler, trop de travail cette semaine",fx:{argent:3,regret:6,lien:-4},set:S=>{S.f.care=(S.f.care||0)-2},ok:"Tu avances au travail.",ko:"{child} attendait derrière la fenêtre, le sac prêt."}
+]};
+const EXNEW={pri:true,cond:S=>!!S.ex,text:S=>kidsHere(S)?"À la fête de l'école, tu vois {ex} avec quelqu'un de nouveau. Cette personne tient la main de {child}.":"Sur la plage de Toaroto, tu vois {ex} avec quelqu'un de nouveau. Ils rient. Tu connais ce rire.",choices:[
+ {t:"Sourire, et souffrir en silence",fx:{stress:5,joie:-5,emo:2},ok:"Tu ne fais pas de scène.",ko:"Le soir, tu pleures dans la voiture."},
+ {t:"Aller saluer, poliment",fx:{emo:6,stress:3,lien:2},ok:"C'est dur, mais tu te sens plus grand{|e} après.",ko:"Ta voix tremble un peu, et tout le monde le voit."},
+ {t:"Partir avant la fin",fx:{regret:4,joie:-3},ok:"Tu te protèges.",ko:S=>kidsHere(S)?"{child} te cherche des yeux pour le spectacle.":"La journée est gâchée quand même."}
+]};
+const SOCIAL={pri:true,cond:S=>!!S.ex,text:"Tard le soir, tu fais défiler les photos de {ex} sur les réseaux : des vacances à Bora Bora, des sourires, une vie qui continue sans toi.",choices:[
+ {t:"Bloquer, pour te protéger",fx:{emo:5,stress:-3,joie:-2},ok:"Tu fermes une fenêtre qui te faisait mal.",ko:"La curiosité revient, certains soirs."},
+ {t:"Continuer à regarder, chaque soir",fx:{stress:6,joie:-6,regret:3},ok:"Tu sais tout de sa vie.",ko:"Et chaque photo est une petite blessure."},
+ {t:"Poser le téléphone et sortir marcher",fx:{sante:3,emo:4,stress:-2},ok:"La nuit est douce. Les étoiles ne publient rien.",ko:"Il faut le refaire le lendemain, et le jour d'après."}
+]};
+const CLOSED={pri:true,cond:S=>S.f.divorced&&!S.f.couple&&!S.f.homeless,prep:prepLover,text:"Une amie veut te présenter quelqu'un : {lover}, « une personne bien, tu verras ». Ton cœur hésite.",choices:[
+ {t:"Fermer ton cœur, pour ne plus jamais souffrir",fx:{stress:-2,lien:-4,joie:-3},set:S=>{S.f.closed=true},ok:"Plus personne ne pourra te blesser comme ça.",ko:"Plus personne ne pourra t'aimer comme ça non plus."},
+ {t:"Accepter un café, sans rien promettre",fx:{stress:2},set:S=>{S.f.closed=false;if(R()<.45){newCouple(S);S.st.joie=clamp(S.st.joie+8);return "Un café, puis un autre. Un jour, tu ris à nouveau pour de vrai.";}return "Une gentille personne. Mais pas pour toi. Au moins, tu as rouvert la porte.";},ok:"Tu laisses une chance à la vie.",ko:"Tu as peur de revivre la même chose."},
+ {t:"Pas encore. Prendre le temps de guérir",fx:{emo:5,stress:-2},ok:"Tu te répares d'abord.",ko:"Le temps passe, et les occasions aussi."}
+]};
+const STEP={pri:true,cond:S=>S.f.couple&&S.f.divorced&&(S.f.coupleSince||0)>=3,text:S=>kidsHere(S)?"Tes enfants voient arriver {partner} à la maison. {child} refuse de lui dire bonjour.":"{partner} a deux enfants d'une première union. Ils te regardent comme un intrus.",choices:[
+ {t:"Ne pas chercher à remplacer un parent. Être là, simplement",fx:{emo:5,lien:4,stress:3},set:S=>{S.f.care=(S.f.care||0)+1},ok:"Des mois plus tard, le plus petit te prend la main sans y penser.",ko:"Il faut accepter d'être rejeté{e}, longtemps, sans le prendre pour toi."},
+ {t:"Imposer tes règles : ici, c'est chez toi",fx:{stress:5,lien:-5},ok:"La maison est tenue.",ko:"Les enfants comptent les jours jusqu'au départ."},
+ {t:"Rester à distance, laisser les parents gérer",fx:{lien:-2,stress:-1},ok:"Pas de conflit.",ko:"Une famille recomposée où chacun vit à côté des autres."}
+]};
+const FILL={pri:true,cond:S=>S.f.divorced&&!S.f.couple&&!S.f.homeless,text:"Le soir, la maison est trop silencieuse. Il faut remplir le vide, d'une façon ou d'une autre.",choices:[
+ {t:"Adopter un chien",fx:{joie:6,lien:3,argent:-2,stress:-2},set:S=>{S.f.animal=true;S.pet=pick(["Toby","Mana","Rocky","Pepito"]);},ok:"Il t'attend à la porte chaque soir, comme si tu étais le centre du monde.",ko:"On te taquine : « C'est ton nouveau conjoint ? » Ça pique un peu.",mem:"un chien pour remplir le silence"},
+ {t:"Le sport : la montagne, le va'a, la course",fx:{sante:8,joie:4,emo:3,lien:2},ok:"L'Aorai à l'aube, les jambes qui brûlent, la tête qui se vide.",ko:"Tu cours pour ne pas penser. Le soir, ça revient.",mem:"l'Aorai à l'aube"},
+ {t:"Le travail, encore plus",fx:{argent:5,reco:3,lien:-5,stress:5},ok:"Ta carrière décolle.",ko:"Le vide est toujours là, juste mieux rangé."},
+ {t:"La bière du soir, devant la télé",fx:{joie:2,sante:-3,stress:-1},set:S=>{S.f.alcool=(S.f.alcool||0)+1},ok:"Ça engourdit.",ko:"Une bière devient trois, et trois deviennent une habitude."}
+]};
+[CUSTODY,PENSION,VISIT,EXNEW,SOCIAL,CLOSED,STEP,FILL].forEach(m=>{MOM[4].push(m);MOM[5].push(m);});
+[EXNEW,SOCIAL,CLOSED,FILL,VISIT].forEach(m=>MOM[6].push(m));
 MOM[6].push(KNEES);
 MOM[7].unshift(CARE,DIGNITY,FORGET);
 
@@ -930,6 +992,8 @@ function birth(){
      st:{sante:80+(disease?disease.start:0),argent:[8,22,48,78][wealth],joie:50,stress:[35,25,15,10][wealth],lien:50,reco:20,utile:10,regret:0,emo:30},
      f:{etu:wealth>=2?1:0},mems:[],plant:[],log:[],ci:-1,dead:false};
   S.fSex=R()<.5?"F":"M";S.friend=loveName(S.fSex);
+  S.sibSex=R()<.5?"F":"M";S.sib=loveName(S.sibSex);
+  S.arc={friend:pick(["success","ice","sick","family"]),sib:pick(["prison","france","stays","church"])};
   S.pSex=loveSex();S.partner=loveName(S.pSex);
 }
 function resolve(fx){const o=typeof fx==="function"?fx(S):{...fx};if(o.argent==="var")o.argent=Math.round(-8+R()*20);return o;}
@@ -943,6 +1007,28 @@ function growPlant(fx){
   if(fx.stress>0)add("dry",Math.ceil(fx.stress/5));
   if(fx.regret>0)add("broken",Math.ceil(fx.regret/6));
   if(fx.sante>0)add("leaf",1);
+}
+const ARCS={
+ friend:{
+  success:{3:"{friend} ouvre un petit salon de tatouage à Papeete. Les touristes font la queue.",4:"{friend} se marie. Tu danses jusqu'au matin, comme à quinze ans.",5:"{friend} a trois salons maintenant. {fIl} t'invite au restaurant et insiste pour payer.",6:"{friend} a tout vendu pour vivre sur un motu. {fIl} t'envoie des photos de couchers de soleil."},
+  ice:{3:"{friend} a changé. Ses yeux brillent trop, {fil} maigrit, {fil} ne rappelle plus.",4:"{friend} est à Nuutania. {fIl} t'écrit une lettre maladroite, pleine de fautes et de regrets.",5:"{friend} est sorti{fe}, sobre depuis trois ans. {fIl} parle aux jeunes dans les collèges, de l'ice et de la honte.",6:"{friend} a fondé une association. On {fle} cite à la radio. Tu es fi{er|ère}, en silence."},
+  sick:{3:"{friend} a déjà du diabète, à trente ans, comme tant d'autres au fenua.",4:"{friend} commence la dialyse. {fIl} rit encore, mais moins fort.",5:"On a amputé {friend} d'un pied. {fIl} t'accueille en disant : « Je cours moins vite, c'est tout. »",6:"{friend} est fatigué{fe}. Tu passes plus souvent, avec du poisson cru et des souvenirs."},
+  family:{3:"{friend} a déjà trois enfants, et un quatrième en route.",4:"{friend} élève aussi les enfants de sa sœur, partie en France. Neuf enfants sous un même toit.",5:"{friend} devient diacre. {fIl} prie pour toi, que tu le demandes ou non.",6:"{friend} a vingt petits-enfants. Il lui faut un carnet pour les anniversaires."}
+ },
+ sib:{
+  prison:{2:"{sib}, {sibw}, traîne avec une bande. Les parents ne dorment plus.",3:"{sib} part à Nuutania, pour un vol. Mama prend le bus chaque samedi pour {sle} voir.",4:"{sib} est sorti{se}. Personne ne veut d'un ancien détenu. {sIl} vient souvent manger chez toi.",5:"{sib} a trouvé sa place : la pêche, à Tautira. {sIl} t'apporte du poisson le dimanche, sans un mot."},
+  france:{3:"{sib}, {sibw}, part étudier en France avec une bourse. Toute la famille l'accompagne à l'aéroport.",4:"{sib} vit à Paris. {sIl} envoie de l'argent, et ne revient presque jamais.",5:"{sib} rentre au fenua, divorcé{se}, et cherche sa place. Ici, tout a changé sans {sle} prévenir.",6:"{sib} et toi, vous rattrapez trente ans en quelques après-midi sur la terrasse."},
+  stays:{3:"{sib}, {sibw}, reste chez les parents et s'occupe de tout, comme toujours.",4:"{sib} est épuisé{se} : les parents, ses enfants, et personne pour l'aider.",5:"{sib} te reproche, un soir, de ne pas en avoir fait plus. {sIl} n'a pas tort, et pas raison non plus.",6:"{sib} et toi, vous êtes les derniers de la fratrie à garder la maison familiale en vie."},
+  church:{3:"{sib}, {sibw}, devient très croyant{se}. {sIl} prie pour toi, que tu le veuilles ou non.",4:"{sib} est diacre. Toute la famille vient l'écouter prêcher.",5:"{sib} organise les himene pour tout le district. Sa voix porte jusqu'à la mer.",6:"{sib} préside les enterrements de la famille. {sIl} trouve toujours les mots."}
+ }
+};
+const EXNEWS=["{ex} s'est remis{xe} en couple. Tu l'apprends par une cousine, au marché.","Tu croises {ex} à la station-service. Vous vous saluez, poliment, comme des inconnus qui savent tout.","{ex} est malade, dit-on. Tu hésites longtemps à appeler.","{ex} t'envoie un message pour ton anniversaire. Juste trois mots. Ça suffit à remuer beaucoup."];
+function news(ci){
+  const out=[];
+  if(S.f.friend&&!S.f.friendDead){const t=ARCS.friend[S.arc.friend][ci];if(t)out.push(t);}
+  const t2=ARCS.sib[S.arc.sib][ci];if(t2&&ci>=2)out.push(t2);
+  if(S.ex&&ci>=4&&R()<.6)out.push(pick(EXNEWS));
+  return out.map(fmt);
 }
 function chapterStart(ci){
   const notes=[];const add=(fx,note)=>{applyFx(fx);if(note)notes.push(fmt(note));};
@@ -976,6 +1062,7 @@ function buildQueue(ci){
   const pool=MOM[ci]||[];const ok=m=>!m.cond||m.cond(S);
   const q=pool.filter(m=>m.must&&ok(m));
   const opt=shuffle(pool.filter(m=>!m.must&&!m.late&&ok(m)&&(!m.p||R()<m.p)&&!(S.seen||[]).includes(m.id)));
+  opt.sort((a,b)=>(b.pri?1:0)-(a.pri?1:0));
   while(q.length<CH[ci].k&&opt.length)q.push(opt.shift());
   q.forEach(m=>{if(m.prep)m.prep(S);});
   const ins=e=>q.splice(ci===0?0:1+Math.floor(R()*q.length),0,e);
@@ -1031,6 +1118,26 @@ function mood(){
   if(st.emo>=60)L.push("Tu sais écouter ce que tu ressens.");
   return L.join(" ");
 }
+function webPeople(){
+  const f=S.f,ci=S.ci,out=[];if(ci<0)return out;
+  if(ci<=5){if(S.par){out.push({c:"#b9850f",n:S.par.name,r:S.par.sex==="F"?"ta mère":"ton père"});out.push({c:"#b9850f",n:S.par2?S.par2.name:"",r:S.par.sex==="F"?"ton père":"ta mère"});}
+    else{out.push({c:"#b9850f",n:"Mama",r:"ta mère"});out.push({c:"#b9850f",n:"Papa",r:"ton père"});}}
+  if(ci>=1&&S.sib)out.push({c:"#9a6fb0",n:S.sib,r:S.sibSex==="F"?"ta sœur":"ton frère"});
+  if(f.friend&&!f.friendDead)out.push({c:"#5f8fa6",n:S.friend,r:S.fSex==="F"?"ton amie d'enfance":"ton ami d'enfance"});
+  if(f.couple)out.push({c:"#c0574f",n:S.partner,r:S.pSex==="F"?"ta compagne":"ton compagnon"});
+  const k=(f.kids||0)-(f.childDead?1:0);
+  if(k>0){if(!f.childDead&&S.childName)out.push({c:"#2a9d8f",n:S.childName,r:S.childSex==="F"?"ta fille":"ton fils"});for(let i=out.filter(o=>o.c==="#2a9d8f").length;i<Math.min(3,k);i++)out.push({c:"#2a9d8f",n:"",r:"un autre de tes enfants"});}
+  if(f.animal&&S.pet)out.push({c:"#a8803a",n:S.pet,r:"ton animal"});
+  if(S.st.lien>60){out.push({c:"#8a7a5a",n:"",r:"tes cousins, tes voisins"});out.push({c:"#8a7a5a",n:"",r:"ta paroisse, ton quartier"});}
+  return out;
+}
+function webHTML(){
+  const pp=webPeople();if(!S||S.ci<0)return "";
+  const lost=[];if(S.f.friendDead)lost.push(S.friend);if(S.f.widow)lost.push(S.partner);if(S.f.childDead&&S.childName)lost.push(S.childName);if(S.ci>5)lost.push("tes parents");
+  return `<h4>Ta toile</h4><p>Les fils au-dessus de ta plante te relient à ceux qui comptent. Chacun de tes choix tire sur ces fils, et leurs choix tirent sur toi. Quand un fil se rompt, quelqu'un s'éloigne, ou s'en va.</p>
+  <ul>${pp.map(o=>`<li><i style="background:${o.c}"></i>${o.n?`<b>${o.n}</b>, `:""}<span>${o.r}</span></li>`).join("")}</ul>
+  ${lost.length?`<p>Fils rompus : ${lost.join(", ")}.</p>`:""}${S.lineage&&S.lineage.length?`<p class="lineage">Ta lignée : ${S.lineage.length>4?"… → ":""}${S.lineage.slice(-4).join(" → ")} → ${S.first}</p>`:""}`;
+}
 function updateAside(){
   const who=$("#who");
   if(!S){who.innerHTML=`<p class="who-name">Pas encore né</p><p class="who-sub">Le hasard choisira ta famille, ton île, ton corps.</p>`;$("#stats").innerHTML="";return;}
@@ -1049,7 +1156,9 @@ function updateAside(){
   if(S.f.casier)st.push("Casier judiciaire");
   if((S.f.trauma||0)>0)st.push("Blessures non soignées");
   if(S.f.dependent)st.push("A besoin d'aide chaque jour");
+  if(S.f.custody&&S.f.divorced)st.push({moi:"Garde des enfants",alt:"Garde alternée",ex:"Un week-end sur deux"}[S.f.custody]);
   who.innerHTML=`<p class="who-name">${S.first}</p><p class="who-sub">${S.sex==="F"?"Fille":"Garçon"} · ${S.place.short} · famille ${WEALTH[S.wealth]}</p><p class="who-sub mood">${mood()}</p>${st.length?`<div class="status">${st.map(s=>`<span>${fmt(s)}</span>`).join("")}</div>`:""}`;
+  $("#web").innerHTML=webHTML();
   $("#stats").innerHTML=STATS.map(([k,l])=>`<span>${l}</span><span class="bar${NEG[k]?" neg":""}"><b style="width:${S.st[k]}%"></b></span><span class="v">${S.st[k]}</span>`).join("");
 }
 function intro(){
@@ -1089,6 +1198,8 @@ function showBirth(){
    <dt>Apparence</dt><dd>${S.skin[0].toUpperCase()+S.skin.slice(1)}, ${S.hair}</dd>
    <dt>Héritage</dt><dd>${S.disease?S.disease.n+".":"Aucune maladie héritée."}</dd>
    <dt>Ton cœur</dt><dd>${heartLine()}</dd>
+   ${S.par?`<dt>Ta lignée</dt><dd>Enfant de ${S.par.name}${S.par2?" et de "+S.par2.name:""}. ${S.gen}<sup>e</sup> génération : ${S.lineage.length>4?"… → ":""}${S.lineage.slice(-4).join(" → ")} → ${S.first}.</dd>`:""}
+   ${S.inherit&&S.inherit.length?`<dt>Ce que tu reçois</dt><dd>${S.inherit.join(" ")}</dd>`:""}
   </dl>
   <p class="hint">Tu n'as rien choisi de tout cela. La suite, en partie, t'appartient.</p>
   <button class="btn" id="go">Commencer la vie</button>`);
@@ -1097,12 +1208,14 @@ function showBirth(){
 function startChapter(ci){
   S.ci=ci;S.qi=0;
   const notes=chapterStart(ci);
+  S.chStart={...S.st};
   const fall=ci>=3&&!S.f.homeless&&S.st.argent<=6&&(S.st.lien<40||R()<.5);
   S.queue=buildQueue(ci);
   if(fall)S.queue.unshift("hev","hom");
   save();
   header(ci);paint(ci);drawPlant();updateAside();
-  setCard(`<p class="lede">${CH[ci].line}</p>${notes.length?`<ul class="notes">${notes.map(n=>`<li>${n}</li>`).join("")}</ul>`:""}<button class="btn" id="go">Vivre ce chapitre</button>`);
+  const nw=S.arc?news(ci):[];
+  setCard(`<p class="lede">${CH[ci].line}</p>${notes.length?`<ul class="notes">${notes.map(n=>`<li>${n}</li>`).join("")}</ul>`:""}${nw.length?`<p class="step">Des nouvelles des tiens</p><ul class="notes">${nw.map(n=>`<li>${n}</li>`).join("")}</ul>`:""}<button class="btn" id="go">Vivre ce chapitre</button>`);
   $("#go").onclick=nextMoment;
   if(ci>0){const top=$("#stage").getBoundingClientRect().top;if(top<0)$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});}
 }
@@ -1110,6 +1223,7 @@ function nextMoment(){
   while(S.qi<S.queue.length){const m=REG[S.queue[S.qi]];if(m&&(!m.cond||m.cond(S)))break;S.qi++;}
   if(S.qi>=S.queue.length)return endChapter();
   const m=REG[S.queue[S.qi++]];
+  if(!m.auto)S.curQ=fmt(m.text).replace(/^Ce n'est pas ton choix, mais il te touche\. /,"").split(/(?<=[.!?])\s/)[0];
   S.seen=S.seen||[];if(!S.seen.includes(m.id))S.seen.push(m.id);
   const left=S.queue.slice(S.qi).map(id=>REG[id]).filter(x=>x&&(!x.cond||x.cond(S))).length;
   const step=left?`Encore ${left} moment${left>1?"s":""} dans ce chapitre`:"Dernier moment de ce chapitre";
@@ -1128,6 +1242,12 @@ function nextMoment(){
 const TIMEP=["Quelques mois passent.","Une saison des pluies, puis une saison sèche.","Le temps file, sans prévenir.","Les jours se ressemblent, puis un jour ne ressemble à aucun autre.","Une année passe, puis une autre.","Le vent tourne, comme il tourne toujours."];
 function ctxLines(){
   const f=S.f,st=S.st,ci=S.ci,L=[];
+  if(S.par&&ci<=2&&S.leg){const g=S.leg;
+    if(g.care>=3)L.push("{par} t'écoute vraiment quand tu parles. Tu ne sais pas encore que c'est rare.","Le soir, {par} te chante les himene que chantait déjà sa propre mère.");
+    if(g.violent||g.hit)L.push("Tu apprends tôt à lire le visage de {par} avant qu'{parIl} ne parle.");
+    if(g.alcool)L.push("Le vendredi soir, {par} rentre tard, et toute la maison retient son souffle.");
+    if(g.helped>=2)L.push("Quand ça ne va pas, {par} dit : « On demande de l'aide, il n'y a pas de honte. » Tu retiens la phrase.");
+    if(g.sober)L.push("{par} ne boit jamais. Tu sauras plus tard pourquoi, et combien ça lui a coûté.");}
   if(ci<=1){L.push("Les poules traversent la cour, et quelqu'un chante dans la cuisine.","L'odeur du pain coco monte de chez la voisine.");
     if(S.wealth<=1)L.push("Le toit fuit quand il pleut fort. On met des casseroles partout.","On dort à quatre dans la même chambre. On se tient chaud.");
     if(S.wealth>=3)L.push("La piscine brille sous le soleil. Tu ne sais pas encore que ce n'est pas normal.");
@@ -1152,12 +1272,47 @@ function ctxLines(){
   if(f.dependent)L.push("On t'aide à t'asseoir près de la fenêtre. La mer est toujours là.");
   return L;
 }
+const has=t=>S.log.some(l=>l.t===t||l.t.startsWith(t));
+const CALLBACKS=[
+ {id:"dog1",r:[3,7],c:S=>has("Le chasser"),t:"Un chien maigre traverse la route devant toi. Tu repenses à celui que tu as chassé, enfant. Il avait les mêmes yeux."},
+ {id:"dog2",r:[5,7],c:S=>has("Le garder et l'appeler"),t:"Il t'arrive encore de siffler {pet}, par habitude, en ouvrant le portail."},
+ {id:"love1",r:[4,6],c:S=>S.f.firstLove,t:"Au marché, tu croises ton premier amour du Heiva. Vous vous souriez comme deux inconnus qui savent tout."},
+ {id:"love2",r:[4,7],c:S=>has("Garder le secret"),t:"Le soir du Heiva te revient parfois. Et si tu avais parlé, ce soir-là ?"},
+ {id:"reo1",r:[4,7],c:S=>S.f.reo===2,t:"Une chanson de mamie te revient, en reo, mot pour mot. Tu la chantes sans y penser."},
+ {id:"reo2",r:[4,7],c:S=>S.f.reo===0,t:"À un enterrement, les anciens chantent en reo. Tu ne comprends plus tous les mots, et ça te serre le cœur."},
+ {id:"fr",r:[4,7],c:S=>S.f.france,t:"Quand il pleut fort sur Papeete, l'hiver de France te revient : le froid, la solitude, et la question « Tu viens d'où ? »."},
+ {id:"tat",r:[5,7],c:S=>has("Te faire tatouer"),t:"Ton tatau a pâli un peu. Ton histoire, elle, est toujours là, sur ta peau."},
+ {id:"dad",r:[4,7],c:S=>has("Exploser et claquer la porte"),t:"Ce repas du dimanche où tu as claqué la porte, ton père n'en a jamais reparlé. Toi non plus."},
+ {id:"dad2",r:[4,7],c:S=>has("Respirer, nommer ce que tu ressens"),t:"Tu te souviens du soir où ton père t'a écouté{e}, enfin. Tu essaies de faire pareil avec les plus jeunes."},
+ {id:"moru",r:[4,7],c:S=>has("Poser des questions, encore et encore"),t:"À la radio, on parle des indemnisations de Moruroa. Les histoires de papy reviennent, intactes."},
+ {id:"bully",r:[4,6],c:S=>has("Te battre"),t:"Tu croises un de ceux qui se moquaient de toi dans la cour. Il a l'air fatigué, lui aussi. Tu ne lui en veux plus."},
+ {id:"motu",r:[4,7],c:S=>has("Rester sur le motu avec les cousins"),t:"L'odeur d'un feu de bois te ramène à l'été sur le motu, avec les cousins et les crabes."},
+ {id:"firi",r:[4,7],c:S=>has("Vendre les firifiri"),t:"Tu achètes des firifiri à un enfant au bord de la route. Tu lui en prends deux fois trop."},
+ {id:"div",r:[5,7],c:S=>S.f.divorced,t:"Il t'arrive de penser à ceux que tu as aimés et quittés. Sans colère, maintenant."},
+ {id:"cas",r:[4,7],c:S=>S.f.casier,t:"Un formulaire demande : « Avez-vous déjà été condamné ? » Ta main hésite au-dessus de la case."},
+ {id:"sob",r:[4,7],c:S=>S.f.sober,t:"Un an, puis cinq, puis dix sans boire. Tu comptes encore, en silence, chaque matin."},
+ {id:"rue",r:[4,7],c:S=>S.f.everHomeless&&!S.f.homeless,t:"Tu ne passes jamais devant la cathédrale sans glisser une pièce, ou au moins un bonjour."},
+ {id:"hand",r:[4,7],c:S=>S.mems.includes("la main tendue d'un inconnu"),t:"Un jour, à ton tour, tu proposes du travail à quelqu'un qui attend au bord de la route. Le fil continue."},
+ {id:"child",r:[5,7],c:S=>S.f.childDead,t:"Certains soirs, tu mets encore une assiette de trop sur la table."},
+ {id:"hit",r:[6,7],c:S=>S.f.hit&&S.f.kids>0&&!S.f.childDead,t:"{child} lève la main sur son propre fils. Tu reconnais le geste. Il vient de toi, et de plus loin encore."},
+ {id:"talk",r:[6,7],c:S=>has("Attendre le lendemain, puis parler sans juger"),t:"{child} parle à son adolescent comme tu lui as parlé, ce matin-là. Tu entends tes propres mots dans sa bouche."},
+ {id:"vaa",r:[5,7],c:S=>has("Le sport : va'a"),t:"Une pirogue passe au large, rame après rame. Ton corps se souvient du rythme."},
+ {id:"closed",r:[5,7],c:S=>S.f.closed&&!S.f.couple,t:"Quelqu'un te sourit au marché, longtemps. Tu détournes les yeux. Ton cœur est resté fermé à clé."},
+ {id:"aorai",r:[5,7],c:S=>S.mems.includes("l'Aorai à l'aube"),t:"Tu montes encore là-haut, plus lentement. La montagne ne t'a jamais demandé de comptes."},
+ {id:"heiva",r:[5,7],c:S=>has("Entrer dans la troupe"),t:"Au Heiva, tu regardes les jeunes danser à To'ata. Tes pieds battent la mesure tout seuls."}
+];
+function callback(){
+  S.cb=S.cb||[];
+  const ok=CALLBACKS.filter(c=>S.ci>=c.r[0]&&S.ci<=c.r[1]&&!S.cb.includes(c.id)&&c.c(S));
+  if(!ok.length)return "";const c=pick(ok);S.cb.push(c.id);return fmt(c.t);
+}
 function bridge(){
   const ci=S.ci,a=CH[ci].a;if(!a)return "";
   const frac=Math.max(0,S.qi-1)/Math.max(1,S.queue.length);
   const age=Math.min(a[1],a[0]+Math.round((a[1]-a[0])*frac));
   const lines=ctxLines().filter(x=>x!==S.lastCtx);
-  const ctx=lines.length?pick(lines):"";S.lastCtx=ctx;
+  let ctx=lines.length?pick(lines):"";S.lastCtx=ctx;
+  if(ci>=3&&R()<.3){const cb=callback();if(cb)ctx=cb;}
   const t=age===S.lastAge?pick(["Quelques semaines plus tard.","Peu de temps après.","Un soir, sans prévenir."]):`Tu as ${age} an${age>1?"s":""}. ${S.qi>1?pick(TIMEP):""}`;
   S.lastAge=age;
   return `<p class="narr">${(t+" "+ctx).replace(/\s+/g," ").trim()}</p>`;
@@ -1165,7 +1320,8 @@ function bridge(){
 function snapshot(){return {...S.st};}
 function diffOf(before){const d={};for(const k in S.st){const v=S.st[k]-before[k];if(v)d[k]=v;}return d;}
 function showEvent(m,step){
-  const before=snapshot();const text=fmt(m.text);const fx=resolve(m.fx);applyFx(fx);growPlant(fx);const note=(m.set&&m.set(S))||"";
+  const before=snapshot();const text=fmt(m.text);
+  S.evlog=S.evlog||[];S.evlog.push({ci:S.ci,q:/^q/.test(m.id),t:text.replace(/^Ce n'est pas ton choix, mais il te touche\. /,"").split(/(?<=[.!?])\s/)[0]});const fx=resolve(m.fx);applyFx(fx);growPlant(fx);const note=(m.set&&m.set(S))||"";
   drawPlant();updateAside();save();
   setCard(`<p class="step">${step}</p>${bridge()}<p class="m-text">${text}</p>${note?`<p class="note">${fmt(note)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
   $("#go").onclick=nextMoment;
@@ -1173,7 +1329,8 @@ function showEvent(m,step){
 function choose(c){
   const before=snapshot();const fx=resolve(c.fx);const label=fmt(c.t);
   if(c.mem)S.mems.push(fmt(c.mem));
-  S.log.push({ci:S.ci,t:label});
+  const w=Object.values(fx).reduce((a,v)=>a+Math.abs(+v||0),0);
+  S.log.push({ci:S.ci,t:label,ok:fmt(c.ok),ko:fmt(c.ko),w,q:S.curQ});
   applyFx(fx);growPlant(fx);
   let note=(c.set&&c.set(S))||"";
   if((fx.emo||0)>=5&&R()<.3){applyFx({stress:4,joie:-3});note=(note?note+" ":"")+pick(WISE_COST);}
@@ -1185,10 +1342,66 @@ function choose(c){
   ${note?`<p class="note">${fmt(note)}</p>`:""}${rip?`<p class="note rip"><b>Ricochet.</b> ${fmt(rip)}</p>`:""}${help?`<p class="note help">${fmt(help)}</p>`:""}${chips(diffOf(before))}<button class="btn" id="go">Continuer</button>`);
   $("#go").onclick=nextMoment;
 }
+const REFRAIN=["Le premier souffle ne choisit rien. Il respire.","L'enfance passe comme une pirogue : on ne la voit vraiment qu'une fois partie.","Entre deux rives, le cœur apprend à nager.","Le monde ouvre ses portes, ou les ferme, et l'on marche quand même.","Les années nous portent, et l'on porte les années.","À mi-chemin, on se retourne : le sillage brille encore.","Le soir descend doucement sur le lagon.","La mer se retire, et laisse sur le sable ce qui comptait."];
+const BUT=["Et pourtant, ","Mais ","Et puis, "];
+const lc=x=>x?x[0].toLowerCase()+x.slice(1):"";
+const end=x=>/[.!?»…]$/.test(x)?x:x+".";
+function chapterPoem(ci){
+  const ch=S.log.filter(l=>l.ci===ci&&l.ok);
+  const keep=ch.map((l,i)=>({...l,i})).sort((a,b)=>b.w-a.w).slice(0,3).sort((a,b)=>a.i-b.i);
+  const P=[];
+  keep.forEach((l,j)=>P.push(`${l.q&&l.q.length<140?`<span class="refrain">${l.q}</span><br>`:""}<i>${end(l.t)}</i><br>${l.ok}<br>${BUT[j%3]}${lc(l.ko)}`));
+  const ev=(S.evlog||[]).filter(e=>e.ci===ci);
+  const evq=ev.filter(e=>e.q),evh=ev.filter(e=>!e.q);
+  if(evh.length)P.push(`Et la vie, sans te demander ton avis :<br>${lc(pick(evh).t)}`);
+  if(evq.length)P.push(`Et, entre deux vagues :<br>${lc(pick(evq).t)}`);
+  const a=S.chStart||S.st,d=k=>S.st[k]-a[k],L=[];
+  if(d("joie")>=5)L.push("La plante a fleuri.");else if(d("joie")<=-5)L.push("Des fleurs sont tombées sans bruit.");
+  if(d("lien")>=5)L.push("De nouveaux fils se sont tissés.");else if(d("lien")<=-5)L.push("Des fils se sont dénoués.");
+  if(d("stress")>=5)L.push("Quelques feuilles ont jauni.");else if(d("stress")<=-5)L.push("Le vent s'est calmé dans les branches.");
+  if(d("regret")>=5)L.push("Une branche s'est brisée.");
+  if(d("emo")>=5)L.push("Les racines sont descendues plus profond.");
+  if(!L.length)L.push("La plante a grandi, simplement, comme grandit tout ce qui vit.");
+  P.push(L.slice(0,3).join("<br>"));
+  P.push(`<span class="refrain">${REFRAIN[ci]}</span>`);
+  return P.map(x=>`<p>${x}</p>`).join("");
+}
+function wrapLines(ctx,text,maxW){const words=text.split(" "),out=[];let line="";for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){out.push(line);line=w;}else line=t;}if(line)out.push(line);return out;}
+async function makeCard(label,ciPaint){
+  try{await document.fonts.load('400 40px "Young Serif"');await document.fonts.load('italic 400 30px "Literata"');}catch(e){}
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+  x.fillStyle="#f6f1e4";x.fillRect(0,0,W,H);
+  const src=$("#painting");x.drawImage(src,0,src.height*.08,src.width,src.height*.84,0,0,W,612);
+  const ps=[...document.querySelectorAll("#card .poem p")];
+  let blocks=ps.map((p,pi)=>p.innerHTML.split(/<br\s*\/?>/).map(h=>{const d=document.createElement("div");d.innerHTML=h;return {t:d.textContent.trim(),it:/<i>|class="refrain"/.test(h),ctx:/class="refrain"/.test(h)&&pi<ps.length-1};}).filter(z=>z.t&&!z.ctx));
+  const top=670,bottom=H-130,maxW=W-140;let fs,lines;
+  const layout=()=>{for(fs=40;fs>=28;fs-=2){lines=[];blocks.forEach((b,i)=>{b.forEach(z=>{x.font=`${z.it?"italic ":""}400 ${fs}px "Literata", Georgia, serif`;wrapLines(x,z.t,maxW).forEach(w=>lines.push({t:w,it:z.it}));});if(i<blocks.length-1)lines.push(null);});const h=lines.reduce((a,l)=>a+(l?fs*1.38:fs*.6),0);if(h<=bottom-top)return true;}return false;};
+  while(!layout()&&blocks.length>2){const ev=blocks.findIndex((b,i)=>i<blocks.length-2&&!b[0].it);blocks.splice(ev>=0?ev:blocks.length-3,1);}
+  let y=top+fs;
+  lines.forEach(l=>{if(!l){y+=fs*.6;return;}x.font=`${l.it?"italic ":""}400 ${fs}px "Literata", Georgia, serif`;x.fillStyle=l.it?"#1d6b68":"#2a2119";x.textAlign="left";x.fillText(l.t,70,y);y+=fs*1.38;});
+  x.fillStyle="#b9850f";x.fillRect(70,H-92,940,2);
+  x.fillStyle="#2a2119";x.font='400 36px "Young Serif", Georgia, serif';x.fillText("Manu o te Taime",70,H-44);
+  x.font='italic 400 26px "Literata", Georgia, serif';x.textAlign="right";x.fillStyle="#56696a";x.fillText(label,W-70,H-44);
+  const g=grain();x.globalCompositeOperation="multiply";x.globalAlpha=.25;x.fillStyle=x.createPattern(g,"repeat");x.fillRect(0,0,W,H);x.globalAlpha=1;x.globalCompositeOperation="source-over";
+  return c;
+}
+function shareBlock(label){
+  return `<div class="share" id="shareBox"><button class="btn2" id="mkCard" type="button">Créer une image de ce poème</button></div>`;
+}
+function wireShare(label){
+  const b=$("#mkCard");if(!b)return;
+  b.onclick=async()=>{b.disabled=true;b.textContent="Peinture en cours…";
+    const c=await makeCard(label);const url=c.toDataURL("image/jpeg",.9);
+    const box=$("#shareBox");box.innerHTML=`<img src="${url}" alt="Le poème de ce chapitre, avec sa peinture"><p class="hint">Appuie longuement sur l'image (ou clic droit) pour l'enregistrer, puis partage-la sur Facebook.</p><div class="btns"><a class="btn2" id="dl" href="${url}" download="manu-o-te-taime-poeme.jpg">Télécharger l'image</a><button class="btn2" id="nshare" type="button" hidden>Partager</button></div>`;
+    c.toBlob(bl=>{try{const f=new File([bl],"manu-o-te-taime-poeme.jpg",{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){const n=$("#nshare");n.hidden=false;n.onclick=()=>navigator.share({files:[f],title:"Manu o te Taime"}).catch(()=>{});}}catch(e){}},"image/jpeg",.9);
+  };
+}
 function endChapter(){
   const ci=S.ci;
-  if(ci===7||(ci>=2&&deathCheck(ci)))return die(ci);
-  startChapter(ci+1);
+  header(ci);drawPlant();updateAside();
+  setCard(`<p class="step">Chant du chapitre : ${lc(CH[ci].t)}</p><div class="poem">${chapterPoem(ci)}</div>${shareBlock()}<button class="btn" id="go">Tourner la page</button>`);
+  wireShare(CH[ci].t);
+  $("#go").onclick=()=>{if(ci===7||(ci>=2&&deathCheck(ci)))return die(ci);startChapter(ci+1);};
 }
 function die(ci){
   const [lo,hi]=CH[ci].a;
@@ -1199,7 +1412,8 @@ function die(ci){
   const recap=[];for(let i=0;i<=ci;i++){const ch=S.log.filter(l=>l.ci===i);if(ch.length)recap.push(`<li><b>${CH[i].t}</b> : ${ch.map(l=>l.t).join(" · ")}</li>`);}
   setCard(`<p class="step">Ta vie, en poème</p><div class="poem">${poem(S.age,why)}</div>${early}
   <details><summary>Relire tes choix</summary><ul class="recap">${recap.join("")}</ul></details>
-  <button class="btn" id="go">Voir ce qui reste après toi</button>`);
+  ${shareBlock()}<button class="btn" id="go">Voir ce qui reste après toi</button>`);
+  wireShare("La vie de "+S.first);
   $("#go").onclick=epilogue;
   $("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
 }
@@ -1242,10 +1456,43 @@ function epilogue(){
   if(f.sober)P.push("Quelqu'un, quelque part, a arrêté de boire parce que tu lui as montré que c'était possible.");
   if(f.friendDead)P.push(`On t'a enterré${S.sex==="F"?"e":""} près de ${S.friend}.`);
   else if(f.friend)P.push(`${S.friend} est venu${S.fSex==="F"?"e":""}, courbé${S.fSex==="F"?"e":""} sur une canne, et n'a rien dit. ${S.fSex==="F"?"Elle":"Il"} est resté${S.fSex==="F"?"e":""} jusqu'à la dernière pelletée.`);
+  if(S.par)P.push(`Tu étais l'enfant de ${S.par.name}. Tu as reçu ses fils, ses blessures et ses forces. Tu en as gardé certains, coupé d'autres, tissé de nouveaux.`);
   P.push("La plante retourne à la terre. Les graines, elles, ont déjà germé ailleurs.");
-  setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p><button class="btn" id="go">Vivre une autre vie</button>`);
+  setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p>${(()=>{const L=legacyOf();return L?`<div class="btns"><button class="btn" id="heir">Continuer la lignée : vivre la vie ${L.heirName?"de "+L.heirName:"d'un de tes enfants"}</button><button class="btn2" id="go">Vivre une autre vie</button></div>`:`<button class="btn" id="go">Vivre une autre vie</button>`})()}`);
+  const hb=$("#heir");if(hb)hb.onclick=()=>{const L=legacyOf();clearSave();bornFrom(L);showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};
   $("#go").onclick=()=>{clearSave();birth();showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};
   $("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
+}
+function legacyOf(){
+  const f=S.f,k=(f.kids||0)-(f.childDead?1:0);if(k<=0)return null;
+  const care=(f.care||0)+(S.st.emo>=55?1:0)+((f.helped||0)>=2?1:0)-(f.hit?1:0)-(f.violent?2:0)-((f.alcool||0)>=2?1:0)-(f.ice?1:0);
+  let w=S.st.argent>=70?3:S.st.argent>=45?2:S.st.argent>=20?1:0;if(f.house)w=Math.min(3,w+1);if(f.everHomeless&&f.homeless)w=0;
+  const alive=!f.childDead&&S.childName;
+  return {name:S.first,sex:S.sex,partner:(f.couple||f.widow||f.divorced)?(f.couple||f.widow?S.partner:S.ex):null,pSex:f.couple||f.widow?S.pSex:S.exSex,
+    heirName:alive?S.childName:null,heirSex:alive?S.childSex:null,wealth:w,place:S.place,heritage:S.heritage,disease:S.disease,
+    care,violent:!!f.violent,hit:!!f.hit,alcool:(f.alcool||0)>=2,sober:!!f.sober,helped:f.helped||0,emo:S.st.emo,
+    terre:!!f.terre,papers:!!f.papers,unfair:!!f.unfair,house:!!f.house,divorced:!!f.divorced,gen:(S.gen||1),lineage:[...(S.lineage||[]),S.first]};
+}
+function bornFrom(L){
+  birth();
+  if(L.heirName){S.first=L.heirName;S.sex=L.heirSex;}
+  S.pSex=loveSex();S.partner=loveName(S.pSex);
+  S.wealth=L.wealth;S.place=L.place;S.heritage=L.heritage;
+  if(L.disease&&R()<.5)S.disease=L.disease;
+  S.st={sante:80+(S.disease?S.disease.start:0),argent:[8,22,48,78][S.wealth],joie:50,stress:[35,25,15,10][S.wealth],lien:50,reco:20,utile:10,regret:0,emo:30};
+  S.par={name:L.name,sex:L.sex};S.par2=L.partner?{name:L.partner,sex:L.pSex}:null;S.leg=L;S.gen=L.gen+1;S.lineage=L.lineage;
+  const notes=[];
+  if(L.care>=3){S.st.emo+=15;S.st.lien+=8;S.st.joie+=5;notes.push(`${L.name} t'a donné du temps, des mots, de la patience. Tu commences la vie avec des racines solides.`);}
+  else if(L.care<=-1){S.st.emo-=10;S.st.stress+=8;trauma(1,"ce que tu as vu à la maison");notes.push(`Tu grandis avec ce que ${L.name} n'a pas su réparer en ${L.sex==="F"?"elle":"lui"}. Ce n'est pas ta faute. C'est ton point de départ.`);}
+  if(L.violent||L.hit){trauma(1,"les coups de ton enfance");notes.push("La violence a traversé ta famille avant toi. Tu peux la porter plus loin, ou l'arrêter.");}
+  if(L.helped>=2){S.st.emo+=5;notes.push("On t'a appris qu'on peut demander de l'aide. C'est un héritage qui ne se voit pas.");}
+  if(L.terre&&!L.papers){S.f.terre=true;S.f.feud=true;notes.push("Tu hérites d'une part de terre en indivision, et des disputes qui vont avec.");}
+  else if(L.terre&&L.papers){S.f.terre=true;notes.push(L.unfair?"Le testament a divisé la famille. Tu en portes la trace.":"La terre familiale a été partagée proprement. Un souci de moins.");}
+  if(L.divorced)notes.push(`Tu nais dans une famille recomposée. ${L.partner?L.partner+" et ":""}${L.name} ne vivent pas toujours sous le même toit.`);
+  if(S.disease&&L.disease&&S.disease.k===L.disease.k)notes.push(`${S.disease.n} : la même maladie que ${L.name}.`);
+  Object.keys(S.st).forEach(k=>S.st[k]=clamp(S.st[k]));
+  S.inherit=notes;
+  if(S.sib===S.first)S.sib=loveName(S.sibSex);if(S.friend===S.first)S.friend=loveName(S.fSex);if(S.partner===S.first)S.partner=loveName(S.pSex);
 }
 function lesson(){
   const L=[],n=S.locked,f=S.f;
@@ -1425,8 +1672,7 @@ function drawPlant(final){
   }
   for(let i=0;i<segs;i++){const a=nodes[i],b=nodes[i+1];for(let l=0;l<2;l++){ctx.globalAlpha=l?.35:1;ctx.strokeStyle="#6a4a31";ctx.lineCap="round";ctx.lineWidth=Math.max(2,(segs-i)*1.3+1.6-l)*k;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+b.x)/2+(Rr()-.5)*4*k,(a.y+b.y)/2,b.x,b.y);ctx.stroke();}}
   ctx.globalAlpha=1;
-  const ppl=[];if(S.ci<=5)ppl.push("#b9850f","#b9850f");if(S.f.friend&&!S.f.friendDead)ppl.push("#5f8fa6");if(S.f.couple)ppl.push("#c0574f");
-  for(let i=0;i<Math.min(3,(S.f.kids||0)-(S.f.childDead?1:0));i++)ppl.push("#2a9d8f");if(S.st.lien>60)ppl.push("#8a7a5a","#8a7a5a");
+  const ppl=webPeople().map(o=>o.c);
   ppl.forEach((col,i)=>{const t=(i+.5)/ppl.length,px=W*(.08+.84*t),py=H*(.07+.06*Math.sin(i*2.1)),n=nodes[1+Math.floor(Rr()*segs)];
     ctx.strokeStyle="rgba(150,138,110,.5)";ctx.lineWidth=.8*k;ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.quadraticCurveTo((n.x+px)/2,(n.y+py)/2+12*k,px,py);ctx.stroke();
     ctx.fillStyle=col;ctx.beginPath();ctx.arc(px,py,3.6*k,0,Math.PI*2);ctx.fill();});

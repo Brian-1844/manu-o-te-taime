@@ -25,6 +25,12 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - Aucun chiffre ni score : la plante et quelques mots disent comment va la vie.
 - Des moments calmes, et des coups du sort, bons ou mauvais, pour tout le monde.
 - Demander de l'aide n'est pas une faiblesse mais une force : le jeu le reconnaît à chaque fois.
+- À la fin de chaque chapitre, un « Chant du chapitre » : un poème composé à partir des choix du joueur.
+- Les proches ont leur propre vie (ami, frère ou sœur, ex), et les souvenirs reviennent au fil des années.
+- Après un divorce : garde des enfants, visites, pension alimentaire, nouveaux conjoints, beaux-enfants, réseaux sociaux, solitude.
+- Chaque poème peut devenir une image à partager sur Facebook.
+- Les générations : après ta mort, tu peux vivre la vie de ton enfant, avec ce que tu lui as transmis.
+- « Ta toile » explique les fils de la plante : qui est relié à toi, et quels fils se sont rompus.
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
