@@ -33,6 +33,14 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - « Ta toile » explique les fils de la plante : qui est relié à toi, et quels fils se sont rompus.
 - Relations toxiques : contrôle, jalousie, manipulation, argent confisqué ; et les rôles qui étouffent (« un homme ne pleure pas », « une fille se tait »).
 - Les enfants poussent en petites plantes à côté de la tienne, reliées par une racine.
+- La solitude à chaque âge : la solitude subie, qui fait mal, et la solitude choisie, qui peut guérir.
+- Les réseaux sociaux : corps retouchés, comparaisons, vies en vitrine, harcèlement, familles derrière les écrans.
+- Les troubles alimentaires, montrés comme une maladie qui se soigne, avec des chemins vers l'aide.
+- L'adolescence : le corps qui change, le désir qui s'éveille, le consentement et la sécurité (sans contenu explicite).
+- Le mariage comme compagnonnage, pas comme possession ; la stérilité, l'adoption, le fa'a'amu, et le choix de ne pas avoir d'enfant.
+- S'épanouir : un don tiré au hasard (musique, danse, mots, mer…), à cultiver ou abandonner ; les discriminations subies, et nos propres préjugés.
+- Quand la vie devient trop dure, une main tendue peut surgir au hasard : à toi de l'accepter.
+- Les liens doivent s'entretenir : sans soin, les fils s'amincissent puis s'effacent. Plus on a donné, plus les mains se tendent.
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
