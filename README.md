@@ -31,6 +31,7 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - Chaque poème peut devenir une image à partager sur Facebook.
 - Les générations : après ta mort, tu peux vivre la vie de ton enfant, avec ce que tu lui as transmis.
 - « Ta toile » explique les fils de la plante : qui est relié à toi, et quels fils se sont rompus.
+- Relations toxiques : contrôle, jalousie, manipulation, argent confisqué ; et les rôles qui étouffent (« un homme ne pleure pas », « une fille se tait »).
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
