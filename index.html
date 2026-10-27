@@ -197,10 +197,10 @@ const NEG={stress:1,regret:1};
 const CH=[
  {n:"Chapitre I",t:"Le bébé",a:[0,2],k:3,line:"Tu ouvres les yeux. Le monde sent le monoï et le lait chaud."},
  {n:"Chapitre II",t:"L'enfance",a:[3,11],k:9,line:"Les pieds nus, les mangues tombées, l'école au bout de la route."},
- {n:"Chapitre III",t:"L'adolescence",a:[12,17],k:15,line:"Le corps change, le cœur s'emballe, les questions arrivent."},
- {n:"Chapitre IV",t:"Le jeune adulte",a:[18,29],k:12,line:"Le monde t'ouvre ses portes, ou te les ferme. Il faut choisir."},
- {n:"Chapitre V",t:"L'âge adulte",a:[30,44],k:13,line:"Les années passent vite. Tu portes les autres, et parfois on te porte."},
- {n:"Chapitre VI",t:"L'âge mûr",a:[45,59],k:11,line:"Tu as fait une bonne partie du chemin. Tu regardes en arrière autant que devant."},
+ {n:"Chapitre III",t:"L'adolescence",a:[12,17],k:17,line:"Le corps change, le cœur s'emballe, les questions arrivent."},
+ {n:"Chapitre IV",t:"Le jeune adulte",a:[18,29],k:14,line:"Le monde t'ouvre ses portes, ou te les ferme. Il faut choisir."},
+ {n:"Chapitre V",t:"L'âge adulte",a:[30,44],k:14,line:"Les années passent vite. Tu portes les autres, et parfois on te porte."},
+ {n:"Chapitre VI",t:"L'âge mûr",a:[45,59],k:12,line:"Tu as fait une bonne partie du chemin. Tu regardes en arrière autant que devant."},
  {n:"Chapitre VII",t:"La vieillesse",a:[60,74],k:10,line:"Le temps ralentit. Tu as enfin le temps de regarder ceux que tu aimes."},
  {n:"Chapitre VIII",t:"Le grand âge",a:[75,95],k:8,line:"Le corps est fatigué, mais la mémoire est pleine de visages et de rires."},
  {n:"Chapitre IX",t:"La mort",a:null},
@@ -1242,6 +1242,93 @@ const PARK_LATE={must:true,cond:S=>S.f.neuro==="park"&&S.ci===7,text:"Le corps s
  {t:"Tout faire seul{e}, coûte que coûte",fx:{sante:-6,stress:4,reco:2},ok:"Ta fierté reste debout.",ko:"Les chutes se multiplient."}
 ]};
 MOM[6].push(ALZ_DIAG,PARK_DIAG);
+/* Gestes simples, savoir-faire, nature, et caprices du ciel */
+const SWEEP={pri:true,text:"Samedi matin, la corvée : balayer les feuilles de manguier et de uru dans toute la cour, avec le balai nī'au. Il y en a des milliers. Le vent en apporte d'autres pendant que tu balaies.",choices:[
+ {t:"Le faire en chantant avec tes frères et sœurs",fx:{joie:4,lien:4,utile:3},ok:"Vous faites un concours du plus gros tas. Papa paie le gagnant en mangues.",ko:"Ça prend toute la matinée."},
+ {t:"Balayer vite, et cacher les feuilles derrière la citerne",fx:{joie:3,regret:1},set:S=>{if(R()<.5)return "Mamie trouve la cachette en dix secondes. Tu recommences, sous son regard.";},ok:"Tu as fini en quinze minutes. Record.",ko:"La technique ne marche qu'une fois."},
+ {t:"Négocier : balayer en échange de la télé ce soir",fx:{joie:3,reco:1},ok:"Mama accepte. Tu découvres le commerce à neuf ans.",ko:"Papa ajoute « et le linge aussi ». Les négociations sont rudes."}
+]};
+const GARDEN={pri:true,cond:S=>!S.f.homeless,text:"Derrière la maison, ton fa'a'apu : du taro, des pota, des tomates, des bananiers, un citronnier. Chaque soir, il faut arroser, désherber, chasser les poules.",choices:[
+ {t:"Arroser chaque soir, au coucher du soleil",fx:{emo:5,sante:3,argent:3,stress:-3},set:S=>{S.f.garden=true},ok:"Le jardin devient ton moment de calme. Et les tomates sont meilleures qu'au magasin.",ko:"Les jours de fatigue, le tuyau pèse une tonne."},
+ {t:"Planter avec les enfants du quartier",fx:{lien:5,utile:5,joie:4},set:S=>{S.f.garden=true},ok:"Chacun a sa rangée, avec son prénom sur un bâton. Le premier taro récolté est fêté comme une victoire.",ko:"Les petits arrosent surtout leurs pieds, et toi."},
+ {t:"Laisser tomber : pas le temps",fx:{stress:-1,regret:2},ok:"Une corvée de moins.",ko:"Les herbes reprennent tout. Les poules aussi."}
+]};
+const SEWING={cond:S=>!S.f.homeless,text:"Les femmes du quartier se retrouvent chaque mercredi pour coudre un tīfaifai, la grande couverture en appliqué. Cette fois, c'est pour un bébé à naître dans la famille. Elles t'invitent.",choices:[
+ {t:"Rejoindre le cercle de couture",fx:{lien:6,joie:5,emo:3},set:S=>{S.f.bloom=(S.f.bloom||0)+(R()<.5?1:0)},ok:S=>S.sex==="M"?"Tu es le seul homme. Elles rient, puis t'apprennent. Ton premier motif d'hibiscus est de travers, et le plus applaudi.":"Les potins, les rires, les fils de couleur, et une fleur d'hibiscus qui naît sous tes doigts.",ko:"Trois mois pour une seule couverture. La patience est un art."},
+ {t:"Coudre seul{e}, chez toi, un petit tīfaifai pour le bébé",fx:{emo:5,utile:4},ok:"Des mois plus tard, l'enfant dort dessous. Il le gardera toute sa vie.",ko:"Tu te piques les doigts mille fois."},
+ {t:"Décliner : ce n'est pas pour toi",fx:{stress:-1},ok:"Ton mercredi reste libre.",ko:"Tu rates des histoires que personne ne racontera ailleurs."}
+]};
+const CROWN={pri:true,text:"Un cousin part vivre en France demain. Toute la famille prépare des couronnes pour l'aéroport. Il faut cueillir, tresser, et faire vite.",choices:[
+ {t:"Tresser une couronne de tiare et de bougainvillier avec ta grand-mère",fx:{joie:5,lien:5,emo:2},set:S=>{S.f.reo=Math.max(S.f.reo||0,1)},ok:"Ses doigts vont si vite que tu ne vois rien. Elle te montre trois fois, en riant. Ta première couronne tient. Presque.",ko:"Le parfum des tiare te suit toute la nuit. Ce n'est pas vraiment un inconvénient."},
+ {t:"Faire une couronne de fougère et de feuilles, comme les anciens",fx:{joie:4,emo:4,reco:3},ok:"Tu montes dans la vallée cueillir la fougère. Ta couronne verte, simple et belle, est celle que le cousin garde jusqu'à Paris.",ko:"Tes mains sentent la sève pendant deux jours."},
+ {t:"Acheter des colliers de coquillages au marché",fx:{argent:-2,joie:2},ok:"Rapide, et joli.",ko:"À l'aéroport, tu regardes les couronnes des autres, tressées à la main."}
+]};
+const VALLEY={pri:true,text:"Dimanche, toute la bande monte dans la vallée : la rivière, les manguiers sauvages, les fe'i qui pendent, et au bout, la cascade et son bassin d'eau glacée.",choices:[
+ {t:"Sauter du rocher, dans le bassin",fx:{joie:7,sante:3,stress:-3},set:S=>{if(R()<.15){S.st.sante=clamp(S.st.sante-5);return "Ton pied heurte une pierre. Tu remontes en boitant, et tu racontes l'histoire pendant dix ans en l'améliorant chaque fois.";}},ok:"L'eau est si froide que tu cries en ressortant. Tout le monde saute après toi.",ko:"Le soleil se cache vite au fond de la vallée."},
+ {t:"Cueillir les fe'i et les goyaves pour le repas",fx:{joie:4,utile:4,lien:3},ok:"Vous redescendez les bras chargés. Ce soir, fe'i grillées pour tout le monde.",ko:"Les moustiques de la vallée ont fait un festin, eux aussi."},
+ {t:"Le ciel est noir en amont : convaincre tout le monde de redescendre",fx:{reco:3,emo:3},set:S=>{if(R()<.5)return "Une heure plus tard, la rivière monte d'un coup, boueuse et rapide. Tu ne sauras jamais ce qui se serait passé. Tes amis, si.";return "Il ne pleut finalement pas. On te traite de « vieille mamie » toute la soirée. Tu as quand même eu raison d'être prudent{|e}.";},ok:"En vallée, la pluie en amont peut faire monter la rivière en quelques minutes. Tu le sais.",ko:"Tes amis râlent pendant toute la descente."}
+]};
+const STORM_PREP={cond:S=>!S.f.homeless,text:"La météo annonce de très fortes pluies pour la nuit. Le ciel est déjà lourd, et ton fare est près de la rivière.",choices:[
+ {t:"Tout surélever, préparer des sacs de sable, garder une lampe et de l'eau",fx:{stress:3,emo:3,argent:-1},set:S=>{if(R()<.5)return "La rivière déborde, mais l'eau s'arrête au seuil de la porte. Tout ce qui comptait est au sec.";},ok:"Tu as appris des tempêtes d'avant.",ko:"Une soirée entière de travail, peut-être pour rien."},
+ {t:"Aller aider la vieille voisine d'abord",fx:{utile:7,lien:5,stress:3},set:S=>{S.f.gave=(S.f.gave||0)+1},ok:"Vous montez ses affaires à l'étage, puis elle te fait du café à minuit, à la lampe.",ko:"Chez toi, l'eau monte pendant ce temps."},
+ {t:"Se coucher, ça passera",fx:{stress:-1},set:S=>{if(R()<.5){S.st.argent=clamp(S.st.argent-6);S.st.stress=clamp(S.st.stress+5);return "À trois heures du matin, tu marches dans vingt centimètres d'eau. Les papiers, les photos, le canapé.";}},ok:"Une bonne nuit de sommeil.",ko:"Le ciel ne prévient pas deux fois."}
+]};
+const FIRST_WAVE={pri:true,text:"Ton oncle te prête un vieux bodyboard, rayé et décollé sur un coin. À l'embouchure de la rivière, les vagues sont petites, mais pour toi elles sont immenses.",choices:[
+ {t:"Ramer, tomber, recommencer, jusqu'à la bonne",fx:{joie:9,sante:4,emo:3},set:S=>{S.f.surf=true;S.mems.push("la première vague");return "Tu bois la tasse vingt fois. Puis, d'un coup, la vague te prend, et tu glisses jusqu'au sable en hurlant de joie. Ton oncle lève les bras comme si tu avais gagné une coupe du monde.";},ok:"La sensation de la première vague, tu ne l'oublieras jamais.",ko:"Le sel dans le nez, les coudes écorchés, le coup de soleil."},
+ {t:"Rester dans la mousse, près du bord",fx:{joie:4,stress:-1},ok:"Tu t'amuses sans risque, et tu regardes les grands.",ko:"Tu te promets d'aller plus loin la prochaine fois."},
+ {t:"Regarder depuis la plage",fx:{regret:2},ok:"Tu n'as pas froid.",ko:"Les autres rentrent avec des yeux qui brillent. Toi aussi, tu aurais voulu."}
+]};
+const SKIP_SURF={pri:true,text:"Mardi matin. La houle est parfaite, l'eau est lisse comme du verre. Tes copains passent devant le lycée, les planches sur le toit du pick-up. Ils klaxonnent. Tu as un contrôle de maths à huit heures.",choices:[
+ {t:"Sauter dans le pick-up",fx:{joie:9,sante:3,etu:-1},set:S=>{S.f.surf=true;S.f.skipSurf=true;if(R()<.5){S.st.lien=clamp(S.st.lien-2);S.st.stress=clamp(S.st.stress+3);return "La meilleure session de ta vie. Le soir, un mot du lycée attend sur la table, avec ton bulletin. Papa ne dit rien. Il regarde juste tes cheveux pleins de sel.";}S.mems.push("le mardi de la houle parfaite");return "Les vagues les plus belles de ta jeunesse. Personne ne s'en aperçoit. Tu rattrapes le contrôle la semaine suivante, avec une excuse que tu as répétée devant le miroir.";},ok:"Certaines matinées valent plus qu'un contrôle.",ko:"Un zéro, ou une explication à donner."},
+ {t:"Aller en cours, le regard vers la mer",fx:{etu:1,regret:3},ok:"Tu as une bonne note. Et une boule au ventre en les voyant rentrer, bronzés.",ko:"Tu entends parler de cette session pendant des années."},
+ {t:"Négocier : « Je viens après les cours ! »",fx:{joie:6,etu:1},set:S=>{S.f.surf=true},ok:"La session du coucher de soleil. La houle a un peu baissé, mais la lumière est orange, et vous êtes encore là à la nuit tombée.",ko:"Les meilleures vagues étaient ce matin."}
+]};
+/* La musique : parfois doué, parfois catastrophique */
+const musicGift=S=>{if(S.f.music==null)S.f.music=(S.talent===0||R()<.3)?"doué":"nul";return S.f.music==="doué";};
+const MUSIC_KID={pri:true,text:"Le tonton te met son vieux ukulele dans les mains. « Trois accords, et tu peux jouer toutes les chansons du fenua. » Do, la mineur, fa. Tes doigts sont tout petits, les cordes font mal.",choices:[
+ {t:"T'entraîner chaque soir, jusqu'à avoir des cornes au bout des doigts",fx:{joie:5,emo:2},set:S=>{S.f.musicPlays=true;if(musicGift(S)){S.f.bloom=(S.f.bloom||0)+1;S.st.reco=clamp(S.st.reco+4);return "Au bout d'un mois, tu joues à la bringue de famille. Les adultes s'arrêtent de parler pour t'écouter. Le tonton a les larmes aux yeux.";}S.st.joie=clamp(S.st.joie+3);return "Au bout d'un mois, le chien hurle dès que tu sors le ukulele. Les voisins ferment leurs fenêtres. Tu joues quand même, de tout ton cœur, et mamie applaudit à chaque fois.";},ok:"Tu apprends que la musique demande de la patience.",ko:"Tes doigts saignent un peu, les premières semaines."},
+ {t:"Chanter, plutôt, pendant que le tonton joue",fx:{joie:5,lien:3},set:S=>{if(musicGift(S))return "Ta voix est claire et juste. Le tonton s'arrête de jouer pour mieux t'écouter.";return "Tu chantes faux, mais si fort et avec tant de joie que tout le monde reprend en chœur pour te couvrir.";},ok:"La musique se partage, même sans instrument.",ko:"Le tonton espérait un successeur."},
+ {t:"Abandonner : ça fait trop mal aux doigts",fx:{regret:3},ok:"Tes doigts te remercient.",ko:"Le ukulele reste accroché au mur. Il t'attendra peut-être."}
+]};
+const MUSIC_TEEN={pri:true,text:"Avec les copains, vous montez un groupe dans le garage : une guitare désaccordée, un ukulele, un bidon en guise de batterie. La fête du lycée est dans un mois, et vous êtes inscrits.",choices:[
+ {t:"Prendre la guitare et le micro",fx:{stress:4,joie:4},set:S=>{S.f.musicPlays=true;crush(S);if(musicGift(S)){S.st.reco=clamp(S.st.reco+8);S.st.joie=clamp(S.st.joie+6);S.mems.push("la fête du lycée, sur scène");return "Le soir de la fête, toute la cour chante avec vous. {crush} est au premier rang. Pendant trois minutes, tu es une star.";}S.st.joie=clamp(S.st.joie+4);return "Une corde casse au deuxième accord. Le micro siffle. Tu oublies les paroles et tu improvises. La salle éclate de rire, puis applaudit plus fort que pour tous les autres groupes. On en parle encore à la réunion des anciens élèves.";},ok:"Tu oses monter sur scène.",ko:"Le trac, la veille, est terrible."},
+ {t:"Rejoindre plutôt la chorale de la paroisse",fx:{lien:5,emo:3},set:S=>{S.f.musicPlays=true;S.f.faith=Math.max(S.f.faith||0,1);if(musicGift(S))return "On te confie le solo du himene de Noël. Toute l'église se tait quand ta voix monte.";return "La cheffe de chœur t'écoute, sourit, et te place au dernier rang, « pour l'équilibre ». Tu chantes fort quand même. Personne ne s'en plaint, sauf l'alto devant toi.";},ok:"Les himene, les répétitions, une deuxième famille.",ko:"Les samedis soirs y passent."},
+ {t:"Être le manager du groupe, et porter les amplis",fx:{lien:4,reco:2},ok:"Sans toi, il n'y aurait pas de concert. Tu le rappelles souvent.",ko:"Tu n'as jamais su si tu aurais aimé jouer."}
+]};
+const MUSIC_ADULT={pri:true,cond:S=>!S.f.musicPlays&&!S.f.homeless,text:"À quarante ans passés, tu décroches enfin la guitare qui prend la poussière depuis des années. Avec des vidéos sur ton téléphone, tu recommences à zéro.",choices:[
+ {t:"T'y tenir, vingt minutes chaque soir",fx:{joie:6,emo:4,stress:-3},set:S=>{S.f.musicPlays=true;S.f.bloom=(S.f.bloom||0)+1;if(musicGift(S))return "Six mois plus tard, tu joues au mariage d'un cousin. Personne ne savait. Tout le monde veut savoir depuis quand.";return "Un an plus tard, tu joues trois chansons, lentement, avec des fausses notes. Mais ce sont tes trois chansons, et tu les joues le soir, pour toi. C'est suffisant.";},ok:"Il n'est jamais trop tard pour apprendre.",ko:"Tes enfants se moquent de toi. Puis ils viennent t'écouter en cachette."},
+ {t:"Remettre la guitare au mur",fx:{regret:3},ok:"Pas le temps, pas l'énergie.",ko:"Elle attend toujours."}
+]};
+const MUSIC_OLD={pri:true,cond:S=>!S.f.homeless,text:"Les petits-enfants te réclament une chanson, comme chaque dimanche. Ils te tendent le vieux ukulele.",choices:[
+ {t:"Jouer et chanter les chansons de ta jeunesse",fx:{joie:7,lien:6,utile:3},set:S=>S.f.musicPlays&&S.f.music==="doué"?"Tes doigts sont plus lents, mais ils se souviennent de tout. Les petits apprennent les paroles. Ces chansons vivront après toi.":S.f.musicPlays?"Tu joues aussi faux qu'avant, peut-être plus. Les petits adorent. Ils réclament surtout la chanson où tu te trompes toujours au même endroit.":"Tu ne sais pas jouer. Tu tapes le rythme sur le ukulele comme sur un tambour, et tu chantes faux. C'est le meilleur concert de leur vie.",ok:"La musique relie les âges.",ko:"Ta voix tremble un peu, maintenant."},
+ {t:"Leur apprendre les accords toi-même",fx:{utile:6,lien:5},set:S=>{if(S.f.musicPlays)return "Do, la mineur, fa. Tu dis la même chose que ton tonton, il y a soixante ans.";return "Tu apprends en même temps qu'eux. Ils sont plus rapides que toi. Ça ne te vexe même pas.";},ok:"Le savoir passe de main en main.",ko:"Leurs petits doigts souffrent, comme les tiens autrefois."}
+]};
+/* La musique qui sert toute la vie : séduire, décompresser, rassembler */
+function withMusic(m,opt){const orig=m.choices;m.choices=S=>{const c=typeof orig==="function"?orig(S):orig;return S.f&&S.f.musicPlays?c.concat([opt]):c;};}
+/* Le choix de ne plus manger de viande */
+const VEG={pri:true,cond:S=>!S.f.vegAsked,text:"Pour le grand repas de famille, tu as vu tuer le cochon du ahima'a. Depuis, tu regardes ton assiette autrement. Un documentaire, une amie qui ne mange plus de viande, et une question qui ne te quitte plus.",choices:[
+ {t:"Devenir végétarien{|ne}",fx:{emo:4,stress:2,lien:-2},set:S=>{S.f.vegAsked=true;S.f.veg=true;return "Plus de viande. Le poisson aussi, tu verras plus tard. Ta grand-mère te demande si tu es malade.";},ok:"Tu es en accord avec toi-même.",ko:"Au fenua, chaque fête tourne autour du cochon, du poulet et du poisson cru."},
+ {t:"Manger beaucoup moins de viande, sans tout arrêter",fx:{emo:2,sante:2},set:S=>{S.f.vegAsked=true;S.f.lessMeat=true},ok:"Un équilibre qui ne fâche personne, et ton corps s'en porte mieux.",ko:"Tu as parfois l'impression de ne pas aller au bout de tes idées."},
+ {t:"Continuer comme avant",fx:{stress:-1},set:S=>{S.f.vegAsked=true},ok:"Rien ne change à table.",ko:"La question revient parfois, en regardant ton assiette."}
+]};
+const VEG_FAMILY={pri:true,cond:S=>S.f.veg&&!S.f.vegFamily,text:"Le tama'ara'a de mariage du cousin : cochon au four, poulet fāfā, poisson cru, chao men au porc. Ta tante te tend une assiette pleine. « Tu ne vas pas nous faire honte devant tout le monde ? » Un tonton rit : « Il mange de l'herbe, maintenant, comme les chèvres ! »",choices:[
+ {t:"Apporter ton propre plat : uru, taro, fe'i, po'e à la banane",fx:{lien:3,emo:4,joie:3},set:S=>{S.f.vegFamily=true;return "Ton po'e disparaît en dix minutes. Même le tonton en reprend deux fois. Il continue de t'appeler « la chèvre », mais avec affection.";},ok:"Tu montres que ton choix peut se partager.",ko:"Tu dois cuisiner pour toi à chaque fête."},
+ {t:"Manger un peu de viande, pour ne pas vexer ta tante",fx:{lien:3,regret:4,emo:-2},set:S=>{S.f.vegFamily=true},ok:"La paix familiale est préservée.",ko:"Tu te sens trahir quelque chose en toi."},
+ {t:"Expliquer calmement pourquoi, sans faire la leçon",fx:{emo:5,stress:3},set:S=>{S.f.vegFamily=true;if(R()<.4)return "Ta cousine t'écoute, puis te dit qu'elle y pense aussi depuis longtemps.";return "On t'écoute poliment, puis on parle d'autre chose. Le respect viendra avec le temps.";},ok:"Tu restes toi-même, avec douceur.",ko:"Certains se sentent jugés, même quand tu ne juges personne."}
+]};
+const VEG_FRIENDS={cond:S=>S.f.veg,text:"Barbecue sur la plage avec les amis. Brochettes, saucisses, poulet. Toi, tu as deux épis de maïs et une salade un peu triste. Les copains rigolent : « Tu n'as pas faim, ou tu fais un régime ? »",choices:[
+ {t:"En rire avec eux, et faire griller du uru",fx:{joie:4,lien:3},ok:"Le uru grillé au feu de bois fait des jaloux. Bientôt, tout le monde en veut.",ko:"Tu rentres quand même avec un peu faim."},
+ {t:"Ne plus aller aux barbecues",fx:{lien:-5,stress:-1},ok:"Plus de remarques.",ko:"Tu rates les rires, les couchers de soleil, les histoires."},
+ {t:"Céder, juste pour ce soir",fx:{lien:2,regret:3},set:S=>{if(R()<.4){S.f.veg=false;S.f.lessMeat=true;return "Un soir devient deux, puis trois. Tu manges maintenant un peu de tout, et beaucoup moins qu'avant.";}},ok:"Tu fais partie du groupe.",ko:"Tu n'aimes pas ce que tu ressens après."}
+]};
+const VEG_DOCTOR={pri:true,cond:S=>S.f.veg||S.f.lessMeat,text:"Bilan de santé chez le médecin. Il regarde tes résultats longuement, puis lève les yeux.",choices:[
+ {t:"Écouter ses conseils et équilibrer tes repas",fx:{sante:6,emo:3},set:S=>{S.f.vegHealthy=true;return S.f.veg?"Ta tension et ton sucre sont meilleurs que ceux de la plupart des gens de ton âge, ici. Il te conseille seulement de surveiller certaines carences et de varier les légumineuses. Tu suis ses conseils.":"Moins de viande, plus de fruits et de légumes : tes résultats sont bons. Il te dit de continuer.";},ok:"Ton corps te remercie de ce choix, des années plus tard.",ko:"Il faut faire attention à ce que tu manges, et ça demande un peu d'organisation."},
+ {t:"Ne pas t'en préoccuper",fx:{stress:-1},set:S=>{if(S.f.veg&&R()<.4){S.st.sante=clamp(S.st.sante-5);return "Quelques mois plus tard, une grande fatigue. Il manquait des choses dans ton assiette. Une prise de sang, des compléments, et tout rentre dans l'ordre.";}},ok:"Tu fais confiance à ton corps.",ko:"Un régime sans viande mal équilibré peut aussi fatiguer."}
+]};
+MOM[2].push(VEG);MOM[3].push(VEG,VEG_FAMILY,VEG_FRIENDS);MOM[4].push(VEG,VEG_FAMILY,VEG_FRIENDS);[5,6].forEach(c=>MOM[c].push(VEG_DOCTOR));
+MOM[1].push(MUSIC_KID);MOM[2].push(MUSIC_TEEN);[4,5].forEach(c=>MOM[c].push(MUSIC_ADULT));[6,7].forEach(c=>MOM[c].push(MUSIC_OLD));
+MOM[1].push(FIRST_WAVE);MOM[2].push(FIRST_WAVE,SKIP_SURF);
+MOM[1].push(SWEEP,VALLEY);MOM[2].push(CROWN,VALLEY);[3,4,5,6,7].forEach(c=>MOM[c].push(GARDEN));[4,5,6].forEach(c=>MOM[c].push(SEWING));[3,4,5].forEach(c=>MOM[c].push(CROWN,STORM_PREP));
 /* Les premières amours */
 const crush=S=>{if(!S.crush){S.crSex=loveSex();S.crush=loveName(S.crSex);}};
 const DRESS={pri:true,text:S=>{crush(S);return "Demain, tu vas croiser {crush} à la sortie du lycée. Ce soir, tu essaies cinq tenues, tu empruntes le parfum de {ton frère|ta sœur} sans demander, et tu passes vingt minutes à placer une fleur de tiare derrière ton oreille.";},choices:[
@@ -1281,7 +1368,8 @@ const careFor=ci=>({pri:true,text:["","","Le lycée, les copains, les écrans : 
  {t:"Méditer, prier, respirer en silence",fx:{emo:6,stress:-5},set:S=>{S.f.habit="medit"},ok:"Dix minutes de silence, et le monde redevient à sa taille.",ko:"Les pensées partent dans tous les sens. Il faut de la patience."},
  {t:"Rien : tu es trop fatigué{e}",fx:{stress:1},ok:"Tu te reposes devant un écran.",ko:"L'heure passe, et tu ne t'en souviens déjà plus."}
 ]});
-[2,3,4,5,6,7].forEach(c=>MOM[c].push(careFor(c)));
+const careMusic={t:"Prendre ton ukulele ou ta guitare, et jouer pour toi",fx:{stress:-6,joie:5,emo:3},set:S=>{S.f.habit="musique"},ok:"Les accords chassent les soucis, un par un.",ko:"Les voisins, eux, n'ont pas choisi le concert."};
+[2,3,4,5,6,7].forEach(c=>{const m=careFor(c);withMusic(m,careMusic);MOM[c].push(m);});
 const NEWJOB={pri:true,cond:S=>!S.f.metier&&!S.f.homeless,text:"Le téléphone sonne. Une entreprise a gardé ton CV : on te propose un poste. Un vrai, avec un contrat.",choices:[
  {t:"Accepter avec joie",fx:{joie:8,argent:6,reco:4,stress:2},set:S=>{const ok=Object.keys(CAREERS).filter(k=>!careerLock(k)&&k!=="commerce");const k=pick(ok.length?ok:["hotel"]);S.f.metier=k;return `Te voilà ${fmt(CAREERS[k].n).toLowerCase()}. Le premier matin, tu arrives une heure en avance.`;},ok:"Une place, un salaire, une raison de te lever.",ko:"Tout est à apprendre, et tu as peur de mal faire."},
  {t:"Refuser : ce n'est pas ce que tu cherches",fx:{regret:3,emo:2},ok:"Tu restes fidèle à ce que tu veux vraiment.",ko:"Les fins de mois restent difficiles."}
@@ -1496,6 +1584,21 @@ const FATE=[
  {r:[6,7],p:.4,cond:S=>S.st.lien<30,text:"Un jeune de la paroisse commence à passer chaque dimanche. Il ne parle pas beaucoup. Toi non plus. Ça suffit.",fx:{lien:10,joie:5}},
  {r:[5,7],p:.15,text:"Quelqu'un que tu avais aidé il y a trente ans frappe à ta porte, pour te remercier. Tu ne te souvenais même plus de son visage.",fx:{reco:8,joie:6,utile:4}}
 ].map(e=>({...e,auto:true}));
+EVENTS.push(...[
+ {ci:1,p:.25,text:"Trois jours de pluie diluvienne. La rivière déborde, la route est coupée, l'école est fermée. Dans le fare, on met des seaux partout et on joue aux cartes à la lampe.",fx:{stress:3,joie:2,lien:3}},
+ {ci:3,p:.25,text:"La rivière sort de son lit pendant la nuit. Au matin, la boue a tout envahi : le salon, les papiers, la voiture. Tout le quartier vient pelleter, en bottes, sans rien demander.",fx:{argent:-6,stress:6,lien:4}},
+ {ci:4,p:.2,text:"La saison sèche n'en finit pas. Coupures d'eau tous les après-midi, le potager grille, on se lave avec un seau. Les vieux disent qu'ils n'ont jamais vu ça.",fx:{stress:4,sante:-2,joie:-2}},
+ {ci:5,p:.2,text:"Une forte houle venue du sud frappe la côte. Elle emporte la petite cabane de plage et la pirogue de ton père, attachée pourtant à deux cocotiers.",fx:{joie:-5,argent:-4,regret:2}},
+ {ci:6,p:.2,text:"Deux jours sans électricité après la tempête. Le congélateur dégèle, alors on cuit tout le poisson d'un coup, et on invite tout le quartier. La meilleure fête de l'année.",fx:{joie:5,lien:5,argent:-2}},
+ {ci:2,p:.15,good:true,text:"Une noix de coco tombe à dix centimètres de ta tête. Tu restes immobile. Ton cousin hurle de rire. Ce jour-là, tu achètes un billet de loto.",fx:{joie:4,stress:2}}
+].map(e=>({...e,auto:true})));
+
+/* La musique, utile plus tard dans la vie */
+withMusic(DATE,{t:"Sortir le ukulele et chanter pour {lover}, sous l'auvent, pendant l'averse",fx:{joie:7,emo:2},set:S=>{if(S.f.music==="doué"){if(R()<.75){newCouple(S);return "Ta voix couvre la pluie. {lover} ne dit rien, puis pose sa tête sur ton épaule. Des années plus tard, vous chantez encore cette chanson à chaque anniversaire de mariage.";}return "{lover} est touché{le}, mais pas amoureux{|se}. Il te reste une très belle chanson.";}if(R()<.45){newCouple(S);return "Tu chantes faux, fort, et tu te trompes de couplet. {lover} rit tellement qu'il faut s'asseoir. « Personne n'a jamais été aussi ridicule pour moi. » C'était la bonne réponse.";}return "Tu chantes faux. Un chien du quartier se met à hurler avec toi. {lover} rit, poliment, et appelle un taxi.";},ok:"La musique dit ce que les mots n'osent pas.",ko:"Le risque de chanter devant quelqu'un qui compte."});
+withMusic(WORK_PARTY,{t:"Prendre la guitare et faire chanter tout le service",fx:{joie:7,lien:5,reco:4},set:S=>{S.f.workRel=Math.min(100,(S.f.workRel??35)+20);return S.f.music==="doué"?"Le chef chante en duo avec la stagiaire. La fête dure jusqu'à minuit. Le lundi, on te surnomme « le DJ ».":"Personne ne connaît les accords, toi non plus, mais tout le monde chante. C'est la plus belle fête que le service ait connue.";},ok:"Tu rassembles les gens autour d'une chanson.",ko:"On te demandera de jouer à chaque fête, désormais."});
+withMusic(SCREENS,{t:"Sortir la guitare : « Qui connaît celle-là ? »",fx:{lien:7,joie:6},set:S=>{S.f.real=(S.f.real||0)+1;return "Un téléphone se pose, puis tous. Les petits tapent le rythme sur la table, mamie chante la deuxième voix. Personne ne se souvient de ce qu'il regardait sur son écran.";},ok:"La musique fait ce qu'aucun panier à téléphones ne fait.",ko:"Les ados lèvent les yeux au ciel. Puis ils chantent."});
+withMusic(BURNOUT,{t:"Reprendre ton instrument, chaque soir, pour décompresser",fx:{stress:-7,emo:5,joie:4},ok:"Vingt minutes d'accords, et la journée s'éloigne. Ça ne règle pas tout, mais ça te tient debout.",ko:"La fatigue est parfois plus forte que l'envie de jouer."});
+
 /* Registre : chaque moment a un identifiant, pour sauvegarder la partie en cours */
 const REG={};
 for(const ci in MOM)MOM[ci].forEach((m,j)=>{if(!m.id)m.id=`m${ci}_${j}`;REG[m.id]=m;});
@@ -1525,6 +1628,50 @@ const HUMOR=[
   {t:"Profiter de ce privilège de l'âge",fx:{joie:7,reco:2},ok:"Le pasteur rit. Le maire aussi, un peu moins. Ta belle-sœur ne te parle plus, et tu trouves ça reposant.",ko:"La famille te surnomme « la radio libre »."},
   {t:"Garder ton sourire mystérieux",fx:{emo:3,joie:3},ok:"Tout le monde se demande ce que tu sais. Tu sais beaucoup de choses.",ko:"Tu emportes quelques bonnes répliques avec toi."}]}
 ];
+HUMOR.push(
+ {ci:1,text:"La bringue de famille pour les quatre-vingts ans de papy dure jusqu'à l'aube. Les ukuleles, les himene, le ma'a qui ne finit jamais. Tu luttes contre le sommeil.",choices:[
+  {t:"Tenir jusqu'au bout, comme les grands",fx:{joie:6,lien:4,sante:-1},ok:"On te retrouve au matin, endormi{|e} sous la table, la tête sur le chien. Il ne s'est pas plaint.",ko:"Le lendemain, tu dors pendant la messe. Mamie te pince."},
+  {t:"Aller dormir dans la voiture avec les cousins",fx:{joie:5,lien:3},ok:"Huit enfants dans un pick-up, à se raconter des histoires de tūpāpa'u jusqu'à trois heures.",ko:"Personne ne dort vraiment. Tout le monde a peur des fantômes."}]},
+ {ci:1,text:"Un tonton t'a donné un surnom quand tu avais trois ans, à cause d'une histoire de couche et de cochon. Tout le district l'utilise. Même la maîtresse.",choices:[
+  {t:"L'assumer, avec fierté",fx:{joie:5,reco:2},ok:"À cinquante ans, on t'appelle encore comme ça au marché. C'est devenu affectueux. Presque.",ko:"Ton vrai prénom, plus personne ne s'en souvient."},
+  {t:"Lutter pour qu'on arrête",fx:{stress:2,joie:2},ok:"Tu obtiens une victoire partielle : on ne le dit plus devant tes amis. Seulement devant tes amoureux.",ko:"Plus tu luttes, plus ça les amuse."}]},
+ {ci:1,text:"Mamie connaît la généalogie de tout le monde. Tu lui montres un garçon à la télé. « Ah, lui ? C'est le petit-fils du cousin de la sœur de ton arrière-grand-père, de Huahine. Il a les oreilles de sa grand-mère. »",choices:[
+  {t:"Lui demander de raconter tout l'arbre",fx:{lien:5,etu:1},set:S=>{S.f.reo=Math.max(S.f.reo||0,1)},ok:"Deux heures plus tard, tu es apparenté{e} à la moitié de la Polynésie, et à un pasteur des Australes.",ko:"Tu ne retiens que les histoires de disputes, évidemment."},
+  {t:"Hocher la tête et changer de chaîne",fx:{joie:2},ok:"Mamie continue toute seule. Elle n'a pas besoin de toi.",ko:"Un jour, tu regretteras de ne pas avoir noté."}]},
+ {ci:2,text:S=>{crush(S);return "Tu as enfin le courage de dire à ta grand-mère que {crush} te plaît. Elle réfléchit longuement, puis sourit : « Ah non. C'est ton cousin. Par ta tante de Taravao. »";},choices:[
+  {t:"Vérifier l'arbre généalogique, par sécurité",fx:{joie:4,etu:1},ok:"Cousin au quatrième degré. Ta grand-mère dit que « ça compte quand même ». Tu as besoin d'une autre île.",ko:"Au fenua, tout le monde est un peu cousin. C'est beau, et c'est compliqué."},
+  {t:"Décider que ta grand-mère se trompe",fx:{joie:3,stress:1},ok:"Ta grand-mère ne se trompe jamais. Mais tu as gagné une semaine de rêve.",ko:"Le repas de famille suivant est très gênant."}]},
+ {ci:2,text:"Tes amis te mettent au défi : goûter le fafaru, le poisson macéré dans l'eau de mer fermentée. L'odeur arrive avant le plat.",choices:[
+  {t:"Manger sans broncher, avec un grand sourire",fx:{reco:4,joie:5},ok:"Tes yeux pleurent, ton sourire tient. Le tonton te tape dans le dos : « Toi, tu es un vrai. »",ko:"Ton haleine, elle, te trahit pendant deux jours."},
+  {t:"Refuser, poliment",fx:{joie:2,reco:-1},ok:"Tu gardes ta dignité, et ton estomac.",ko:"Les copains te le rappellent à chaque repas."}]},
+ {ci:3,text:"Tu présentes {partner} à ta famille, « en petit comité ». Quarante-sept personnes sont là. Chacune pose les trois mêmes questions : « Tu travailles où ? Tu es de quelle famille ? C'est pour quand, le bébé ? »",cond:S=>S.f.couple,choices:[
+  {t:"Laisser {partner} se débrouiller, pour voir",fx:{joie:5,lien:3},ok:"{partner} répond quarante-sept fois, avec patience. Ta mère l'adopte avant le dessert.",ko:"Le soir, {partner} te demande s'il y aura un examen écrit."},
+  {t:"Préparer une fiche avec les réponses et la distribuer",fx:{joie:6,reco:2},ok:"La fiche devient légendaire. Ta tante la garde encore dans son sac.",ko:"Certains posent les questions quand même, pour le plaisir."}]},
+ {ci:3,text:"Tu organises ton anniversaire. Rendez-vous à dix-huit heures. À dix-huit heures, tu es seul{e} avec le gâteau. Le premier invité arrive à vingt heures trente, en disant : « Je suis en avance ? »",choices:[
+  {t:"Annoncer l'heure de la prochaine fête deux heures plus tôt",fx:{joie:4,reco:1},ok:"Tout le monde arrive pile à l'heure que tu voulais vraiment. Tu as percé le secret de l'heure tahitienne.",ko:"Une tante l'a compris, et arrive maintenant quatre heures en retard."},
+  {t:"Lâcher prise et manger le gâteau en attendant",fx:{joie:3,stress:-2},ok:"Quand tout le monde arrive, la fête est magnifique. Il ne reste juste plus de gâteau.",ko:"Ton régime, lui, ne s'en remet pas."}]},
+ {ci:3,text:"Tu as acheté un énorme 4x4, à crédit, pour une île qui fait soixante kilomètres de tour. Le premier jour, il ne passe pas dans le chemin de la maison familiale.",choices:[
+  {t:"Le garer au bord de la route, et marcher fièrement",fx:{joie:4,reco:2,argent:-2},ok:"Il brille. Les voisins l'admirent. Toi, tu marches dix minutes sous la pluie.",ko:"Le crédit dure sept ans. Le chemin, lui, ne s'élargit pas."},
+  {t:"Élargir le chemin avec les cousins, un samedi",fx:{joie:5,lien:5,sante:-1},ok:"Une journée de travail, puis un barbecue, puis une bringue. Le chemin est plus large, et la famille plus soudée.",ko:"Tu as abattu le manguier de ta grand-mère. Elle ne t'a pas encore pardonné."}]},
+ {ci:4,text:"Pour les quatre-vingts ans de mamie, la famille crée un groupe de discussion. Trente-deux membres. Quatre cents messages en une soirée pour choisir le menu. Un oncle répond « ok » à tout, une cousine n'envoie que des autocollants, et quelqu'un a ajouté mamie par erreur.",choices:[
+  {t:"Proposer un sondage, pour décider une bonne fois pour toutes",fx:{reco:3,stress:2},ok:"Le sondage dit poisson cru. Mamie, qui lisait tout depuis le début, écrit son premier message : « Je veux du chao men. » Fin du débat.",ko:"Trois cousins contestent le sondage."},
+  {t:"Couper les notifications et attendre le jour J",fx:{joie:4,stress:-3},ok:"Le jour de la fête, il y a du poisson cru, du chao men, trois gâteaux, et tout le monde est content.",ko:"Tu découvres sur place que c'était toi qui devais apporter la glace."}]},
+ {ci:4,text:"Chaque fois que tu rends visite à Mama, elle te regarde avec inquiétude : « Tu as maigri. Mange. » Tu as pris dix kilos depuis Noël.",choices:[
+  {t:"Manger, pour lui faire plaisir",fx:{joie:5,lien:4,sante:-1},ok:"Trois assiettes de chao men, un uru entier, et un gâteau coco pour la route. Mama est heureuse.",ko:"Ta ceinture, elle, a déposé une réclamation."},
+  {t:"Lui montrer la balance",fx:{joie:3,lien:2},ok:"« Elle est fausse, ta balance. » La discussion est close.",ko:"Tu repars quand même avec deux barquettes."}]},
+ {ci:4,text:"Lundi, dix heures du matin. Ton collègue soupire : « Je suis fiu. » Toi, tu l'es depuis neuf heures et demie.",cond:S=>!!S.f.metier,choices:[
+  {t:"Proposer une pause coco-pain coco",fx:{joie:5,stress:-3},set:S=>{S.f.workRel=Math.min(100,(S.f.workRel??35)+5)},ok:"La pause dure quarante minutes. C'est la plus productive de la semaine.",ko:"Le chef passe pile à ce moment-là."},
+  {t:"Déclarer officiellement le lundi « jour fiu »",fx:{joie:4,reco:1},ok:"Tout le service adopte la règle. On ne fait rien d'important le lundi avant midi.",ko:"Le mardi devient le nouveau lundi."}]},
+ {ci:5,text:"Ton tonton raconte encore l'histoire du marlin qu'il a pêché en 1987. Il y a vingt ans, le poisson faisait deux mètres. Aujourd'hui, il en fait cinq, et il a failli couler le bateau.",choices:[
+  {t:"Lui demander des détails, pour voir jusqu'où ça va",fx:{joie:6,lien:3},ok:"Le marlin a maintenant mangé un requin, et le tonton l'a ramené à la nage. Tout le monde applaudit.",ko:"Le repas dure deux heures de plus."},
+  {t:"Lui rappeler gentiment qu'il faisait deux mètres",fx:{joie:3},ok:"« Deux mètres… sans la queue ! » Le tonton ne perd jamais.",ko:"Ta tante te fait les gros yeux : on ne touche pas au marlin."}]},
+ {ci:5,text:"Au temple, ta voisine porte son chapeau du dimanche, tressé de fleurs et de coquillages. Il est si grand que tu ne vois plus le pasteur depuis trois mois.",choices:[
+  {t:"Changer de banc",fx:{joie:3},ok:"Tu vois enfin le pasteur. Il a beaucoup vieilli.",ko:"La voisine te demande, vexée, si tu as un problème avec elle."},
+  {t:"Lui faire un compliment sincère sur son chapeau",fx:{joie:4,lien:4},ok:"Elle t'en tresse un, pour ton anniversaire. Il est encore plus grand.",ko:"Maintenant, c'est la personne derrière toi qui ne voit plus le pasteur."}]},
+ {ci:6,text:"Ta première visio avec tes petits-enfants à Paris. Pendant vingt minutes, ils voient ton oreille, puis ton plafond, puis ton chien. Tu leur parles quand même avec beaucoup d'émotion.",cond:S=>S.f.kids>0&&!S.f.childDead,choices:[
+  {t:"Continuer, ils finiront bien par te voir",fx:{joie:6,lien:5},ok:"À la fin, ils te voient enfin, pendant trois secondes. Tout le monde crie de joie, des deux côtés de la planète.",ko:"Ils connaissent maintenant très bien ton plafond."},
+  {t:"Appeler la voisine de quatorze ans à l'aide",fx:{joie:5,lien:3},ok:"Elle règle tout en dix secondes, sans lever les yeux de son propre téléphone. Tu lui donnes une mangue.",ko:"Elle te le rappellera chaque fois qu'elle te croisera."}]}
+);
 HUMOR.forEach((m,i)=>{m.id=`hu${i}`;m.good=true;REG[m.id]=m;m.choices.forEach(c=>{const o=c.set;c.set=S=>{S.f.laughs=(S.f.laughs||0)+1;return o?o(S):"";};});});
 /* La main tendue : quand tout devient trop lourd */
 const GIVERS=[
@@ -1608,7 +1755,7 @@ function news(ci){
 function chapterStart(ci){
   const notes=[];const add=(fx,note)=>{applyFx(fx);if(note)notes.push(fmt(note));};
   const decay=[0,0,0,-2,-4,-7,-10,-14][ci];
-  const d=S.disease&&ci>=2?S.disease.decay:0;
+  const d=S.disease&&ci>=2?Math.round(S.disease.decay*((S.f.veg||S.f.lessMeat)&&S.disease.k==="diabete"?.5:1)):0;
   if(decay||d)add({sante:decay+d},d?`${S.disease.n} : ta santé s'use un peu plus vite.`:null);
   if(S.f.lostJob&&S.f.metier){const n=fmt(CAREERS[S.f.metier].n).toLowerCase();S.f.metier=null;add({argent:-6,reco:-3,stress:4},`Tu as perdu ton travail (${n}). Il faudra en retrouver un.`);}
   S.f.lostJob=false;
@@ -1645,6 +1792,10 @@ function chapterStart(ci){
   if(S.scars&&S.scars.length){syncScars();const open=S.scars.filter(x=>!x.healed);
     if(open.length&&S.st.emo>=60&&R()<.35){S.f.trauma=Math.max(0,(S.f.trauma||0)-1);syncScars();add({emo:2,joie:2},"Une vieille blessure s'est refermée, doucement. Il en reste une cicatrice sur ton tronc : elle fait partie de toi, mais elle ne saigne plus.");}
     else if(open.length){let worse=false;open.forEach(x=>{if(x.sz<2.4){x.sz+=.3;worse=true;}});if(worse&&R()<.5)add({},"Une blessure qu'on ne soigne pas ne disparaît pas : elle s'élargit, en silence, et change la façon dont tu aimes, travailles, réagis.");}}
+  if(S.f.garden&&ci>=3&&!S.f.homeless)add({emo:2,sante:1,argent:1},"Le fa'a'apu donne. Les bananes mûrissent toutes en même temps, alors tu en distribues à tout le quartier.");
+  if((S.f.veg||S.f.lessMeat)&&ci>=4)add({sante:S.f.veg?3:2},S.f.veg?"Moins de viande, plus de fruits et de légumes : ton cœur et ta tension te remercient doucement, année après année.":"Tu manges moins de viande qu'avant. Ton corps s'en porte mieux, sans que tu y penses.");
+  if(S.f.habit==="musique"&&ci>=3)add({stress:-3,joie:2},"Le soir, quelques accords, et la journée s'éloigne.");
+  if(S.f.musicPlays&&ci>=3&&ci<=6&&R()<.35&&!S.f.homeless)add({lien:3,joie:3},S.f.music==="doué"?"À chaque fête de famille, on te tend la guitare avant même le dessert. Tu fais chanter trois générations.":"À chaque fête de famille, on te tend la guitare. Tu joues mal, tout le monde chante plus fort pour couvrir tes fausses notes, et c'est exactement pour ça qu'on t'aime.");
   if(S.f.habit==="sport"&&ci>=3)add({sante:3,stress:-2},"Tu continues à bouger. Ton corps te le rend.");
   if(S.f.habit==="lire"&&ci>=3)add({emo:2,joie:1},"Il y a toujours un livre ouvert sur ta table de nuit.");
   if(S.f.habit==="medit"&&ci>=3)add({stress:-3,emo:2},"Chaque matin, dix minutes de silence. Ça change tout le reste de la journée.");
@@ -1676,7 +1827,7 @@ function buildQueue(ci){
   if(ci>=3&&ci<=6&&SURPRISE_BDAY.cond(S)&&R()<.55)ins(SURPRISE_BDAY);
   const good=EVENTS.filter(e=>e.good&&e.ci===ci&&(!e.cond||e.cond(S))&&R()<e.p);
   shuffle(good).slice(0,2).forEach(ins);
-  {const h=HUMOR.filter(x=>x.ci===ci&&!(S.seen||[]).includes(x.id)&&(!x.cond||x.cond(S)));if(h.length)ins(pick(h));}
+  {const h=HUMOR.filter(x=>x.ci===ci&&!(S.seen||[]).includes(x.id)&&(!x.cond||x.cond(S)));shuffle(h).slice(0,ci>=1&&ci<=5?2:1).forEach(ins);}
   shuffle(QUIET.filter(e=>e.ci===ci)).slice(0,ci===0?1:2).forEach(ins);
   const fate=FATE.filter(e=>(e.fx&&(e.fx.joie||0)>=0||(S.heavy||0)<10||R()<.4)&&ci>=e.r[0]&&ci<=e.r[1]&&(!e.cond||e.cond(S))&&R()<e.p);
   if(fate.length)ins(pick(fate));
@@ -1893,6 +2044,7 @@ function ctxLines(){
   if(f.neuro==="alz"&&f.neuroKnown)L.push("Tu cherches tes lunettes. Elles sont sur ta tête.","Tu racontes la même histoire pour la troisième fois. Personne ne t'arrête.","Tu as mis le sucre dans le frigo, et le lait dans le placard.");
   if(f.neuro==="park"&&f.neuroKnown)L.push("Ta tasse tremble un peu. Tu la tiens à deux mains.","Tes pas sont courts, mais tu marches encore jusqu'à la mer.");
   if(f.pregCi===ci)L.push(S.sex==="F"?"Tu poses souvent la main sur ton ventre, sans y penser.":fmt("Le ventre de {partner} s'arrondit. Tu lui apportes des mangues vertes et du sel, à minuit."));
+  if(f.garden)L.push("Ce matin, une tomate a rougi dans le fa'a'apu. Tu la manges sur place, encore tiède de soleil.","Il faut encore balayer les feuilles de manguier. Elles reviennent toujours, comme la vie.");
   if(f.dependent)L.push("On t'aide à t'asseoir près de la fenêtre. La mer est toujours là.");
   return L;
 }
@@ -1925,12 +2077,15 @@ const CALLBACKS=[
  {id:"aorai",r:[5,7],c:S=>S.mems.includes("l'Aorai à l'aube"),t:"Tu montes encore là-haut, plus lentement. La montagne ne t'a jamais demandé de comptes."},
  {id:"letter",r:[4,7],c:S=>S.f.letterKept,t:"En rangeant un tiroir, tu retrouves la lettre jamais donnée, avec sa faute d'orthographe. Tu souris. Tu te demandes ce qu'est devenu{cre} {crush}."},
  {id:"window",r:[5,7],c:S=>S.f.caught,t:"Ton propre enfant rentre à trois heures du matin. Tu es assis{|e} dans le fauteuil, bras croisés. Et soudain, tu comprends ton père."},
+ {id:"surf",r:[4,7],c:S=>S.f.surf,t:"La houle se lève au large. Même après tant d'années, ton cœur accélère un peu, comme à quinze ans sur ta planche."},
+ {id:"skip",r:[5,7],c:S=>S.f.skipSurf&&S.f.kids>0,t:"{child} te demande si tu as déjà séché l'école. Tu réponds « jamais », en regardant la mer."},
+ {id:"music",r:[4,7],c:S=>S.f.musicPlays,t:S=>S.f.music==="doué"?"Le soir, tu prends le ukulele sans y penser. Tes doigts trouvent les accords tout seuls, comme on retrouve un chemin.":"Tu fredonnes en faisant la vaisselle. Faux, comme toujours. Personne ne te demande d'arrêter."},
  {id:"heiva",r:[5,7],c:S=>has("Entrer dans la troupe"),t:"Au Heiva, tu regardes les jeunes danser à To'ata. Tes pieds battent la mesure tout seuls."}
 ];
 function callback(){
   S.cb=S.cb||[];
   const ok=CALLBACKS.filter(c=>S.ci>=c.r[0]&&S.ci<=c.r[1]&&!S.cb.includes(c.id)&&c.c(S));
-  if(!ok.length)return "";const c=pick(ok);S.cb.push(c.id);return fmt(c.t);
+  if(!ok.length)return "";const c=pick(ok);S.cb.push(c.id);return fmt(typeof c.t==="function"?c.t(S):c.t);
 }
 function bridge(){
   const ci=S.ci,a=CH[ci].a;if(!a)return "";
@@ -2085,6 +2240,7 @@ function epilogue(){
   if(f.neuro==="alz"&&f.neuroKnown)P.push("Les derniers mois, tu ne savais plus les prénoms. Mais tu souriais quand on chantait, et tu serrais les mains qui tenaient les tiennes. Ce qu'on oublie avec la tête, on le garde parfois avec le cœur.");
   if(f.neuro==="park"&&f.neuroKnown)P.push("Tes mains tremblaient, mais tes histoires, elles, ne tremblaient pas. Elles sont enregistrées quelque part, dans le téléphone d'un petit-enfant.");
   if(f.repented)P.push("Ceux qui t'ont connu{e} jeune, puis vieux, disent que tu avais changé. Certains te devaient leur deuxième chance, parce que tu leur avais montré que c'était possible.");
+  if(f.musicPlays&&S.talent!==0)P.push(f.music==="doué"?"Ton ukulele est resté accroché au mur. Un petit-enfant l'a décroché le jour de l'enterrement, et a joué ta chanson préférée.":"On rit encore de tes fausses notes, avec tendresse. Quelqu'un fredonne ta chanson, aussi faux que toi, exprès.");
   if((f.bloom||0)>=3)P.push(tal(S).trace);
   else if(f.talentLost)P.push(`Ton don pour ${tal(S).n} est resté en toi, endormi. Personne ne saura jamais ce qu'il aurait pu devenir.`);
   if(st.reco>=60)P.push("On parle encore de toi au marché, au temple, sur le quai. Une salle, une pirogue ou un enfant porte ton prénom.");
@@ -2107,7 +2263,7 @@ function legacyOf(){
   const alive=!f.childDead&&S.childName;
   return {name:S.first,sex:S.sex,partner:(f.couple||f.widow||f.divorced)?(f.couple||f.widow?S.partner:S.ex):null,pSex:f.couple||f.widow?S.pSex:S.exSex,
     heirName:alive?S.childName:null,heirSex:alive?S.childSex:null,wealth:w,place:S.place,heritage:S.heritage,disease:S.disease,
-    care,bloom:f.bloom||0,grudge:f.grudge||0,repented:!!f.repented,grudgeWho:f.grudgeWho,forgave:f.forgave||0,talent:S.talent||0,violent:!!f.violent,controlling:(f.controlling||0)>=2,hit:!!f.hit,alcool:(f.alcool||0)>=2,sober:!!f.sober,helped:f.helped||0,emo:S.st.emo,
+    care,veg:!!f.veg,bloom:f.bloom||0,grudge:f.grudge||0,repented:!!f.repented,grudgeWho:f.grudgeWho,forgave:f.forgave||0,talent:S.talent||0,violent:!!f.violent,controlling:(f.controlling||0)>=2,hit:!!f.hit,alcool:(f.alcool||0)>=2,sober:!!f.sober,helped:f.helped||0,emo:S.st.emo,
     terre:!!f.terre,papers:!!f.papers,unfair:!!f.unfair,house:!!f.house,divorced:!!f.divorced,gen:(S.gen||1),lineage:[...(S.lineage||[]),S.first]};
 }
 function bornFrom(L){
@@ -2127,6 +2283,7 @@ function bornFrom(L){
   if(L.grudge>0){S.f.feud=true;notes.push(`Tu hérites d'une rancune que tu ne comprends pas : dans ta famille, on ne parle pas à ${fmt(L.grudgeWho||'certains')}. Personne ne se souvient très bien pourquoi.`);}
   if(L.repented)notes.push(`On raconte que ${L.name} avait fait du mal, autrefois, et qu'${L.sex==="F"?"elle":"il"} a passé sa vie à réparer. Tu grandis en sachant qu'on peut changer.`);
   if(L.forgave>0)notes.push(`${L.name} a su pardonner. On dit dans la famille que ça a changé l'air de la maison.`);
+  if(L.veg&&R()<.4){S.f.vegAsked=true;S.f.lessMeat=true;notes.push(`${L.name} ne mangeait pas de viande. À la maison, tu as grandi avec du uru, du taro et des légumes du fa'a'apu, et tu as gardé l'habitude.`);}
   if(L.helped>=2){S.st.emo+=5;notes.push("On t'a appris qu'on peut demander de l'aide. C'est un héritage qui ne se voit pas.");}
   if(L.terre&&!L.papers){S.f.terre=true;S.f.feud=true;notes.push("Tu hérites d'une part de terre en indivision, et des disputes qui vont avec.");}
   else if(L.terre&&L.papers){S.f.terre=true;notes.push(L.unfair?"Le testament a divisé la famille. Tu en portes la trace.":"La terre familiale a été partagée proprement. Un souci de moins.");}
@@ -2187,6 +2344,9 @@ function lesson(){
   if(f.meaning)L.push("Tu as connu le vide, même au milieu de tout. Il n'était pas un défaut : c'était une question. Tu y as répondu en cherchant un sens, pas en remplissant.");
   else if(f.fillEmpty)L.push("Tu as essayé de remplir le vide avec des choses. Il ne demandait pas des choses : il demandait du sens.");
   if(f.rejected)L.push("À seize ans, on t'a dit non. Tu as cru que tu ne t'en remettrais jamais. Tu t'en es remis{|e}, et tu as appris qu'être refusé{e} ne dit rien de ta valeur.");
+  if(f.veg)L.push("Tu as choisi de ne plus manger de viande, dans un pays où chaque fête tourne autour du cochon. Ça t'a coûté des remarques et des repas tristes ; ton corps, lui, t'en a été reconnaissant.");
+  if(f.musicPlays)L.push(f.music==="doué"?"La musique t'a accompagné{e} toute ta vie : pour séduire, pour décompresser, pour rassembler. Un don partagé ne s'use pas.":"Tu n'as jamais bien joué, mais tu as toujours joué. La musique n'a pas besoin d'être parfaite pour rassembler les gens.");
+  if(f.garden)L.push("Tu as cultivé un jardin. Arroser chaque soir, attendre, récolter, partager : c'était déjà une façon de vivre.");
   if((f.laughs||0)>=3)L.push("Tu as beaucoup ri, même dans les années difficiles. Le rire ne répare pas tout, mais il aide à tout porter.");
   if(f.newFriend)L.push("Un jour, tu as souri à un inconnu au lieu de te méfier. Les plus belles amitiés commencent souvent comme ça.");
   if(S.scars&&S.scars.some(x=>x.healed))L.push("Ton tronc porte des cicatrices. Elles ne disent pas que tu as été faible : elles disent que tu as guéri.");

@@ -49,6 +49,9 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - Les blessures profondes laissent des entailles sur le tronc, qui s'élargissent sans soin ou deviennent des cicatrices ; l'amour fait fleurir la plante et attire des papillons.
 - La grossesse : la fleur devient fruit ; de rares complications, et très rarement la mort en couches. Un hasard qui n'est pas cruel : après trois coups durs, un répit.
 - Les joies et l'humour : arcs-en-ciel, étoiles filantes, promotions, guérisons, fous rires à chaque âge, et les premières amours de l'adolescence (lettres, textos, sorties en cachette).
+- Les gestes simples : balayer les feuilles, le fa'a'apu, le tīfaifai, les couronnes de fleurs et de fougère, la vallée et sa cascade, la première vague ; et les caprices du ciel.
+- La musique à chaque âge : ukulele, guitare, chorale, parfois doué, parfois catastrophique, toujours avec le cœur.
+- Devenir végétarien : les remarques en famille et entre amis, et les bienfaits pour la santé avec les années.
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
