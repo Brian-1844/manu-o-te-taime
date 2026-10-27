@@ -46,6 +46,9 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - La maladie d'Alzheimer et la maladie de Parkinson dans la vieillesse.
 - La vie professionnelle et l'argent : crédits, surendettement, prêt immobilier, créer son entreprise (réussite ou faillite, et réessayer), harcèlement, grèves, droits au travail.
 - L'amitié au travail : sport d'entreprise, fêtes, et parfois un anniversaire surprise des collègues.
+- Les blessures profondes laissent des entailles sur le tronc, qui s'élargissent sans soin ou deviennent des cicatrices ; l'amour fait fleurir la plante et attire des papillons.
+- La grossesse : la fleur devient fruit ; de rares complications, et très rarement la mort en couches. Un hasard qui n'est pas cruel : après trois coups durs, un répit.
+- Les joies et l'humour : arcs-en-ciel, étoiles filantes, promotions, guérisons, fous rires à chaque âge, et les premières amours de l'adolescence (lettres, textos, sorties en cachette).
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.
