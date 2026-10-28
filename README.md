@@ -52,6 +52,8 @@ Une vie commencée doit être vécue jusqu'au bout : on ne peut pas en commencer
 - Les gestes simples : balayer les feuilles, le fa'a'apu, le tīfaifai, les couronnes de fleurs et de fougère, la vallée et sa cascade, la première vague ; et les caprices du ciel.
 - La musique à chaque âge : ukulele, guitare, chorale, parfois doué, parfois catastrophique, toujours avec le cœur.
 - Devenir végétarien : les remarques en famille et entre amis, et les bienfaits pour la santé avec les années.
+- L'autre côté de l'histoire après les conflits ; respirer avant de réagir ; vies croisées : vivre la vie d'une personne de sa toile.
+- **Comprendre l'autre** : les premières impressions qui se trompent, réparer après une dispute, la voix d'un ancien, « Ce que tu n'as pas vu » dans l'épilogue et la question « Et toi ? » à la fin des chapitres.
 - Personne ne vit pour soi seul : chaque choix fait des ricochets sur les autres, et les choix des autres touchent le joueur.
 - Pas de héros ni de méchant : seulement des gens, leur environnement et leurs choix.
 - Une vie complète prend environ une heure.

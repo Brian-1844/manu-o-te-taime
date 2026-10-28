@@ -113,6 +113,16 @@ summary{cursor:pointer;color:var(--accent)}
 .lesson{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
 .lesson h4{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
 .lesson p{margin:0;max-width:62ch}
+.elder{margin:0;font-family:var(--display);color:var(--sun);max-width:62ch}
+.elder span{display:block;font-family:var(--body);font-size:.85rem;color:var(--muted);font-style:italic;margin-top:2px}
+.unseen{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.unseen h4{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sun);font-weight:600}
+.unseen p{margin:0;max-width:62ch;font-style:italic}
+.feel{margin:0;font-style:italic;color:var(--accent);max-width:62ch}
+.choice.breathe{border-style:dashed;border-color:var(--accent);color:var(--accent)}
+.crossbox{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.crossbox h4{margin:0;font-family:var(--display);font-weight:400;font-size:1.05rem}
+.crossbox p{margin:0;font-size:.9rem;color:var(--muted);font-style:italic}
 .lesson details{display:flex;flex-direction:column;gap:8px}
 .lesson details p{margin-top:8px}
 #life{grid-area:life;min-width:0;display:flex;flex-direction:column;gap:14px;align-self:start}
@@ -446,13 +456,13 @@ const COUPLE_TALK={cond:S=>S.f.couple,text:"{partner} rentre fermé{pe}. La soir
  {t:"Bouder en silence",fx:{stress:4,lien:-3},ok:"Pas de cris ce soir.",ko:"Le silence devient un mur."},
  {t:"Proposer d'en parler demain, à tête reposée",fx:{emo:4,stress:-3,lien:2},ok:"La nuit calme les deux cœurs.",ko:"Rien n'est réglé ce soir."}
 ]};
-const BETRAYAL={p:.45,cond:S=>S.f.couple,text:"Tu découvres que {partner} te ment depuis des mois : une autre relation, cachée. Plus tard, tu apprendras que {pil} se sentait invisible depuis des années. Ça n'excuse rien. Ça explique un peu.",choices:[
+const BETRAYAL={p:.45,cond:S=>S.f.couple,text:"Tu découvres que {partner} te ment depuis des mois : une autre relation, cachée.",choices:[
  {t:"Laisser éclater ta colère",fx:{stress:6,joie:-6,emo:-3,reco:-2},set:S=>{trauma(1,"la trahison");if(R()<.5){endCouple(S);return "Les cris, la valise jetée dehors : c'est fini.";}return "Après la tempête, vous restez ensemble. Mais quelque chose s'est brisé.";},ok:"Ta colère, au moins, est vraie.",ko:"Des mots qui ne s'effaceront pas."},
  {t:"Pleurer, en silence",fx:{joie:-8,stress:5,regret:3},set:S=>{trauma(1,"la trahison")},ok:"Tu ne fais de mal à personne.",ko:"Sauf à toi-même."},
  {t:"Rompre",fx:{joie:-8,stress:5,lien:-5,reco:2},set:S=>{endCouple(S);trauma(1,"la trahison");if(R()<.5){S.f.depression=1;return "La tristesse t'accompagne de longs mois.";}},ok:"Tu te respectes.",ko:"Tout un monde s'écroule. Il faudra reconstruire.",mem:"une trahison, et la force de repartir"},
  {t:"Prendre le temps de comprendre, puis décider",lock:TR,fx:{emo:6,stress:3},set:S=>{if(R()<.35+S.st.emo/200){S.st.lien=clamp(S.st.lien+6);return "Vous vous reconstruisez, lentement, autrement.";}endCouple(S);return "Comprendre n'a pas suffi. Vous vous séparez, sans haine.";},ok:"Tu cherches ce qui s'est vraiment passé.",ko:"Des semaines dans le doute."}
 ]};
-const FRIEND_BETRAYAL={p:.4,text:"{friend} a raconté à tout le quartier un secret que tu lui avais confié. Un soir de fête, quelques bières, et les mots sont sortis.",choices:[
+const FRIEND_BETRAYAL={p:.4,text:"{friend} a raconté à tout le quartier un secret que tu lui avais confié.",choices:[
  {t:"Couper les ponts",fx:{lien:-6,reco:2,regret:3},ok:"Tu protèges ta confiance.",ko:"Des années d'amitié s'arrêtent là."},
  {t:"Lui dire ta colère, en face",fx:{stress:4,emo:3},set:S=>{if(R()<.5)return "{fIl} s'excuse, les larmes aux yeux.";S.st.lien=clamp(S.st.lien-5);return "{fIl} se défend, et l'amitié se fissure.";},ok:"Tu dis les choses.",ko:"La conversation est dure."},
  {t:"Chercher à comprendre pourquoi",lock:TR,fx:{emo:6,stress:2},set:S=>{if(R()<.6){S.st.lien=clamp(S.st.lien+5);return "{fIl} avait peur et a mal agi. Vous vous retrouvez.";}return "Tu comprends, mais la confiance ne revient pas.";},ok:"Tu regardes au-delà de la blessure.",ko:"C'est à toi de faire le premier pas, alors que c'est toi qui as été blessé{e}."},
@@ -541,7 +551,7 @@ const BINGO={cond:S=>!S.f.homeless,text:"Le bingo du quartier, chaque samedi soi
  {t:"Y aller sans argent, juste pour les gens",fx:{lien:3,joie:1},ok:"Tu gardes la fête, pas la perte.",ko:"Tenter sa chance « juste une fois » est une tentation hebdomadaire."},
  {t:"Arrêter net",fx:{argent:4,lien:-3,emo:2},ok:"Ton compte en banque respire.",ko:"Le samedi devient très long."}
 ]};
-const VIOLENCE_V={p:.35,cond:S=>S.f.couple,text:"Un soir de dispute, {partner} lève la main sur toi. Puis pleure, et jure que ça n'arrivera plus. {pIl} a grandi dans une maison où les coups étaient la langue du soir. Ça n'excuse rien, et tu as le droit de te protéger.",choices:[
+const VIOLENCE_V={p:.35,cond:S=>S.f.couple,text:"Un soir de dispute, {partner} lève la main sur toi. Puis pleure, et jure que ça n'arrivera plus. Tu as le droit de te protéger.",choices:[
  {t:"Partir chez ta mère, cette nuit",fx:{stress:6,joie:-6,lien:2,emo:2},set:S=>{endCouple(S);trauma(1,"les coups");return "La porte claque derrière toi. Tu ne sais pas encore que c'est le bon choix.";},ok:"Tu te protèges.",ko:"Tout quitter, en une nuit, sans rien."},
  {t:"Rester, et {le|la} croire",fx:{stress:8,emo:-4,joie:-4},set:S=>{trauma(1,"les coups");if(R()<.6){S.st.sante=clamp(S.st.sante-8);return "Ça recommence. Plus fort. Près de trois mille victimes de violences conjugales par an au fenua, et tu en fais partie.";}return "Ça ne recommence pas. Mais tu ne dors plus de la même façon.";},ok:"Tu donnes une chance.",ko:"La peur est entrée dans la maison."},
  {t:"Porter plainte",fx:{stress:7,reco:-2,emo:3,lien:-4},set:S=>{endCouple(S);trauma(1,"les coups");return "La gendarmerie, l'association d'aide aux victimes, les regards de la belle-famille. Mais tu es en vie.";},ok:"La loi est de ton côté.",ko:"La famille de {partner} te traite de menteu{r|se}."}
@@ -1326,6 +1336,39 @@ const VEG_DOCTOR={pri:true,cond:S=>S.f.veg||S.f.lessMeat,text:"Bilan de santé c
  {t:"Ne pas t'en préoccuper",fx:{stress:-1},set:S=>{if(S.f.veg&&R()<.4){S.st.sante=clamp(S.st.sante-5);return "Quelques mois plus tard, une grande fatigue. Il manquait des choses dans ton assiette. Une prise de sang, des compléments, et tout rentre dans l'ordre.";}},ok:"Tu fais confiance à ton corps.",ko:"Un régime sans viande mal équilibré peut aussi fatiguer."}
 ]};
 MOM[2].push(VEG);MOM[3].push(VEG,VEG_FAMILY,VEG_FRIENDS);MOM[4].push(VEG,VEG_FAMILY,VEG_FRIENDS);[5,6].forEach(c=>MOM[c].push(VEG_DOCTOR));
+/* Les premières impressions */
+const judge=(k,v)=>S=>{S.f.judge=S.f.judge||{};S.f.judge[k]=v;};
+const NEIGHBOR={pri:true,cond:S=>!(S.f.judge||{}).neighbor,text:"Le voisin, un vieux bourru, crie chaque fois que votre ballon passe par-dessus sa clôture. Il ne sourit jamais. Les enfants du quartier l'appellent « le requin ».",choices:[
+ {t:"L'appeler « le requin », comme tout le monde",fx:{joie:2,lien:2},set:judge("neighbor","mal"),ok:"Tu fais partie de la bande.",ko:"Il t'entend, un jour. Il ne dit rien."},
+ {t:"Aller lui rapporter le ballon toi-même, et dire pardon",fx:{emo:3,stress:2},set:judge("neighbor","curieux"),ok:"Il grogne. Mais il te rend le ballon, et un jour, une mangue avec.",ko:"Tu as eu très peur, sur le chemin."}
+]};
+const NEIGHBOR_TRUTH={must:true,cond:S=>(S.f.judge||{}).neighbor&&!S.f.judgeSeen?.neighbor,text:S=>"Des années plus tard, à l'enterrement du vieux voisin, ta mère te raconte : son fils unique s'est noyé à dix ans, en courant après un ballon sur la route. Depuis, il criait sur tous les enfants qui jouaient près de chez lui. Il avait peur pour vous."+(S.f.judge.neighbor==="mal"?" Tu repenses au surnom. Il t'avait entendu{e}.":" Tu repenses à la mangue. C'était sa façon de dire merci."),choices:[
+ {t:"Rester un moment près de sa tombe",fx:{emo:6,regret:2},set:S=>{S.f.judgeSeen=Object.assign(S.f.judgeSeen||{},{neighbor:1});S.f.misjudged=(S.f.misjudged||0)+(S.f.judge.neighbor==="mal"?1:0);},ok:"On juge les autres sur leurs actes, et soi-même sur ses intentions.",ko:"Certaines excuses arrivent trop tard."}
+]};
+const COLD_COLLEAGUE={pri:true,cond:S=>!!S.f.metier&&!(S.f.judge||{}).colleague,text:"Une collègue ne dit jamais bonjour, part à seize heures pile, refuse tous les pots et toutes les sorties. Les autres la trouvent hautaine.",choices:[
+ {t:"La trouver hautaine, toi aussi",fx:{lien:2},set:judge("colleague","mal"),ok:"Tu partages l'avis de l'équipe.",ko:"Tu ne lui adresses plus la parole."},
+ {t:"Lui proposer un café, un matin, sans insister",fx:{emo:3},set:judge("colleague","curieux"),ok:"Elle hésite, puis accepte. Elle parle peu, mais elle te remercie.",ko:"Elle refuse, la première fois."}
+]};
+const COLD_TRUTH={must:true,cond:S=>(S.f.judge||{}).colleague&&!S.f.judgeSeen?.colleague,text:S=>"Un jour, tu apprends pourquoi ta collègue part toujours à seize heures : elle s'occupe seule de sa mère, atteinte d'Alzheimer, et de son fils handicapé. Elle dort quatre heures par nuit. Elle n'a jamais voulu qu'on la plaigne."+(S.f.judge.colleague==="mal"?" Tu repenses à ce que tu as dit d'elle.":" Tu repenses au café. C'était peut-être le seul moment de sa journée pour elle."),choices:[
+ {t:"Lui proposer ton aide, discrètement",fx:{utile:6,emo:5,lien:3},set:S=>{S.f.judgeSeen=Object.assign(S.f.judgeSeen||{},{colleague:1});S.f.misjudged=(S.f.misjudged||0)+(S.f.judge.colleague==="mal"?1:0);S.f.gave=(S.f.gave||0)+1;},ok:"Tu la remplaces un vendredi. Elle t'apporte des beignets le lundi, sans un mot.",ko:"Elle a du mal à accepter. Il faut du tact."},
+ {t:"Ne rien changer, mais ne plus la juger",fx:{emo:4},set:S=>{S.f.judgeSeen=Object.assign(S.f.judgeSeen||{},{colleague:1});S.f.misjudged=(S.f.misjudged||0)+(S.f.judge.colleague==="mal"?1:0);},ok:"Tu la regardes autrement. Les autres finissent par faire pareil.",ko:"Elle porte toujours tout, seule."}
+]};
+const SCARY_LADY={pri:true,cond:S=>!(S.f.judge||{}).lady,text:"Au bout du chemin vit une vieille dame aux cheveux blancs, qui parle seule et n'ouvre jamais ses volets. Les enfants disent que c'est une tahu'a, une sorcière.",choices:[
+ {t:"Courir quand tu passes devant chez elle",fx:{joie:2,stress:1},set:judge("lady","mal"),ok:"Le frisson du jeu.",ko:"Un jour, tu la vois te regarder courir, tristement."},
+ {t:"Lui dire bonjour, un matin, en tremblant",fx:{emo:4,stress:2},set:judge("lady","curieux"),ok:"Elle ouvre ses volets, pour la première fois depuis des années.",ko:"Tes copains te traitent de fou."}
+]};
+const LADY_TRUTH={must:true,cond:S=>(S.f.judge||{}).lady&&!S.f.judgeSeen?.lady,text:S=>"Un jour, dans un vieux livre sur le Heiva, tu la reconnais en photo : la vieille dame du bout du chemin était la plus grande danseuse de sa génération. Elle a tout perdu le jour où son mari est mort en mer, et ne parle plus qu'à lui."+(S.f.judge.lady==="mal"?" Tu repenses à tes courses devant sa maison.":" Tu repenses aux volets ouverts. C'était pour toi."),choices:[
+ {t:"Lui apporter des fleurs, et lui demander de te raconter",fx:{emo:5,lien:4,joie:3},set:S=>{S.f.judgeSeen=Object.assign(S.f.judgeSeen||{},{lady:1});S.f.misjudged=(S.f.misjudged||0)+(S.f.judge.lady==="mal"?1:0);},ok:"Elle te raconte To'ata en 1965, les costumes, les applaudissements. Ses yeux brillent comme une jeune fille.",ko:"Elle pleure un peu, aussi."}
+]};
+MOM[1].push(NEIGHBOR,SCARY_LADY);MOM[2].push(LADY_TRUTH);MOM[3].push(NEIGHBOR_TRUTH);[3,4].forEach(c=>MOM[c].push(COLD_COLLEAGUE));[4,5].forEach(c=>MOM[c].push(COLD_TRUTH));MOM[4].push(NEIGHBOR_TRUTH);MOM[3].push(LADY_TRUTH);
+/* Réparer après une dispute */
+const REPAIR_MAP={"Reprocher : « Tu ne fais jamais rien ! »":"{partner}","Exploser et claquer la porte":"ton père","Une gifle, comme on t'a élevé{e}":"{child}","Crier, punir, confisquer le téléphone":"{child}","Le confronter devant tout le monde":"ton collègue","Bouder pendant trois jours sans expliquer pourquoi":"{crush}","La frapper":"ta petite sœur","Te fâcher, repousser les mains":"ceux qui prennent soin de toi","Te venger":"ceux que ta vengeance a touchés","Lui dire que c'est de sa faute":"{partner}","Nier : « Tu dis n'importe quoi. »":"{partner}","Te justifier : « Tu ne comprends pas ce que je vivais »":"la personne que tu as blessée"};
+const REPAIR={id:"repair",text:S=>`Le lendemain, la dispute avec ${fmt(S._repairWho||"l'autre")} est toujours là, entre vous, comme un meuble au milieu de la pièce. Personne n'en parle.`,choices:[
+ {t:"Revenir vers l'autre, et reconnaître ta part, sans « mais »",fx:{emo:6,lien:5,stress:-3},set:S=>{S.f.repaired=(S.f.repaired||0)+1;if(R()<.7)return "« Je me suis emporté{e}. Je suis désolé{e}. » L'autre baisse la garde. Vous parlez, vraiment, pour la première fois depuis longtemps. Le lien en sort plus solide qu'avant.";return "L'autre n'est pas encore prêt{|e} à entendre. Mais tu as ouvert la porte, et elle restera ouverte.";},ok:"Réparer, c'est le vrai talent des relations qui durent.",ko:"Il faut ravaler ta fierté."},
+ {t:"T'excuser, mais expliquer que l'autre l'avait cherché",fx:{stress:2,lien:1},ok:"Tu as dit pardon.",ko:"Un pardon suivi d'un « mais » n'est qu'à moitié un pardon. L'autre l'a entendu."},
+ {t:"Attendre que l'autre fasse le premier pas",fx:{stress:3,regret:3,lien:-2},ok:"Ta fierté est sauve.",ko:"L'autre attend la même chose. Le silence s'installe."},
+ {t:"Faire comme si de rien n'était",fx:{lien:-3,stress:2},ok:"Pas de discussion pénible.",ko:"Les disputes qu'on ne répare pas s'empilent, comme les feuilles de manguier."}
+]};
 MOM[1].push(MUSIC_KID);MOM[2].push(MUSIC_TEEN);[4,5].forEach(c=>MOM[c].push(MUSIC_ADULT));[6,7].forEach(c=>MOM[c].push(MUSIC_OLD));
 MOM[1].push(FIRST_WAVE);MOM[2].push(FIRST_WAVE,SKIP_SURF);
 MOM[1].push(SWEEP,VALLEY);MOM[2].push(CROWN,VALLEY);[3,4,5,6,7].forEach(c=>MOM[c].push(GARDEN));[4,5,6].forEach(c=>MOM[c].push(SEWING));[3,4,5].forEach(c=>MOM[c].push(CROWN,STORM_PREP));
@@ -1673,6 +1716,26 @@ HUMOR.push(
   {t:"Appeler la voisine de quatorze ans à l'aide",fx:{joie:5,lien:3},ok:"Elle règle tout en dix secondes, sans lever les yeux de son propre téléphone. Tu lui donnes une mangue.",ko:"Elle te le rappellera chaque fois qu'elle te croisera."}]}
 );
 HUMOR.forEach((m,i)=>{m.id=`hu${i}`;m.good=true;REG[m.id]=m;m.choices.forEach(c=>{const o=c.set;c.set=S=>{S.f.laughs=(S.f.laughs||0)+1;return o?o(S):"";};});});
+/* L'autre côté de l'histoire, et l'émotion nommée avant de choisir */
+const byText=t=>{for(const ci in MOM)for(const m of MOM[ci])if(typeof m.text==="string"&&m.text.startsWith(t))return m;return null;};
+const POV=new Map([
+ [BETRAYAL,{feel:"Ce que tu ressens : la colère d'abord. Et dessous, une peur plus ancienne : celle de ne pas compter.",reveal:S=>"{partner}, ce soir-là, reste dans sa voiture garée devant la maison, sans oser entrer. Depuis des mois, {pil} se sentait transparent{pe} : plus de regards, plus de questions sur sa journée. Ce n'est pas une excuse, et {pil} le sait. {pIl} a honte, et {pil} a peur de ce que tu vas dire."}],
+ [FRIEND_BETRAYAL,{feel:"Ce que tu ressens : la trahison, et une humiliation brûlante. Tu as envie de tout couper.",reveal:S=>"{friend} n'a pas dormi depuis. Ce soir-là, {fil} avait bu, {fil} voulait faire rire, et ton secret est sorti tout seul. Le lendemain, {fil} a écrit dix messages d'excuses, sans oser en envoyer un seul."}],
+ [byText("Ton père t'humilie"),{feel:"Ce que tu ressens : la honte, qui se déguise en colère.",reveal:S=>"Ton père, le soir, seul sur la terrasse. Son propre père le rabaissait devant tout le monde ; il s'était juré de ne jamais faire pareil. Et aujourd'hui, les mêmes mots sont sortis de sa bouche. Il ne sait pas comment te le dire."}],
+ [byText("Ton frère a vendu"),{feel:"Ce que tu ressens : la trahison d'un frère, et l'impression d'être volé{e}.",reveal:S=>"Ton frère avait des dettes que personne ne connaissait, et un fils malade. Il avait trop honte pour demander de l'aide. Il s'était dit qu'il te rembourserait vite. Il n'a jamais pu, et il évite ton regard depuis."}],
+ [VIOLENCE_V,{feel:"Ce que tu ressens : la peur, la sidération, et une petite voix qui cherche déjà des excuses à l'autre.",reveal:S=>"{partner}, enfant, se cachait sous la table quand son père rentrait. {pIl} s'était promis de ne jamais devenir comme lui. Ce soir, {pil} se regarde dans le miroir de la salle de bain, et ne se reconnaît pas. Comprendre d'où vient la main ne t'oblige pas à rester. Ta sécurité passe d'abord."}],
+ [CONTROL,{feel:"Ce que tu ressens : l'étouffement, et la culpabilité de vouloir respirer.",reveal:S=>"Quand {partner} vérifie ton téléphone, son cœur bat à tout rompre. Dans sa tête, une seule phrase tourne : « Tout le monde finit par partir. » Sa mère est partie un matin, sans un mot, quand {pil} avait six ans. Sa peur est réelle. Ce n'est pas à toi de la porter."}],
+ [ADMIRER,{feel:"Ce que tu ressens : la gêne, et l'envie de fuir la situation.",reveal:S=>{const l=(S.log[S.log.length-1]||{}).t||"";return l.startsWith("Lui dire non")?"Elle rentre chez elle, triste, mais pas humiliée. Des années plus tard, elle se souviendra que tu as été doux{|ce} avec elle, à un âge où personne ne l'était.":"Elle rentre chez elle et déchire son dessin de fleur. Elle avait mis trois soirs à le faire. Elle se demande ce qui ne va pas chez elle.";}}],
+ [SELF_BIAS,{feel:"Ce que tu ressens : un malaise, et la tentation de suivre le groupe.",reveal:S=>"Le soir, dans une chambre louée à Faa'a, ton collègue appelle sa fille à Manille. Il lui dit que tout va bien, que les gens sont gentils. Puis il raccroche, et reste longtemps assis dans le noir."}],
+ [KIDS_TEEN,{feel:"Ce que tu ressens : la peur pour ton enfant, déguisée en colère.",reveal:S=>"{child}, dans sa chambre, la porte fermée. Ce soir-là, quelqu'un l'a humilié{cie} devant tout le lycée. Le paka, c'était pour ne plus rien sentir. {ciIl} aurait voulu que tu le devines, sans avoir à le dire."}],
+ [EXNEW,{feel:"Ce que tu ressens : un pincement de jalousie, et une vieille tristesse qui remonte.",reveal:S=>"{ex}, sur le parking, après la fête. {xIl} t'a vu{e} partir. {xIl} non plus n'a pas tout oublié. On peut refaire sa vie et garder une blessure."}],
+ [BURDEN,{feel:"Ce que tu ressens : la honte de dépendre, et la peur de déranger.",reveal:S=>S.f.kids>0&&!S.f.childDead?"{child}, dans sa voiture, avant d'entrer chez toi, pleure trente secondes. Puis {ciil} s'essuie les yeux et sourit. Pas parce que tu es un poids. Parce qu'{ciil} a peur de te perdre.":"Ta nièce, dans sa voiture, avant d'entrer chez toi, pleure trente secondes. Pas parce que tu es un poids. Parce qu'elle a peur de te perdre."}],
+ [LONE_CHILD,{feel:"Ce que tu ressens : la honte d'être seul{e}, comme si ça se voyait sur ton visage.",reveal:S=>"L'autre enfant seul de la cour, ce soir-là, dit à sa mère : « Je suis le seul à n'avoir personne. » Il ne sait pas que tu penses exactement la même chose, à vingt mètres de lui."}],
+ [DISCRIM,{feel:"Ce que tu ressens : l'injustice, et la fatigue de la vivre encore.",reveal:S=>"La personne qui t'a jugé{e}, ce jour-là, ne s'est même pas rendu compte de ce qu'elle faisait. Ses préjugés, on les lui a appris enfant, comme on t'a appris les tiens. Ça n'excuse rien. Ça explique comment ils se transmettent, et pourquoi il faut les nommer."}]
+].filter(([k])=>k));
+const BREATHE={t:"Respirer, et chercher à comprendre avant de réagir",breathe:true,fx:{emo:4,stress:-2},ok:"Tu prends le temps de regarder la situation autrement.",ko:"L'émotion est toujours là. Mais elle ne choisit plus à ta place."};
+REG.repair=REPAIR;
+REG.pov={id:"pov",auto:true,good:true,text:S=>"<b>De l'autre côté.</b> "+(S._povText||""),fx:{emo:2}};
 /* La main tendue : quand tout devient trop lourd */
 const GIVERS=[
  {r:[1,2],t:"Ta maîtresse a remarqué tes yeux cernés. Elle te garde après la classe, sans te gronder, et te demande simplement : « Comment ça va, à la maison ? »",fx:{emo:4,lien:4}},
@@ -1747,8 +1810,8 @@ const ARCS={
 const EXNEWS=["{ex} s'est remis{xe} en couple. Tu l'apprends par une cousine, au marché.","Tu croises {ex} à la station-service. Vous vous saluez, poliment, comme des inconnus qui savent tout.","{ex} est malade, dit-on. Tu hésites longtemps à appeler.","{ex} t'envoie un message pour ton anniversaire. Juste trois mots. Ça suffit à remuer beaucoup."];
 function news(ci){
   const out=[];
-  if(S.f.friend&&!S.f.friendDead){const t=ARCS.friend[S.arc.friend][ci];if(t)out.push(t);}
-  const t2=ARCS.sib[S.arc.sib][ci];if(t2&&ci>=2)out.push(t2);
+  if(S.f.friend&&!S.f.friendDead&&S.arc.friend){const t=ARCS.friend[S.arc.friend][ci];if(t)out.push(t);}
+  if(S.arc.sib){const t2=ARCS.sib[S.arc.sib][ci];if(t2&&ci>=2)out.push(t2);}
   if(S.ex&&ci>=4&&R()<.6)out.push(pick(EXNEWS));
   return out.map(fmt);
 }
@@ -1963,6 +2026,7 @@ function showBirth(){
    <dt>Héritage</dt><dd>${S.disease?S.disease.n+".":"Aucune maladie héritée."}</dd>
    <dt>Ton cœur</dt><dd>${heartLine()}</dd>
    <dt>Ton don</dt><dd>Quelque part en toi dort un talent. Tu le découvriras dans l'enfance.</dd>
+   ${S.cross?`<dt>Vie croisée</dt><dd>Tu as connu cette personne de l'extérieur, dans la vie de ${S.cross.who}. Cette fois, tu es à sa place. ${S.cross.who} sera ${S.cross.role==="sib"?(S.cross.whoSex==="F"?"ta sœur":"ton frère"):S.cross.role==="friend"?(S.cross.whoSex==="F"?"ton amie":"ton ami"):"peut-être l'amour de ta vie"}. Tu sauras ce que tu ne voyais pas.</dd>`:""}
    ${S.par?`<dt>Ta lignée</dt><dd>Enfant de ${S.par.name}${S.par2?" et de "+S.par2.name:""}. ${S.gen}<sup>e</sup> génération : ${S.lineage.length>4?"… → ":""}${S.lineage.slice(-4).join(" → ")} → ${S.first}.</dd>`:""}
    ${S.inherit&&S.inherit.length?`<dt>Ce que tu reçois</dt><dd>${S.inherit.join(" ")}</dd>`:""}
   </dl>
@@ -1998,12 +2062,15 @@ function nextMoment(){
   const left=S.queue.slice(S.qi).map(id=>REG[id]).filter(x=>x&&(!x.cond||x.cond(S))).length;
   const step=left?`Encore ${left} moment${left>1?"s":""} dans ce chapitre`:"Dernier moment de ce chapitre";
   if(m.auto){if(m.prep)m.prep(S);return showEvent(m,step);}
-  const choices=typeof m.choices==="function"?m.choices(S):m.choices;
-  setCard(`<p class="step">${step}</p>${bridge()}<p class="m-text">${fmt(m.text)}</p><div class="choices" id="ch"></div>`);
+  S._curM=m.id;
+  const pv=POV.get(m);S._br=S._br||{};
+  const choices=(typeof m.choices==="function"?m.choices(S):m.choices).slice();
+  if(pv&&!S._br[m.id])choices.push(BREATHE);
+  setCard(`<p class="step">${step}</p>${bridge()}<p class="m-text">${fmt(m.text)}</p>${pv?`<p class="feel">${fmt(pv.feel)}</p>`:""}<div class="choices" id="ch"></div>`);
   const box=$("#ch");
   choices.forEach(c=>{
     const reason=c.lock?c.lock(S):null;if(reason)S.locked++;
-    const b=document.createElement("button");b.className="choice";
+    const b=document.createElement("button");b.className="choice"+(c.breathe?" breathe":"");
     b.innerHTML=`<span>${fmt(c.t)}</span>`+(reason?`<span class="c-lock">${fmt(reason)}</span>`:"");
     if(reason){b.disabled=true;b.classList.add("locked");}else b.onclick=()=>choose(c);
     box.append(b);
@@ -2118,6 +2185,10 @@ function choose(c){
   if(WR[c.t]!=null&&S.f.metier)wr(WR[c.t])(S);
   applyFx(fx);growPlant(fx);
   let note=(c.set&&c.set(S))||"";
+  if(REPAIR_MAP[c.t]&&!S.f.homeless){S._repairWho=REPAIR_MAP[c.t];S.queue.splice(S.qi,0,"repair");}
+  {const pm=REG[S._curM],pv=pm&&POV.get(pm);S._povShown=S._povShown||{};
+   if(c.breathe&&pv){S._br[pm.id]=true;S._povShown[pm.id]=true;S.f.povs=(S.f.povs||0)+1;S.f.breathed=(S.f.breathed||0)+1;S.queue.splice(S.qi,0,pm.id);note="De l'autre côté : "+fmt(pv.reveal(S));}
+   else if(pv&&!S._povShown[pm.id]){S._povShown[pm.id]=true;S._povText=fmt(pv.reveal(S));S.f.povs=(S.f.povs||0)+1;S.queue.splice(S.qi,0,"pov");}}
   if((fx.emo||0)>=5&&R()<.3){applyFx({stress:4,joie:-3});note=(note?note+" ":"")+pick(WISE_COST);}
   let help="";if(HELP.has(c.t)){S.f.helped=(S.f.helped||0)+1;help=pick(HELP_NOTE);}
   let rip=ripple(fx);if(help&&note)rip="";else if(help&&rip&&R()<.5)rip="";
@@ -2181,10 +2252,32 @@ function wireShare(label){
     c.toBlob(bl=>{try{const f=new File([bl],"manu-o-te-taime-poeme.jpg",{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){const n=$("#nshare");n.hidden=false;n.onclick=()=>navigator.share({files:[f],title:"Manu o te Taime"}).catch(()=>{});}}catch(e){}},"image/jpeg",.9);
   };
 }
+const ELDER=[
+ [S=>(S.f.repaired||0)>0,"La colère est une vague : laisse-la passer avant de prendre la mer."],
+ [S=>S.st.lien<35,"Un fil seul se casse. Tressé avec d'autres, il tient la pirogue."],
+ [S=>(S.heavy||0)>=4,"Même le cocotier plie sous le vent. C'est pour ça qu'il ne casse pas."],
+ [S=>S.st.stress>60,"On ne voit pas le fond du lagon quand l'eau est agitée. Attends qu'elle se calme."],
+ [S=>(S.f.misjudged||0)>0,"On ne voit pas le corail depuis la surface. Pour connaître quelqu'un, il faut plonger."],
+ [S=>S.st.joie>65,"Le rire est la pluie qui fait pousser le cœur."],
+ [S=>S.f.kids>0,"Ce que tu donnes à tes enfants, ils le rendront à leurs enfants. Rien ne se perd."],
+ [S=>true,"Le uru ne donne pas de fruits la première année. Laisse le temps faire."],
+ [S=>true,"Celui qui donne n'est jamais vraiment pauvre."],
+ [S=>true,"Prends soin de tes racines : ce sont elles qui te tiennent quand le vent souffle."],
+ [S=>true,"Les mots dits en colère ont la mémoire longue. Les mots doux aussi."],
+ [S=>true,"La nuit la plus noire a toujours des étoiles, pour qui lève la tête."]
+];
+function elderLine(ci){
+  if(ci===0||R()<.35)return "";
+  S._elderUsed=S._elderUsed||[];const ok=ELDER.filter((e,i)=>!S._elderUsed.includes(i)&&e[0](S));if(!ok.length)return "";
+  const spec=ok.filter(e=>ELDER.indexOf(e)<7);const e=spec.length&&R()<.7?spec[0]:pick(ok);S._elderUsed.push(ELDER.indexOf(e));
+  const who=ci<=2?"disait ta grand-mère":ci<=4?"t'a dit un jour un ancien du quartier":ci===5?"disait ta mère, et tu la comprends enfin":"dis-tu maintenant, toi, aux plus jeunes";
+  return `<p class="elder">« ${e[1]} »<span>${who}</span></p>`;
+}
+const ASK=["","Te souviens-tu d'un enfant seul dans ta cour d'école ? Que lui dirais-tu aujourd'hui ?","As-tu déjà jugé quelqu'un trop vite, et découvert ensuite son histoire ?","À qui n'as-tu pas encore dit merci ?","Quel fil de ta vie s'amincit en ce moment, faute de temps ?","Quelle blessure attend encore d'être soignée, chez toi ou chez quelqu'un que tu aimes ?","Qu'aimerais-tu transmettre, et à qui ?","Qui aimerais-tu appeler aujourd'hui, avant qu'il ne soit trop tard ?"];
 function endChapter(){
   const ci=S.ci;
   header(ci);drawPlant();updateAside();
-  setCard(`<p class="step">Chant du chapitre : ${lc(CH[ci].t)}</p><div class="poem">${chapterPoem(ci)}</div>${shareBlock()}<button class="btn" id="go">Tourner la page</button>`);
+  setCard(`<p class="step">Chant du chapitre : ${lc(CH[ci].t)}</p><div class="poem">${chapterPoem(ci)}</div>${elderLine(ci)}${ASK[ci]?`<details><summary>Et toi ?</summary><p class="hint" style="margin-top:8px">${ASK[ci]} Tu peux y penser seul{e}, ou en parler avec quelqu'un.</p></details>`:""}${shareBlock()}<button class="btn" id="go">Tourner la page</button>`.replace("seul{e}","seul ou seule"));
   wireShare(CH[ci].t);
   $("#go").onclick=()=>{if(ci===7||(ci>=2&&deathCheck(ci)))return die(ci);startChapter(ci+1);};
 }
@@ -2251,10 +2344,51 @@ function epilogue(){
   if((f.workRel||0)>=55&&S.cw)P.push(fmt(f.surprise?"Tes anciens collègues sont venus en groupe, avec une couronne de fleurs. {cw} a raconté le gâteau surprise, et tout le monde a ri en pleurant.":"Tes anciens collègues sont venus en groupe, avec une couronne de fleurs. {cw} a parlé de toi mieux que personne."));
   if(S.par)P.push(`Tu étais l'enfant de ${S.par.name}. Tu as reçu ses fils, ses blessures et ses forces. Tu en as gardé certains, coupé d'autres, tissé de nouveaux.`);
   P.push("La plante retourne à la terre. Les graines, elles, ont déjà germé ailleurs.");
-  setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p>${(()=>{const L=legacyOf();return L?`<div class="btns"><button class="btn" id="heir">Continuer la lignée : vivre la vie ${L.heirName?"de "+L.heirName:"d'un de tes enfants"}</button><button class="btn2" id="go">Vivre une autre vie</button></div>`:`<button class="btn" id="go">Vivre une autre vie</button>`})()}`);
+  if(!S._unseen)S._unseen=unseenLines();
+  const UN=S._unseen;
+  setCard(`<p class="step">Après toi</p><div class="poem">${P.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>${UN.length?`<div class="unseen"><h4>Ce que tu n'as pas vu</h4>${UN.map(x=>`<p>${fmt(x)}</p>`).join("")}</div>`:""}${lesson()}<p class="hint">Si cette vie a réveillé quelque chose de lourd en toi, parles-en à un proche ou à ton médecin. En cas d'urgence, appelle le 15.</p>${(()=>{const L=legacyOf();return L?`<div class="btns"><button class="btn" id="heir">Continuer la lignée : vivre la vie ${L.heirName?"de "+L.heirName:"d'un de tes enfants"}</button><button class="btn2" id="go">Vivre une autre vie</button></div>`:`<button class="btn" id="go">Vivre une autre vie</button>`})()}`);
   const hb=$("#heir");if(hb)hb.onclick=()=>{const L=legacyOf();clearSave();bornFrom(L);showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};
   $("#go").onclick=()=>{clearSave();birth();showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};
+  const xo=crossOptions();
+  if(xo.length){const prev={first:S.first,sex:S.sex,wealth:S.wealth,place:S.place,heritage:S.heritage};const d=document.createElement("div");d.className="crossbox";
+    d.innerHTML=`<h4>Vies croisées</h4><p>Tu as vu ces personnes de l'extérieur, à travers ta vie. Tu peux maintenant vivre la leur, de l'intérieur, et te découvrir toi-même dans leur histoire.</p><div class="btns">${xo.map((o,i)=>`<button class="btn2" id="cross${i}" type="button">Vivre la vie de ${o.name}, ${o.label}</button>`).join("")}</div>`;
+    card.append(d);xo.forEach((o,i)=>{$("#cross"+i).onclick=()=>{clearSave();crossBorn(o,prev);showBirth();$("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});};});}
   $("#stage").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
+}
+function crossOptions(){
+  const o=[],f=S.f;
+  if(f.friend&&S.friend)o.push({role:"friend",name:S.friend,sex:S.fSex,label:S.fSex==="F"?"ton amie d'enfance":"ton ami d'enfance"});
+  if(S.partner&&(f.couple||f.widow))o.push({role:"partner",name:S.partner,sex:S.pSex,label:S.pSex==="F"?"ta compagne":"ton compagnon"});
+  else if(S.ex)o.push({role:"partner",name:S.ex,sex:S.exSex,label:S.exSex==="F"?"ton ex":"ton ex"});
+  if(S.sib)o.push({role:"sib",name:S.sib,sex:S.sibSex,label:S.sibSex==="F"?"ta sœur":"ton frère"});
+  return o.slice(0,3);
+}
+function crossBorn(o,prev){
+  birth();S.first=o.name;S.sex=o.sex;S.gen=1;S.lineage=[];
+  S.cross={who:prev.first,whoSex:prev.sex,role:o.role};
+  if(o.role==="sib"){S.wealth=prev.wealth;S.place=prev.place;S.heritage=prev.heritage;S.sib=prev.first;S.sibSex=prev.sex;S.arc.sib=null;}
+  if(o.role==="friend"){S.place=prev.place;S.friend=prev.first;S.fSex=prev.sex;S.arc.friend=null;}
+  if(o.role==="partner"){S.orient=prev.sex===S.sex?"gay":"hetero";S.queer=S.orient!=="hetero"||S.trans;S.partner=prev.first;S.pSex=prev.sex;}
+  S.st=Object.assign(S.st,{argent:[8,22,48,78][S.wealth],stress:[35,25,15,10][S.wealth]});
+  if(o.role!=="sib"&&S.sib===S.first)S.sib=loveName(S.sibSex);
+  if(o.role!=="friend"&&S.friend===S.first)S.friend=loveName(S.fSex);
+  if(o.role!=="partner"&&S.partner===S.first)S.partner=loveName(S.pSex);
+}
+function unseenLines(){
+  const has=(t,mx=9)=>S.log.some(l=>l.ci<=mx&&l.t.startsWith(t)),out=[],neg=[];
+  if(S.f.newFriend)out.push("Le jour où tu as souri à cet inconnu au bord de la route, il traversait la pire semaine de sa vie. Il a raconté ce sourire à sa femme, le soir. Il s'en souvient encore.");
+  if(has("Aller vers un autre enfant"))out.push("L'enfant seul de la cour, à qui tu as parlé, est devenu professeur. Chaque année, il cherche des yeux l'élève qui reste seul, et il va lui parler.");
+  if(has("L'écouter jusqu'au bout")||has("Lui demander : « Tu veux"))out.push(fmt("Cette nuit où tu as écouté {friend} jusqu'au bout, {fil} avait décidé de tout laisser tomber. {fIl} ne l'a pas fait. {fIl} ne te l'a jamais dit."));
+  if(has("Aller lui parler",1))out.push(fmt("{friend} a gardé toute sa vie le souvenir du premier enfant qui lui a parlé, dans la cour. C'était toi."));
+  if(has("L'inviter à manger avec toi"))out.push("Ton collègue venu des Philippines a écrit à sa fille, ce soir-là : « Aujourd'hui, quelqu'un m'a invité à manger. » Elle a gardé le message.");
+  if(has("Lui dire non, gentiment"))out.push("La personne qui t'avait écrit cette lettre, au lycée, a osé aimer à nouveau, plus tard, parce que ton refus avait été doux.");
+  if(S.f.gave>=4)out.push("Une partie de ce que tu as donné a continué son chemin, de main en main, jusqu'à des gens que tu n'as jamais rencontrés.");
+  if(has("Montrer la lettre aux copains"))neg.push("La lettre que tu as montrée aux copains, au lycée, a été lue par toute l'école. Celle qui l'avait écrite n'a plus jamais osé écrire à quelqu'un.");
+  if(S.f.hit||S.f.violent)neg.push(fmt("{child} a appris de toi que la colère sort par les mains. Il lui a fallu des années pour désapprendre."));
+  if(has("Rire avec les autres"))neg.push("Ton collègue venu des Philippines a quitté l'entreprise six mois plus tard. Il n'a jamais dit pourquoi.");
+  if(has("Changer de sujet"))neg.push(fmt("Ce soir où {friend} t'a appelé{e} et où tu as changé de sujet, {fil} n'a plus jamais osé t'appeler quand ça n'allait pas."));
+  const pickN=(a,n)=>shuffle(a).slice(0,n);
+  return pickN(out,2).concat(pickN(neg,1));
 }
 function legacyOf(){
   const f=S.f,k=(f.kids||0)-(f.childDead?1:0);if(k<=0)return null;
@@ -2351,6 +2485,11 @@ function lesson(){
   if(f.newFriend)L.push("Un jour, tu as souri à un inconnu au lieu de te méfier. Les plus belles amitiés commencent souvent comme ça.");
   if(S.scars&&S.scars.some(x=>x.healed))L.push("Ton tronc porte des cicatrices. Elles ne disent pas que tu as été faible : elles disent que tu as guéri.");
   else if(S.scars&&S.scars.filter(x=>!x.healed).length>=2)L.push("Certaines blessures ne se sont jamais refermées. Elles n'étaient pas ta faute ; elles demandaient seulement d'être soignées.");
+  if(f.misjudged)L.push("Tu as jugé quelqu'un sur son apparence, et la vie t'a montré son histoire. On juge les autres sur leurs actes, et soi-même sur ses intentions.");
+  if(f.repaired)L.push("Tu as su revenir vers l'autre après une dispute, sans « mais ». Les relations qui durent ne sont pas celles qui ne se disputent jamais : ce sont celles qui savent réparer.");
+  if(f.breathed)L.push(`Tu as pris le temps de respirer avant de réagir${f.breathed>1?`, ${f.breathed} fois`:""}. Comprendre l'autre ne change pas toujours ce qu'on décide ; ça change la façon de le faire.`);
+  else if(f.povs)L.push("Tu as vu l'autre côté de plusieurs histoires. Derrière chaque geste qui blesse, il y a souvent une blessure plus ancienne. Ça n'excuse rien, mais ça aide à ne pas haïr.");
+  if(S.cross)L.push(`Tu as vécu de l'intérieur une vie que tu n'avais vue que de l'extérieur, à travers ${S.cross.who}. Chacun est le personnage principal de sa propre histoire, et un personnage secondaire dans celle des autres.`);
   if(f.hands)L.push(`Quand tout était trop lourd, une main s'est tendue${f.hands>1?`, ${f.hands} fois`:""}. Ce n'était pas seulement de la chance : plus tu avais donné et tissé de fils, plus il y avait de mains pour se tendre.`);
   else if((f.gave||0)<2&&S.st.lien<35)L.push("Quand la vie est devenue lourde, peu de mains se sont tendues. Les fils qu'on ne tisse pas ne peuvent pas nous retenir.");
   if(f.friendFaded||f.sibFaded)L.push("Certains liens se sont effacés sans dispute, simplement faute de temps. Les liens sont comme des plantes : il faut les arroser, même quand tout va bien.");
